@@ -1,8 +1,8 @@
-import React from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useColorScheme } from "@/lib/use-color-scheme";
-import { NAV_THEME } from "@/lib/constants";
+import type React from "react";
 import { StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { NAV_THEME } from "@/lib/constants";
+import { useColorScheme } from "@/lib/use-color-scheme";
 
 export function Container({ children }: { children: React.ReactNode }) {
 	const { colorScheme } = useColorScheme();

@@ -1,7 +1,7 @@
-import { TabBarIcon } from "@/components/tabbar-icon";
-import { useColorScheme } from "@/lib/use-color-scheme";
 import { Tabs } from "expo-router";
+import { TabBarIcon } from "@/components/tabbar-icon";
 import { NAV_THEME } from "@/lib/constants";
+import { useColorScheme } from "@/lib/use-color-scheme";
 
 export default function TabLayout() {
 	const { isDarkColorScheme } = useColorScheme();

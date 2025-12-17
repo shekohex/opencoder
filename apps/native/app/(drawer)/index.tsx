@@ -1,13 +1,7 @@
-import {
-	View,
-	Text,
-	ScrollView,
-	TouchableOpacity,
-	StyleSheet,
-} from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Container } from "@/components/container";
-import { useColorScheme } from "@/lib/use-color-scheme";
 import { NAV_THEME } from "@/lib/constants";
+import { useColorScheme } from "@/lib/use-color-scheme";
 
 export default function Home() {
 	const { colorScheme } = useColorScheme();
@@ -26,7 +20,7 @@ export default function Home() {
 							styles.card,
 							{ backgroundColor: theme.card, borderColor: theme.border },
 						]}
-					></View>
+					/>
 				</View>
 			</ScrollView>
 		</Container>
