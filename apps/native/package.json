@@ -3,6 +3,7 @@
 	"version": "1.0.0",
 	"main": "expo-router/entry",
 	"scripts": {
+		"check": "biome check --write .",
 		"dev": "expo start --clear",
 		"android": "expo run:android",
 		"ios": "expo run:ios",

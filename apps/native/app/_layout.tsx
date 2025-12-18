@@ -5,11 +5,13 @@ import {
 	ThemeProvider,
 } from "@react-navigation/native";
 import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { Platform, StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { setAndroidNavigationBar } from "@/lib/android-navigation-bar";
+import { SessionProvider, useSession } from "@/lib/auth";
 import { NAV_THEME } from "@/lib/constants";
 import { useColorScheme } from "@/lib/use-color-scheme";
 
@@ -23,8 +25,11 @@ const DARK_THEME: Theme = {
 };
 
 export const unstable_settings = {
-	initialRouteName: "(drawer)",
+	initialRouteName: "(app)",
 };
+
+// Keep the splash screen visible while we fetch resources
+SplashScreen.preventAutoHideAsync();
 
 const useIsomorphicLayoutEffect =
 	Platform.OS === "web" && typeof window === "undefined"
@@ -37,10 +42,11 @@ const styles = StyleSheet.create({
 	},
 });
 
-export default function RootLayout() {
+function RootLayoutContent() {
 	const hasMounted = useRef(false);
 	const { colorScheme, isDarkColorScheme } = useColorScheme();
 	const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
+	const { isLoading } = useSession();
 
 	useIsomorphicLayoutEffect(() => {
 		if (hasMounted.current) {
@@ -51,24 +57,38 @@ export default function RootLayout() {
 		hasMounted.current = true;
 	}, []);
 
-	if (!isColorSchemeLoaded) {
+	useEffect(() => {
+		if (isColorSchemeLoaded && !isLoading) {
+			SplashScreen.hideAsync();
+		}
+	}, [isColorSchemeLoaded, isLoading]);
+
+	if (!isColorSchemeLoaded || isLoading) {
 		return null;
 	}
 
 	return (
-		<>
-			<ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-				<StatusBar style={isDarkColorScheme ? "light" : "dark"} />
-				<GestureHandlerRootView style={styles.container}>
-					<Stack>
-						<Stack.Screen name="(drawer)" options={{ headerShown: false }} />
-						<Stack.Screen
-							name="modal"
-							options={{ title: "Modal", presentation: "modal" }}
-						/>
-					</Stack>
-				</GestureHandlerRootView>
-			</ThemeProvider>
-		</>
+		<ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
+			<StatusBar style={isDarkColorScheme ? "light" : "dark"} />
+			<GestureHandlerRootView style={styles.container}>
+				<Stack>
+					<Stack.Screen name="(app)" options={{ headerShown: false }} />
+					<Stack.Screen name="sign-in" options={{ headerShown: false }} />
+					<Stack.Screen
+						name="modal"
+						options={{ title: "Modal", presentation: "modal" }}
+					/>
+					<Stack.Screen name="+not-found" />
+				</Stack>
+			</GestureHandlerRootView>
+		</ThemeProvider>
+	);
+}
+
+export default function RootLayout() {
+	return (
+		<SessionProvider>
+			<RootLayoutContent />
+		</SessionProvider>
 	);
 }
