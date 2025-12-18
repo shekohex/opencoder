@@ -19,7 +19,9 @@
       "name": "native",
       "version": "1.0.0",
       "dependencies": {
+        "@coder/sdk": "workspace:*",
         "@expo/vector-icons": "^15.0.2",
+        "@opencode-ai/sdk": "^1.0",
         "@react-navigation/bottom-tabs": "^7.2.0",
         "@react-navigation/drawer": "^7.1.1",
         "@react-navigation/native": "^7.0.14",
@@ -379,6 +381,8 @@
     "@jridgewell/sourcemap-codec": ["@jridgewell/sourcemap-codec@1.5.5", "", {}, "sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og=="],
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.31", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw=="],
+
+    "@opencode-ai/sdk": ["@opencode-ai/sdk@1.0.167", "", {}, "sha512-zUeAg+s/lddSyJ4noeKxUclT35huyOK0hHRBJn3bKL6LzBTxlRXxKVsSBaqT3JaX/xL+kJeLqzV2W4IetAzlUA=="],
 
     "@opencoder/config": ["@opencoder/config@workspace:packages/config"],
 
