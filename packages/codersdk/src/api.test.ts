@@ -1,0 +1,197 @@
+import {
+	MockProvisionerJob,
+	MockTemplate,
+	MockTemplateVersion2,
+	MockTemplateVersionParameter1,
+	MockTemplateVersionParameter2,
+	MockWorkspace,
+	MockWorkspaceBuild,
+} from "testHelpers/entities";
+import { beforeEach, describe, expect, it, jest } from "bun:test";
+import { API, getURLWithSearchParams, MissingBuildParameters } from "./api";
+import type { CoderError } from "./errors";
+import type * as TypesGen from "./typesGenerated";
+
+describe("api.ts", () => {
+	beforeEach(() => {
+		jest.restoreAllMocks();
+	});
+
+	describe("login", () => {
+		it("should return LoginResponse", async () => {
+			// given
+			const loginResponse: TypesGen.LoginWithPasswordResponse = {
+				session_token: "abc_123_test",
+			};
+
+			const mockFetch = jest.fn(() =>
+				Promise.resolve(
+					new Response(JSON.stringify(loginResponse), { status: 200 }),
+				),
+			);
+			global.fetch = mockFetch as unknown as typeof fetch;
+
+			// when
+			const result = await API.login("test", "123");
+
+			// then
+			expect(mockFetch).toHaveBeenCalled();
+			expect(result).toStrictEqual(loginResponse);
+		});
+
+		it("should throw an error on 401", async () => {
+			// given
+			expect.assertions(1);
+			const expectedError = {
+				message: "Validation failed",
+				errors: [{ field: "email", code: "email" }],
+			};
+
+			global.fetch = jest.fn(() =>
+				Promise.resolve(
+					new Response(JSON.stringify(expectedError), {
+						status: 400,
+						statusText: "Bad Request",
+					}),
+				),
+			) as unknown as typeof fetch;
+
+			try {
+				await API.login("test", "123");
+			} catch (error: unknown) {
+				const coderError = error as CoderError;
+				expect(coderError.data).toStrictEqual(expectedError);
+			}
+		});
+	});
+
+	describe("logout", () => {
+		it("should return without erroring", async () => {
+			// given
+			const mockFetch = jest.fn(() =>
+				Promise.resolve(new Response(null, { status: 204 })),
+			);
+			global.fetch = mockFetch as unknown as typeof fetch;
+
+			// when
+			await API.logout();
+
+			// then
+			expect(mockFetch).toHaveBeenCalled();
+		});
+	});
+
+	describe("getApiKey", () => {
+		it("should return APIKeyResponse", async () => {
+			// given
+			const apiKeyResponse: TypesGen.GenerateAPIKeyResponse = {
+				key: "abc_123_test",
+			};
+			const mockFetch = jest.fn(() =>
+				Promise.resolve(
+					new Response(JSON.stringify(apiKeyResponse), { status: 200 }),
+				),
+			);
+			global.fetch = mockFetch as unknown as typeof fetch;
+
+			// when
+			const result = await API.getApiKey();
+
+			// then
+			expect(mockFetch).toHaveBeenCalled();
+			expect(result).toStrictEqual(apiKeyResponse);
+		});
+	});
+
+	describe("getURLWithSearchParams - workspaces", () => {
+		it.each<[string, TypesGen.WorkspaceFilter | undefined, string]>([
+			["/api/v2/workspaces", undefined, "/api/v2/workspaces"],
+			["/api/v2/workspaces", { q: "" }, "/api/v2/workspaces"],
+			[
+				"/api/v2/workspaces",
+				{ q: "owner:1" },
+				"/api/v2/workspaces?q=owner%3A1",
+			],
+			[
+				"/api/v2/workspaces",
+				{ q: "owner:me" },
+				"/api/v2/workspaces?q=owner%3Ame",
+			],
+		])("Workspaces - getURLWithSearchParams(%p, %p) returns %p", (basePath, filter, expected) => {
+			expect(getURLWithSearchParams(basePath, filter)).toBe(expected);
+		});
+	});
+
+	describe("update", () => {
+		describe("given a running workspace", () => {
+			it("stops with current version before starting with the latest version", async () => {
+				jest.spyOn(API, "getWorkspaceBuildParameters").mockResolvedValue([]);
+				jest
+					.spyOn(API, "getTemplateVersionRichParameters")
+					.mockResolvedValue([]);
+				jest
+					.spyOn(API, "postWorkspaceBuild")
+					.mockImplementation((_id, data) => {
+						if (data.transition === "stop") {
+							return Promise.resolve({
+								...MockWorkspaceBuild,
+								transition: "stop",
+							} as TypesGen.WorkspaceBuild);
+						}
+						return Promise.resolve({
+							...MockWorkspaceBuild,
+							template_version_id: MockTemplateVersion2.id,
+							transition: "start",
+						} as TypesGen.WorkspaceBuild);
+					});
+				jest.spyOn(API, "getTemplate").mockResolvedValue({
+					...MockTemplate,
+					active_version_id: MockTemplateVersion2.id,
+				} as TypesGen.Template);
+				jest.spyOn(API, "getWorkspaceBuildByNumber").mockResolvedValue({
+					...MockWorkspaceBuild,
+					job: { ...MockProvisionerJob, status: "succeeded" },
+				} as TypesGen.WorkspaceBuild);
+				await API.updateWorkspace(MockWorkspace);
+
+				expect(API.postWorkspaceBuild).toHaveBeenCalledWith(MockWorkspace.id, {
+					transition: "stop",
+				});
+				expect(API.postWorkspaceBuild).toHaveBeenCalledWith(MockWorkspace.id, {
+					transition: "start",
+					template_version_id: MockTemplateVersion2.id,
+					rich_parameter_values: [],
+				});
+			});
+
+			it("fails when having missing parameters", async () => {
+				jest
+					.spyOn(API, "postWorkspaceBuild")
+					.mockResolvedValue(MockWorkspaceBuild as TypesGen.WorkspaceBuild);
+				jest
+					.spyOn(API, "getTemplate")
+					.mockResolvedValue(MockTemplate as TypesGen.Template);
+				jest.spyOn(API, "getWorkspaceBuildParameters").mockResolvedValue([]);
+				jest
+					.spyOn(API, "getTemplateVersionRichParameters")
+					.mockResolvedValue([
+						MockTemplateVersionParameter1,
+						{ ...MockTemplateVersionParameter2, mutable: false },
+					]);
+
+				let error = new Error();
+				try {
+					await API.updateWorkspace(MockWorkspace);
+				} catch (e) {
+					error = e as Error;
+				}
+
+				expect(error).toBeInstanceOf(MissingBuildParameters);
+				expect((error as MissingBuildParameters).parameters).toEqual([
+					MockTemplateVersionParameter1,
+					{ ...MockTemplateVersionParameter2, mutable: false },
+				]);
+			});
+		});
+	});
+});

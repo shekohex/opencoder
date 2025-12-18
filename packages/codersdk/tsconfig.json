@@ -1,0 +1,15 @@
+{
+	"extends": "@opencoder/config/tsconfig.base",
+	"compilerOptions": {
+		"baseUrl": ".",
+		"lib": ["DOM", "DOM.Iterable", "ESNext"],
+		"types": ["bun", "node"],
+		"paths": {
+			"@/*": ["./src"],
+			"api/*": ["./src/*"],
+			"utils/*": ["./src/utils/*"],
+			"testHelpers/*": ["./testHelpers/*"]
+		}
+	},
+	"include": ["**/*.ts"]
+}
