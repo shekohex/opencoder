@@ -1,7 +1,23 @@
 # Agent Instructions
 
+## Project Overview
+
+Opencoder is an open source project that combines coder.com remote workspaces with opencode, it is an interface (web, mobile, desktop) to manage remote workspaces and vibecode on these workspaces using opencode.
+
+it is built with these technologies:
+- React Native (mobile, web, desktop) with Expo
+- Bun (package manager and test runner)
+- TypeScript
+- MMKV (fast key/value storage for React Native)
+- Nitro Modules (fast module loading for React Native)
+
+## Expo CLI usage
+
+If you want to use the `expo` CLI, use `bunx expo ...` instead of `expo ...`.
+
 ## Testing & Quality Checks
 
+- Run `bun run test` for running project tests
 - Run `bun run check` for project-wide linting via Turbo and Biome.
 - Run `bun run check-types` to execute TypeScript project checks.
 - Do not mark a task, phase, or proposal complete until all three commands pass without warnings.
@@ -86,14 +102,6 @@ bd close bd-42 --reason "Completed" --json
 5. **Complete**: `bd close <id> --reason "Done"`
 6. **Commit together**: Always commit the `.beads/issues.jsonl` file together with the code changes so issue state stays in sync with code state
 
-### Auto-Sync
-
-bd automatically syncs with git:
-
-- Exports to `.beads/issues.jsonl` after changes (5s debounce)
-- Imports from JSONL when newer (e.g., after `git pull`)
-- No manual export/import needed!
-
 ### Important Rules
 
 - Use bd for ALL task tracking
@@ -111,4 +119,59 @@ Important reminders:
    • Link discovered work with discovered-from dependencies
    • Check bd ready before asking "what should I work on?"
 
+**Essential commands for AI agents:**
+
+```bash
+# Find work
+bd ready --json                                    # Unblocked issues
+bd stale --days 30 --json                          # Forgotten issues
+
+# Create and manage issues
+bd create "Issue title" --description="Detailed context about the issue" -t bug|feature|task -p 0-4 --json
+bd create "Found bug" --description="What the bug is and how it was discovered" -p 1 --deps discovered-from:<parent-id> --json
+bd update <id> --status in_progress --json
+bd close <id> --reason "Done" --json
+
+# Search and filter
+bd list --status open --priority 1 --json
+bd list --label-any urgent,critical --json
+bd show <id> --json
+
+# Sync (CRITICAL at end of session!)
+bd sync  # Force immediate export/commit/push
+```
+
+## Landing the Plane (Session Completion)
+
+**When ending a work session**, you MUST complete ALL steps below. Work is NOT complete until `git push` succeeds.
+
+**MANDATORY WORKFLOW:**
+
+1. **File issues for remaining work** - Create issues for anything that needs follow-up
+2. **Run quality gates** (if code changed) - Tests, linters, builds
+3. **Update issue status** - Close finished work, update in-progress items
+4. **PUSH TO REMOTE** - This is MANDATORY:
+   ```bash
+   git pull --rebase
+   bd sync
+   git push
+   git status  # MUST show "up to date with origin"
+   ```
+5. **Clean up** - Clear stashes, prune remote branches
+6. **Verify** - All changes committed AND pushed
+7. **Hand off** - Provide context for next session
+
+**CRITICAL RULES:**
+- Work is NOT complete until `git push` succeeds
+- NEVER stop before pushing - that leaves work stranded locally
+- NEVER say "ready to push when you are" - YOU must push
+- If push fails, resolve and retry until it succeeds
+
 </bd>
+
+<code_reference>
+
+1. You can find the full `opencode` codebase at `/tmp/opencode`
+2. You can find the full `coder` codebase at `/tmp/coder`
+
+</code_reference>
