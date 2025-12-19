@@ -107,12 +107,12 @@ function Input({ className, ...props }: InputProps) {
 	const [isFocused, setIsFocused] = useState(false);
 
 	const baseStyles =
-		"h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-base text-foreground placeholder:text-foreground-weak focus:outline-none";
+		"h-10 w-full rounded-md border border-border bg-input px-3 py-2 text-base text-foreground placeholder:text-foreground-weak focus:outline-none";
 	const focusStyles = isFocused
 		? "border-border-interactive ring-2 ring-border-interactive/20"
 		: "";
 	const invalidStyles = isInvalid
-		? "border-border-critical text-text-critical"
+		? "border-border-critical text-foreground-critical bg-surface-critical"
 		: "";
 	const disabledStyles = isDisabled ? "opacity-50 bg-input-disabled" : "";
 
@@ -173,7 +173,7 @@ function ErrorMessage({ children, className, ...props }: ErrorMessageProps) {
 	return (
 		<Text
 			nativeID={errorMessageId}
-			className={`font-medium text-sm text-text-critical ${className}`}
+			className={`font-medium text-foreground-critical text-sm ${className}`}
 			{...props}
 		>
 			{children}

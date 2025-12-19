@@ -29,15 +29,15 @@ export interface ButtonProps extends Omit<PressableProps, "style"> {
 
 const VARIANTS: Record<ButtonVariant, string> = {
 	primary:
-		"bg-surface-interactive hover:bg-surface-interactive-hover active:bg-surface-interactive-active border-transparent text-foreground-interactive",
+		"bg-icon-interactive hover:bg-icon-interactive/90 active:bg-icon-interactive/80 border-transparent",
 	secondary:
-		"bg-surface-weak hover:bg-surface-hover active:bg-surface-active border-transparent text-foreground",
+		"bg-surface-weak hover:bg-surface-hover active:bg-surface-active border-transparent",
 	ghost:
-		"bg-transparent hover:bg-surface-hover active:bg-surface-active border-transparent text-foreground",
+		"bg-transparent hover:bg-surface-hover active:bg-surface-active border-transparent",
 	danger:
-		"bg-surface-critical hover:bg-surface-critical/80 active:bg-surface-critical/60 border-transparent text-foreground-critical",
+		"bg-icon-critical hover:bg-icon-critical/90 active:bg-icon-critical/80 border-transparent",
 	outline:
-		"bg-transparent border-border hover:bg-surface-hover active:bg-surface-active text-foreground",
+		"bg-transparent border-border hover:bg-surface-hover active:bg-surface-active",
 };
 
 const SIZES: Record<ButtonSize, string> = {
@@ -72,7 +72,7 @@ export const Button = forwardRef<View, ButtonProps>(
 		const variantStyles = VARIANTS[variant];
 		const sizeStyles = SIZES[size];
 		const disabledStyles = disabled
-			? "opacity-50 pointer-events-none bg-input-disabled text-foreground-weak"
+			? "pointer-events-none bg-input-disabled"
 			: "";
 
 		const textBaseStyle = "font-medium text-center";
@@ -82,9 +82,9 @@ export const Button = forwardRef<View, ButtonProps>(
 			if (disabled) return "text-foreground-weak";
 			switch (variant) {
 				case "primary":
-					return "text-foreground-interactive";
+					return "text-white";
 				case "danger":
-					return "text-foreground-critical";
+					return "text-white";
 				default:
 					return "text-foreground";
 			}
