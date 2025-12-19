@@ -89,6 +89,14 @@
 	--color-info: var(--surface-info);
 }
 
+@layer utilities {
+	.focus-ring {
+		@apply outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+		--tw-ring-color: var(--color-border-interactive);
+		--tw-ring-offset-color: var(--color-background);
+	}
+}
+
 @layer theme {
 	:root {
 		@variant light {
