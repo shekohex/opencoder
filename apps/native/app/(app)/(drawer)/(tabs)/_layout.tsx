@@ -35,6 +35,15 @@ export default function TabLayout() {
 					),
 				}}
 			/>
+			<Tabs.Screen
+				name="tokens"
+				options={{
+					title: "Tokens",
+					tabBarIcon: ({ color }) => (
+						<TabBarIcon name="paint-brush" color={color} />
+					),
+				}}
+			/>
 		</Tabs>
 	);
 }
