@@ -1,4 +1,6 @@
+import { Link } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Button } from "@/components/button";
 import { Container } from "@/components/container";
 import { NAV_THEME } from "@/lib/constants";
 import { useColorScheme } from "@/lib/use-color-scheme";
@@ -15,6 +17,13 @@ export default function TabOne() {
 					<Text style={[styles.subtitle, { color: theme.text, opacity: 0.7 }]}>
 						Explore the first section of your app
 					</Text>
+
+					<View className="mt-8">
+						{/* @ts-ignore */}
+						<Link href="/primitives" asChild>
+							<Button>Go to Primitives Demo</Button>
+						</Link>
+					</View>
 				</View>
 			</ScrollView>
 		</Container>
