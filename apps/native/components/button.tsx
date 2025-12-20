@@ -7,6 +7,8 @@ import {
 	type View,
 	type ViewStyle,
 } from "react-native";
+import { palette, semanticColors } from "@/lib/tokens";
+import { useColorScheme } from "@/lib/use-color-scheme";
 
 export type ButtonVariant =
 	| "primary"
@@ -67,28 +69,29 @@ export const Button = forwardRef<View, ButtonProps>(
 		},
 		ref,
 	) => {
+		const { colorScheme } = useColorScheme();
+		const colors = semanticColors[colorScheme];
+
 		const baseStyles =
 			"flex-row items-center justify-center border font-medium transition-colors focus-ring";
-		const variantStyles = VARIANTS[variant];
+		const variantStyles = disabled ? "" : VARIANTS[variant];
 		const sizeStyles = SIZES[size];
 		const disabledStyles = disabled
-			? "pointer-events-none bg-input-disabled"
+			? `${loading ? "opacity-80" : "opacity-50"} pointer-events-none ${loading ? "bg-icon-interactive" : "bg-input-disabled"}`
 			: "";
 
 		const textBaseStyle = "font-medium text-center";
 		const textSizeStyle = TEXT_SIZES[size];
 
+		const isWhiteText = variant === "primary" || variant === "danger";
+
 		const getTextColorClass = () => {
-			if (disabled) return "text-foreground-weak";
-			switch (variant) {
-				case "primary":
-					return "text-white";
-				case "danger":
-					return "text-white";
-				default:
-					return "text-foreground";
-			}
+			if (disabled && !loading) return "text-foreground-weak";
+			if (isWhiteText) return "text-white";
+			return "text-foreground";
 		};
+
+		const indicatorColor = isWhiteText ? palette.white : colors.text.base;
 
 		return (
 			<Pressable
@@ -99,15 +102,14 @@ export const Button = forwardRef<View, ButtonProps>(
 				accessibilityState={{ disabled: disabled || loading, busy: loading }}
 				{...props}
 			>
-				{loading ? (
+				{loading && (
 					<ActivityIndicator
 						size="small"
-						color="currentColor"
-						className="mr-2"
+						color={indicatorColor}
+						style={{ marginRight: 8 }}
 					/>
-				) : (
-					leftIcon
 				)}
+				{!loading && leftIcon}
 				{typeof children === "string" ? (
 					<Text
 						className={`${textBaseStyle} ${textSizeStyle} ${getTextColorClass()}`}

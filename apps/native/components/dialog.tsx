@@ -176,25 +176,19 @@ export function DialogContent({
 						ref={ref}
 						// Use simple spread for props on Web, but filtering might be needed if conflicts arise.
 						// React Native Web handles many aria attributes correctly.
-						// @ts-expect-error - 'overlayProps' might have types incompatible with ViewProps but are valid on Web or filtered by RNW.
-						{...overlayProps}
+						{...(overlayProps as any)}
 						style={{ maxWidth: "100%", maxHeight: "100%" }}
 						// Using onStartShouldSetResponder to trap touches is a robust way to prevent
 						// touches from bubbling to the backdrop Pressable in React Native.
 						onStartShouldSetResponder={() => true}
 						// Stop propagation on web to prevent the backdrop or useOverlay from seeing these events.
-						// @ts-expect-error
-						onPointerDown={(e) => {
-							e.stopPropagation();
-						}}
-						// @ts-expect-error
-						onMouseDown={(e) => {
-							e.stopPropagation();
-						}}
-						// @ts-expect-error
-						onClick={(e) => {
-							e.stopPropagation();
-						}}
+						{...(Platform.OS === "web"
+							? {
+									onPointerDown: (e: any) => e.stopPropagation(),
+									onMouseDown: (e: any) => e.stopPropagation(),
+									onClick: (e: any) => e.stopPropagation(),
+								}
+							: {})}
 					>
 						<Animated.View
 							entering={ZoomIn.duration(200).springify().damping(20)}

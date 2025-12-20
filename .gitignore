@@ -52,3 +52,4 @@ temp
 # bv (beads viewer) local config and caches
 .bv/
 .agent/skills/dev-browser/profiles/
+.agent/skills/dev-browser/tmp/
