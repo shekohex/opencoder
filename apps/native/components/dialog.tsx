@@ -158,7 +158,7 @@ export function DialogContent({
 						ref={ref}
 						entering={ZoomIn.duration(200).springify().damping(20)}
 						exiting={ZoomOut.duration(150)}
-						className={`w-full max-w-sm rounded-xl border border-border bg-surface shadow-xl ${className}`}
+						className={`w-full max-w-sm rounded-xl border border-border bg-background shadow-xl ${className}`}
 						style={style as any}
 						// @ts-expect-error
 						accessibilityRole="dialog"
