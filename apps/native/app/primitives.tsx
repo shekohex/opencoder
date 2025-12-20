@@ -1,8 +1,19 @@
 import { Stack } from "expo-router";
 import { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
+
 import { Button } from "@/components/button";
 import { Container } from "@/components/container";
+import {
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@/components/dialog";
 import { Switch } from "@/components/switch";
 import { TextField } from "@/components/text-field";
 
@@ -54,6 +65,69 @@ export default function PrimitivesScreen() {
 									Loading
 								</Button>
 							</View>
+						</View>
+					</View>
+
+					{/* Dialogs Section */}
+					<View className="gap-4">
+						<Text className="font-bold text-foreground text-xl">Dialogs</Text>
+						<View className="flex-row flex-wrap gap-4">
+							<Dialog>
+								<DialogTrigger asChild>
+									<Button variant="outline">Open Dialog</Button>
+								</DialogTrigger>
+								<DialogContent>
+									<DialogHeader>
+										<DialogTitle>Edit Profile</DialogTitle>
+										<DialogDescription>
+											Make changes to your profile here. Click save when you're
+											done.
+										</DialogDescription>
+									</DialogHeader>
+									<View className="gap-4 px-6 py-4">
+										<TextField>
+											<TextField.Label>Name</TextField.Label>
+											<TextField.Input defaultValue="Pedro Duarte" />
+										</TextField>
+										<TextField>
+											<TextField.Label>Username</TextField.Label>
+											<TextField.Input defaultValue="@peduarte" />
+										</TextField>
+									</View>
+									<DialogFooter>
+										<DialogClose asChild>
+											<Button variant="ghost">Cancel</Button>
+										</DialogClose>
+										<DialogClose asChild>
+											<Button>Save changes</Button>
+										</DialogClose>
+									</DialogFooter>
+									<DialogClose />
+								</DialogContent>
+							</Dialog>
+
+							<Dialog>
+								<DialogTrigger asChild>
+									<Button variant="danger">Delete Account</Button>
+								</DialogTrigger>
+								<DialogContent>
+									<DialogHeader>
+										<DialogTitle>Are you absolutely sure?</DialogTitle>
+										<DialogDescription>
+											This action cannot be undone. This will permanently delete
+											your account and remove your data from our servers.
+										</DialogDescription>
+									</DialogHeader>
+									<DialogFooter>
+										<DialogClose asChild>
+											<Button variant="ghost">Cancel</Button>
+										</DialogClose>
+										<DialogClose asChild>
+											<Button variant="danger">Yes, delete account</Button>
+										</DialogClose>
+									</DialogFooter>
+								</DialogContent>
+							</Dialog>
 						</View>
 					</View>
 

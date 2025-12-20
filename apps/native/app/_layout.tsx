@@ -1,4 +1,5 @@
 import "../global.css";
+import { OverlayProvider } from "@react-native-aria/overlays";
 import {
 	DarkTheme,
 	DefaultTheme,
@@ -11,6 +12,7 @@ import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useRef } from "react";
 import { Platform, StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+
 import { setAndroidNavigationBar } from "@/lib/android-navigation-bar";
 import { SessionProvider, useSession } from "@/lib/auth";
 import { NAV_THEME } from "@/lib/constants";
@@ -72,15 +74,17 @@ function RootLayoutContent() {
 		<ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
 			<StatusBar style={isDarkColorScheme ? "light" : "dark"} />
 			<GestureHandlerRootView style={styles.container}>
-				<Stack>
-					<Stack.Screen name="(app)" options={{ headerShown: false }} />
-					<Stack.Screen name="sign-in" options={{ headerShown: false }} />
-					<Stack.Screen
-						name="modal"
-						options={{ title: "Modal", presentation: "modal" }}
-					/>
-					<Stack.Screen name="+not-found" />
-				</Stack>
+				<OverlayProvider>
+					<Stack>
+						<Stack.Screen name="(app)" options={{ headerShown: false }} />
+						<Stack.Screen name="sign-in" options={{ headerShown: false }} />
+						<Stack.Screen
+							name="modal"
+							options={{ title: "Modal", presentation: "modal" }}
+						/>
+						<Stack.Screen name="+not-found" />
+					</Stack>
+				</OverlayProvider>
 			</GestureHandlerRootView>
 		</ThemeProvider>
 	);
