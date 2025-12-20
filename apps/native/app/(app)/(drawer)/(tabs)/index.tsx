@@ -2,19 +2,19 @@ import { Link } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Button } from "@/components/button";
 import { Container } from "@/components/container";
-import { NAV_THEME } from "@/lib/constants";
-import { useColorScheme } from "@/lib/use-color-scheme";
+import { useTheme } from "@/lib/theme-context";
 
 export default function TabOne() {
-	const { colorScheme } = useColorScheme();
-	const theme = colorScheme === "dark" ? NAV_THEME.dark : NAV_THEME.light;
+	const { theme } = useTheme();
 
 	return (
 		<Container>
 			<ScrollView style={styles.scrollView}>
 				<View style={styles.content}>
-					<Text style={[styles.title, { color: theme.text }]}>Tab One</Text>
-					<Text style={[styles.subtitle, { color: theme.text, opacity: 0.7 }]}>
+					<Text style={[styles.title, { color: theme.text.strong }]}>
+						Tab One
+					</Text>
+					<Text style={[styles.subtitle, { color: theme.text.weak }]}>
 						Explore the first section of your app
 					</Text>
 

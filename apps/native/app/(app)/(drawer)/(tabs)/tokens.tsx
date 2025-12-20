@@ -1,5 +1,9 @@
 import { ScrollView, Text, View } from "react-native";
+import { Button } from "@/components/button";
 import { Container } from "@/components/container";
+import { Switch } from "@/components/switch";
+import { useTheme } from "@/lib/theme-context";
+import { themeDisplayNames } from "@/lib/themes";
 
 function ColorSwatch({
 	name,
@@ -53,12 +57,56 @@ function RadiusSwatch({
 }
 
 export default function TokensScreen() {
+	const { themeName, mode, setThemeName, availableThemes } = useTheme();
+
 	return (
 		<Container>
 			<ScrollView className="flex-1 p-4">
 				<Text className="mb-6 font-bold text-2xl text-foreground-strong">
 					Design Tokens
 				</Text>
+
+				<Section title="Quick Theme Switch">
+					<View className="mb-4 flex-row flex-wrap gap-2">
+						{availableThemes.map((name) => (
+							<Button
+								key={name}
+								variant={themeName === name ? "primary" : "outline"}
+								size="sm"
+								onPress={() => setThemeName(name)}
+							>
+								{themeDisplayNames[name]}
+							</Button>
+						))}
+					</View>
+					<Text className="text-foreground-weak text-sm">
+						Active: {themeDisplayNames[themeName]} ({mode} mode)
+					</Text>
+				</Section>
+
+				<Section title="Button Variants">
+					<View className="gap-2">
+						<Button variant="primary" size="sm">
+							Primary
+						</Button>
+						<Button variant="secondary" size="sm">
+							Secondary
+						</Button>
+						<Button variant="outline" size="sm">
+							Outline
+						</Button>
+						<Button variant="ghost" size="sm">
+							Ghost
+						</Button>
+						<Button variant="danger" size="sm">
+							Danger
+						</Button>
+					</View>
+				</Section>
+
+				<Section title="Switch Component">
+					<Switch label="Demo Switch" checked={mode === "dark"} />
+				</Section>
 
 				<Section title="Background Colors">
 					<ColorSwatch name="background" colorClass="bg-background" />

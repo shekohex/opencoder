@@ -1,17 +1,17 @@
 import { StyleSheet, Text, View } from "react-native";
 import { Container } from "@/components/container";
-import { NAV_THEME } from "@/lib/constants";
-import { useColorScheme } from "@/lib/use-color-scheme";
+import { useTheme } from "@/lib/theme-context";
 
 export default function Modal() {
-	const { colorScheme } = useColorScheme();
-	const theme = colorScheme === "dark" ? NAV_THEME.dark : NAV_THEME.light;
+	const { theme } = useTheme();
 
 	return (
 		<Container>
 			<View style={styles.container}>
 				<View style={styles.header}>
-					<Text style={[styles.title, { color: theme.text }]}>Modal</Text>
+					<Text style={[styles.title, { color: theme.text.strong }]}>
+						Modal
+					</Text>
 				</View>
 			</View>
 		</Container>

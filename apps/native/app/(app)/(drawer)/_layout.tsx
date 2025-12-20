@@ -2,30 +2,30 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { Link } from "expo-router";
 import { Drawer } from "expo-router/drawer";
 import { HeaderButton } from "@/components/header-button";
-import { NAV_THEME } from "@/lib/constants";
-import { useColorScheme } from "@/lib/use-color-scheme";
+import { useTheme } from "@/lib/theme-context";
 
 const DrawerLayout = () => {
-	const { colorScheme } = useColorScheme();
-	const theme = colorScheme === "dark" ? NAV_THEME.dark : NAV_THEME.light;
+	const { theme } = useTheme();
+	const navColors = theme.navTheme;
 
 	return (
 		<Drawer
 			screenOptions={{
 				headerStyle: {
-					backgroundColor: theme.background,
+					backgroundColor: navColors.background,
 				},
 				headerTitleStyle: {
-					color: theme.text,
+					color: navColors.text,
 				},
-				headerTintColor: theme.text,
+				headerTintColor: navColors.text,
 				drawerStyle: {
-					backgroundColor: theme.background,
+					backgroundColor: navColors.background,
 				},
 				drawerLabelStyle: {
-					color: theme.text,
+					color: navColors.text,
 				},
-				drawerInactiveTintColor: theme.text,
+				drawerInactiveTintColor: navColors.text,
+				drawerActiveTintColor: navColors.primary,
 			}}
 		>
 			<Drawer.Screen
@@ -50,6 +50,16 @@ const DrawerLayout = () => {
 						<Link href="/modal" asChild>
 							<HeaderButton />
 						</Link>
+					),
+				}}
+			/>
+			<Drawer.Screen
+				name="settings"
+				options={{
+					headerTitle: "Settings",
+					drawerLabel: "Settings",
+					drawerIcon: ({ size, color }) => (
+						<Ionicons name="settings-outline" size={size} color={color} />
 					),
 				}}
 			/>

@@ -1,21 +1,20 @@
 import { Tabs } from "expo-router";
 import { TabBarIcon } from "@/components/tabbar-icon";
-import { NAV_THEME } from "@/lib/constants";
-import { useColorScheme } from "@/lib/use-color-scheme";
+import { useTheme } from "@/lib/theme-context";
 
 export default function TabLayout() {
-	const { isDarkColorScheme } = useColorScheme();
-	const theme = isDarkColorScheme ? NAV_THEME.dark : NAV_THEME.light;
+	const { theme } = useTheme();
+	const navColors = theme.navTheme;
 
 	return (
 		<Tabs
 			screenOptions={{
 				headerShown: false,
-				tabBarActiveTintColor: theme.primary,
-				tabBarInactiveTintColor: theme.text,
+				tabBarActiveTintColor: navColors.primary,
+				tabBarInactiveTintColor: navColors.text,
 				tabBarStyle: {
-					backgroundColor: theme.background,
-					borderTopColor: theme.border,
+					backgroundColor: navColors.background,
+					borderTopColor: navColors.border,
 				},
 			}}
 		>

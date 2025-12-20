@@ -3,8 +3,8 @@ import { OverlayProvider } from "@react-native-aria/overlays";
 import {
 	DarkTheme,
 	DefaultTheme,
+	ThemeProvider as NavigationThemeProvider,
 	type Theme,
-	ThemeProvider,
 } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -15,23 +15,12 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { setAndroidNavigationBar } from "@/lib/android-navigation-bar";
 import { SessionProvider, useSession } from "@/lib/auth";
-import { NAV_THEME } from "@/lib/constants";
-import { useColorScheme } from "@/lib/use-color-scheme";
-
-const LIGHT_THEME: Theme = {
-	...DefaultTheme,
-	colors: NAV_THEME.light,
-};
-const DARK_THEME: Theme = {
-	...DarkTheme,
-	colors: NAV_THEME.dark,
-};
+import { ThemeProvider, useTheme } from "@/lib/theme-context";
 
 export const unstable_settings = {
 	initialRouteName: "(app)",
 };
 
-// Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
 
 const useIsomorphicLayoutEffect =
@@ -47,32 +36,39 @@ const styles = StyleSheet.create({
 
 function RootLayoutContent() {
 	const hasMounted = useRef(false);
-	const { colorScheme, isDarkColorScheme } = useColorScheme();
-	const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
+	const { mode, theme, themeName } = useTheme();
+	const [isThemeLoaded, setIsThemeLoaded] = React.useState(false);
 	const { isLoading } = useSession();
 
+	const navTheme: Theme = React.useMemo(
+		() => ({
+			...(mode === "dark" ? DarkTheme : DefaultTheme),
+			colors: theme.navTheme,
+		}),
+		[mode, theme.navTheme],
+	);
+
 	useIsomorphicLayoutEffect(() => {
-		if (hasMounted.current) {
-			return;
+		if (!hasMounted.current) {
+			setIsThemeLoaded(true);
+			hasMounted.current = true;
 		}
-		setAndroidNavigationBar(colorScheme);
-		setIsColorSchemeLoaded(true);
-		hasMounted.current = true;
-	}, []);
+		setAndroidNavigationBar(mode, theme.background.base);
+	}, [mode, themeName, theme.background.base]);
 
 	useEffect(() => {
-		if (isColorSchemeLoaded && !isLoading) {
+		if (isThemeLoaded && !isLoading) {
 			SplashScreen.hideAsync();
 		}
-	}, [isColorSchemeLoaded, isLoading]);
+	}, [isThemeLoaded, isLoading]);
 
-	if (!isColorSchemeLoaded || isLoading) {
+	if (!isThemeLoaded || isLoading) {
 		return null;
 	}
 
 	return (
-		<ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-			<StatusBar style={isDarkColorScheme ? "light" : "dark"} />
+		<NavigationThemeProvider value={navTheme}>
+			<StatusBar style={mode === "dark" ? "light" : "dark"} />
 			<GestureHandlerRootView style={styles.container}>
 				<OverlayProvider>
 					<Stack>
@@ -86,14 +82,16 @@ function RootLayoutContent() {
 					</Stack>
 				</OverlayProvider>
 			</GestureHandlerRootView>
-		</ThemeProvider>
+		</NavigationThemeProvider>
 	);
 }
 
 export default function RootLayout() {
 	return (
 		<SessionProvider>
-			<RootLayoutContent />
+			<ThemeProvider>
+				<RootLayoutContent />
+			</ThemeProvider>
 		</SessionProvider>
 	);
 }

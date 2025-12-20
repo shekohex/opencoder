@@ -7,8 +7,8 @@ import {
 	type View,
 	type ViewStyle,
 } from "react-native";
-import { palette, semanticColors } from "@/lib/tokens";
-import { useColorScheme } from "@/lib/use-color-scheme";
+import { useTheme } from "@/lib/theme-context";
+import { palette } from "@/lib/tokens";
 
 export type ButtonVariant =
 	| "primary"
@@ -69,8 +69,7 @@ export const Button = forwardRef<View, ButtonProps>(
 		},
 		ref,
 	) => {
-		const { colorScheme } = useColorScheme();
-		const colors = semanticColors[colorScheme];
+		const { theme } = useTheme();
 
 		const baseStyles =
 			"flex-row items-center justify-center border font-medium transition-colors focus-ring";
@@ -91,7 +90,7 @@ export const Button = forwardRef<View, ButtonProps>(
 			return "text-foreground";
 		};
 
-		const indicatorColor = isWhiteText ? palette.white : colors.text.base;
+		const indicatorColor = isWhiteText ? palette.white : theme.text.base;
 
 		return (
 			<Pressable

@@ -353,6 +353,76 @@ export const semanticColors = {
 	},
 } as const;
 
+export type SemanticColors = {
+	background: {
+		base: string;
+		weak: string;
+		strong: string;
+		stronger: string;
+	};
+	surface: {
+		base: string;
+		hover: string;
+		active: string;
+		weak: string;
+		strong: string;
+		brand: string;
+		brandHover: string;
+		interactive: string;
+		interactiveHover: string;
+		success: string;
+		successStrong: string;
+		warning: string;
+		warningStrong: string;
+		critical: string;
+		criticalStrong: string;
+		info: string;
+		infoStrong: string;
+	};
+	text: {
+		base: string;
+		weak: string;
+		weaker: string;
+		strong: string;
+		interactive: string;
+		success: string;
+		critical: string;
+		warning: string;
+	};
+	border: {
+		base: string;
+		hover: string;
+		active: string;
+		weak: string;
+		strong: string;
+		selected: string;
+		interactive: string;
+		success: string;
+		warning: string;
+		critical: string;
+		info: string;
+	};
+	icon: {
+		base: string;
+		hover: string;
+		active: string;
+		weak: string;
+		strong: string;
+		interactive: string;
+		success: string;
+		warning: string;
+		critical: string;
+		info: string;
+	};
+	input: {
+		base: string;
+		hover: string;
+		active: string;
+		selected: string;
+		disabled: string;
+	};
+};
+
 export const typography = {
 	fontFamily: {
 		sans: "Inter",
