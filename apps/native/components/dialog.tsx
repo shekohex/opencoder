@@ -8,7 +8,14 @@ import React, {
 	useRef,
 	useState,
 } from "react";
-import { Modal, Pressable, Text, View, type ViewStyle } from "react-native";
+import {
+	Modal,
+	Platform,
+	Pressable,
+	Text,
+	View,
+	type ViewStyle,
+} from "react-native";
 import Animated, {
 	FadeIn,
 	FadeOut,
@@ -134,7 +141,7 @@ export function DialogContent({
 				return false;
 			},
 		},
-		ref,
+		ref as any,
 	);
 
 	if (!isOpen) return null;
@@ -164,8 +171,14 @@ export function DialogContent({
 					{/* Wrapper view to hold the ref for useOverlay compatibility */}
 					<View
 						ref={ref}
+						// Use simple spread for props on Web, but filtering might be needed if conflicts arise.
+						// React Native Web handles many aria attributes correctly.
+						// @ts-expect-error - 'overlayProps' might have types incompatible with ViewProps but are valid on Web or filtered by RNW.
 						{...overlayProps}
 						style={{ maxWidth: "100%", maxHeight: "100%" }}
+						// Using onStartShouldSetResponder to trap touches is a robust way to prevent
+						// touches from bubbling to the backdrop Pressable in React Native.
+						onStartShouldSetResponder={() => true}
 					>
 						<Animated.View
 							entering={ZoomIn.duration(200).springify().damping(20)}
@@ -173,7 +186,7 @@ export function DialogContent({
 							className={`w-full max-w-sm rounded-xl border border-border bg-background shadow-xl ${className}`}
 							style={style as any}
 							// @ts-expect-error
-							accessibilityRole="dialog"
+							accessibilityRole={Platform.OS === "web" ? "dialog" : "alert"}
 							accessibilityModal
 							aria-modal="true"
 							aria-labelledby={titleId}
