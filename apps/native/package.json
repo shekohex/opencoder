@@ -9,7 +9,8 @@
 		"ios": "expo run:ios",
 		"prebuild": "expo prebuild",
 		"web": "expo start --web",
-		"check-types": "tsc --noEmit"
+		"check-types": "tsc --noEmit",
+		"validate-themes": "bun scripts/validate-themes.ts"
 	},
 	"dependencies": {
 		"@coder/sdk": "workspace:*",

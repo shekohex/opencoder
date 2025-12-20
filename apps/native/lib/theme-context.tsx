@@ -7,8 +7,9 @@ import {
 	useMemo,
 	useState,
 } from "react";
-import { Platform, useColorScheme as useRNColorScheme } from "react-native";
+import { useColorScheme as useRNColorScheme } from "react-native";
 import { createMMKV } from "react-native-mmkv";
+import { Uniwind } from "uniwind";
 import {
 	type ResolvedTheme,
 	resolveTheme,
@@ -18,6 +19,10 @@ import {
 } from "./themes";
 
 const storage = createMMKV({ id: "theme-storage" });
+
+type UniwindThemeName =
+	| ThemeMode
+	| `${Exclude<ThemeName, "opencode">}-${ThemeMode}`;
 
 const THEME_KEY = "theme_name";
 const MODE_PREFERENCE_KEY = "theme_mode_preference";
@@ -75,10 +80,12 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 	}, [themeName, mode]);
 
 	useEffect(() => {
-		if (Platform.OS === "web" && typeof document !== "undefined") {
-			document.documentElement.setAttribute("data-theme", themeName);
-		}
-	}, [themeName]);
+		const uniwindTheme =
+			themeName === "opencode"
+				? (mode satisfies ThemeMode)
+				: (`${themeName}-${mode}` satisfies UniwindThemeName);
+		Uniwind.setTheme(uniwindTheme);
+	}, [themeName, mode]);
 
 	const setThemeName = useCallback((name: ThemeName) => {
 		setThemeNameState(name);
