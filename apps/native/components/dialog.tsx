@@ -127,7 +127,7 @@ export function DialogContent({
 			isDismissable: true,
 			shouldCloseOnBlur: true,
 		},
-		ref as any,
+		ref,
 	);
 
 	if (!isOpen) return null;
@@ -154,22 +154,27 @@ export function DialogContent({
 				pointerEvents="box-none"
 			>
 				<FocusScope contain restoreFocus autoFocus>
-					<Animated.View
+					{/* Wrapper view to hold the ref for useOverlay compatibility */}
+					<View
 						ref={ref}
-						entering={ZoomIn.duration(200).springify().damping(20)}
-						exiting={ZoomOut.duration(150)}
-						className={`w-full max-w-sm rounded-xl border border-border bg-background shadow-xl ${className}`}
-						style={style as any}
-						// @ts-expect-error
-						accessibilityRole="dialog"
-						accessibilityModal
-						aria-modal="true"
-						aria-labelledby={titleId}
-						aria-describedby={descriptionId}
 						{...overlayProps}
+						style={{ maxWidth: "100%", maxHeight: "100%" }}
 					>
-						{children}
-					</Animated.View>
+						<Animated.View
+							entering={ZoomIn.duration(200).springify().damping(20)}
+							exiting={ZoomOut.duration(150)}
+							className={`w-full max-w-sm rounded-xl border border-border bg-background shadow-xl ${className}`}
+							style={style as any}
+							// @ts-expect-error
+							accessibilityRole="dialog"
+							accessibilityModal
+							aria-modal="true"
+							aria-labelledby={titleId}
+							aria-describedby={descriptionId}
+						>
+							{children}
+						</Animated.View>
+					</View>
 				</FocusScope>
 			</View>
 		</Modal>
