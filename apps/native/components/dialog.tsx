@@ -132,7 +132,10 @@ export function DialogContent({
 			isOpen,
 			onClose,
 			isDismissable: true,
-			shouldCloseOnBlur: true,
+			// Setting this to false is critical for Web/focus-trap compatibility.
+			// Otherwise, clicking non-focusable elements inside the dialog (like text)
+			// might trigger a blur that react-aria interprets as clicking outside.
+			shouldCloseOnBlur: false,
 			shouldCloseOnInteractOutside: (_element) => {
 				// We handle backdrop clicks manually with the absolute Pressable below.
 				// This avoids issues where clicks inside the dialog are interpreted as outside
@@ -179,6 +182,19 @@ export function DialogContent({
 						// Using onStartShouldSetResponder to trap touches is a robust way to prevent
 						// touches from bubbling to the backdrop Pressable in React Native.
 						onStartShouldSetResponder={() => true}
+						// Stop propagation on web to prevent the backdrop or useOverlay from seeing these events.
+						// @ts-expect-error
+						onPointerDown={(e) => {
+							e.stopPropagation();
+						}}
+						// @ts-expect-error
+						onMouseDown={(e) => {
+							e.stopPropagation();
+						}}
+						// @ts-expect-error
+						onClick={(e) => {
+							e.stopPropagation();
+						}}
 					>
 						<Animated.View
 							entering={ZoomIn.duration(200).springify().damping(20)}
