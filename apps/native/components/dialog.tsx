@@ -9,11 +9,14 @@ import React, {
 	useState,
 } from "react";
 import {
+	type GestureResponderEvent,
 	Modal,
 	Platform,
 	Pressable,
+	type StyleProp,
 	Text,
 	View,
+	type ViewProps,
 	type ViewStyle,
 } from "react-native";
 import Animated, {
@@ -24,6 +27,10 @@ import Animated, {
 } from "react-native-reanimated";
 
 // --- Types & Context ---
+
+interface TriggerProps {
+	onPress?: (e: GestureResponderEvent) => void;
+}
 
 interface DialogContextValue {
 	isOpen: boolean;
@@ -99,9 +106,9 @@ export function DialogTrigger({ children, asChild }: DialogTriggerProps) {
 	const { onOpen } = useDialogContext();
 
 	if (asChild && React.isValidElement(children)) {
-		return React.cloneElement(children as React.ReactElement<any>, {
-			onPress: (e: any) => {
-				(children as React.ReactElement<any>).props.onPress?.(e);
+		return React.cloneElement(children as React.ReactElement<TriggerProps>, {
+			onPress: (e: GestureResponderEvent) => {
+				(children as React.ReactElement<TriggerProps>).props.onPress?.(e);
 				onOpen();
 			},
 		});
@@ -114,7 +121,7 @@ export function DialogTrigger({ children, asChild }: DialogTriggerProps) {
 interface DialogContentProps {
 	children: React.ReactNode;
 	className?: string;
-	style?: ViewStyle;
+	style?: StyleProp<ViewStyle>;
 	overlayClassName?: string;
 }
 
@@ -144,7 +151,7 @@ export function DialogContent({
 				return false;
 			},
 		},
-		ref as any,
+		ref as unknown as React.RefObject<HTMLElement>,
 	);
 
 	if (!isOpen) return null;
@@ -176,7 +183,7 @@ export function DialogContent({
 						ref={ref}
 						// Use simple spread for props on Web, but filtering might be needed if conflicts arise.
 						// React Native Web handles many aria attributes correctly.
-						{...(overlayProps as any)}
+						{...(overlayProps as unknown as ViewProps)}
 						style={{ maxWidth: "100%", maxHeight: "100%" }}
 						// Using onStartShouldSetResponder to trap touches is a robust way to prevent
 						// touches from bubbling to the backdrop Pressable in React Native.
@@ -184,9 +191,12 @@ export function DialogContent({
 						// Stop propagation on web to prevent the backdrop or useOverlay from seeing these events.
 						{...(Platform.OS === "web"
 							? {
-									onPointerDown: (e: any) => e.stopPropagation(),
-									onMouseDown: (e: any) => e.stopPropagation(),
-									onClick: (e: any) => e.stopPropagation(),
+									onPointerDown: (e: { stopPropagation: () => void }) =>
+										e.stopPropagation(),
+									onMouseDown: (e: { stopPropagation: () => void }) =>
+										e.stopPropagation(),
+									onClick: (e: { stopPropagation: () => void }) =>
+										e.stopPropagation(),
 								}
 							: {})}
 					>
@@ -194,7 +204,7 @@ export function DialogContent({
 							entering={ZoomIn.duration(200).springify().damping(20)}
 							exiting={ZoomOut.duration(150)}
 							className={`w-full max-w-sm rounded-xl border border-border bg-background shadow-xl ${className}`}
-							style={style as any}
+							style={style as StyleProp<ViewStyle>}
 							// @ts-expect-error
 							accessibilityRole={Platform.OS === "web" ? "dialog" : "alert"}
 							accessibilityModal
@@ -302,9 +312,9 @@ export function DialogClose({
 	const { onClose } = useDialogContext();
 
 	if (asChild && React.isValidElement(children)) {
-		return React.cloneElement(children as React.ReactElement<any>, {
-			onPress: (e: any) => {
-				(children as React.ReactElement<any>).props.onPress?.(e);
+		return React.cloneElement(children as React.ReactElement<TriggerProps>, {
+			onPress: (e: GestureResponderEvent) => {
+				(children as React.ReactElement<TriggerProps>).props.onPress?.(e);
 				onClose();
 			},
 		});
