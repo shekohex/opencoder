@@ -126,6 +126,13 @@ export function DialogContent({
 			onClose,
 			isDismissable: true,
 			shouldCloseOnBlur: true,
+			shouldCloseOnInteractOutside: (_element) => {
+				// We handle backdrop clicks manually with the absolute Pressable below.
+				// This avoids issues where clicks inside the dialog are interpreted as outside
+				// if the ref isn't perfectly resolved (especially with Animated/Web views).
+				// We keep isDismissable=true for Escape key support.
+				return false;
+			},
 		},
 		ref,
 	);
