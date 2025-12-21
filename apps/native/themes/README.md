@@ -99,3 +99,33 @@ Update:
 
 - Uniwind Custom Themes: https://docs.uniwind.dev/theming/custom-themes
 - Uniwind updateCSSVariables: https://docs.uniwind.dev/theming/update-css-variables
+
+## FAQ
+
+### Why do we need themes in both TypeScript and CSS?
+
+In a pure web app, you usually only need CSS variables. However, in **React Native** with **Expo**, we need both for different parts of the system:
+
+#### 1. CSS Files (`themes/*.css` -> Uniwind/Tailwind)
+
+**Purpose:** Styling UI Components.
+This is what powers your Tailwind classes like `bg-background`, `text-foreground`, `border-border`.
+
+- **Engine:** The `uniwind` compiler reads these CSS variables at build/runtime to generate the native styles for React Native `View`, `Text`, etc.
+- **Scope:** Any component using `className="..."`.
+
+#### 2. TypeScript Definitions (`lib/themes.ts`)
+
+**Purpose:** Configuring Native System & Libraries.
+React Native libraries often require raw hex strings (e.g., `"#FF0000"`) and cannot read CSS variables.
+
+- **React Navigation:** The navigation bar, tab bar, and headers are native views controlled by the navigation library. We must pass it a JS object (`ResolvedTheme`) so it knows what color to paint the header background or the tab icons.
+- **Status Bar & System UI:** Setting the Android navigation bar color or iOS status bar style often requires imperative JS calls with hex codes.
+- **Canvas / 3D:** If you ever add charts (Skia) or 3D (Three.js), they usually need raw color values passed as props, not CSS classes.
+
+**In summary:**
+
+- **CSS** = For the code you write (React components).
+- **TS** = For the code libraries write (Navigation, Native Modules).
+
+We keep them in sync so the "header" (Native) matches the "page background" (CSS).
