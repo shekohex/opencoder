@@ -3,6 +3,7 @@ import { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 
 import { Button } from "@/components/button";
+import { CodeText } from "@/components/code-text";
 import { Container } from "@/components/container";
 import {
 	Dialog,
@@ -194,6 +195,40 @@ export default function PrimitivesScreen() {
 						/>
 
 						<Switch disabled checked={false} label="Disabled Unchecked" />
+					</View>
+
+					{/* CodeText Section */}
+					<View className="gap-4">
+						<Text className="font-bold text-foreground text-xl">Code</Text>
+
+						<View className="rounded-md border border-border bg-surface-weak p-4">
+							<CodeText className="text-foreground text-sm">
+								<Text className="text-foreground-interactive">function</Text>{" "}
+								<Text className="text-foreground-success">hello</Text>() {"{"}
+								{"\n"} console.
+								<Text className="text-foreground-interactive">log</Text>(
+								<Text className="text-foreground-warning">"Hello World"</Text>);
+								{"\n"}
+								{"}"}
+							</CodeText>
+						</View>
+
+						<View className="gap-2">
+							<Text className="font-semibold text-base text-foreground">
+								Nerd Fonts (Manual Toggle)
+							</Text>
+							<View className="rounded-md border border-border bg-surface-weak p-4">
+								<CodeText className="text-foreground text-sm" forceNerd>
+									With Nerd:    
+								</CodeText>
+								<CodeText
+									className="mt-2 text-foreground text-sm"
+									forceNerd={false}
+								>
+									Without Nerd:    
+								</CodeText>
+							</View>
+						</View>
 					</View>
 				</ScrollView>
 			</Container>

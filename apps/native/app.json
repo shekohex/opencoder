@@ -41,7 +41,160 @@
 					}
 				}
 			],
-			"expo-secure-store"
+			"expo-secure-store",
+			[
+				"expo-font",
+				{
+					"fonts": [
+						"node_modules/@expo-google-fonts/inter/300Light/Inter_300Light.ttf",
+						"node_modules/@expo-google-fonts/inter/400Regular/Inter_400Regular.ttf",
+						"node_modules/@expo-google-fonts/inter/700Bold/Inter_700Bold.ttf",
+						"node_modules/@expo-google-fonts/manrope/300Light/Manrope_300Light.ttf",
+						"node_modules/@expo-google-fonts/manrope/400Regular/Manrope_400Regular.ttf",
+						"node_modules/@expo-google-fonts/manrope/700Bold/Manrope_700Bold.ttf",
+						"node_modules/@expo-google-fonts/ibm-plex-mono/300Light/IBMPlexMono_300Light.ttf",
+						"node_modules/@expo-google-fonts/ibm-plex-mono/400Regular/IBMPlexMono_400Regular.ttf",
+						"node_modules/@expo-google-fonts/ibm-plex-mono/700Bold/IBMPlexMono_700Bold.ttf",
+						"node_modules/@expo-google-fonts/jetbrains-mono/300Light/JetBrainsMono_300Light.ttf",
+						"node_modules/@expo-google-fonts/jetbrains-mono/400Regular/JetBrainsMono_400Regular.ttf",
+						"node_modules/@expo-google-fonts/jetbrains-mono/700Bold/JetBrainsMono_700Bold.ttf",
+						"./assets/fonts/nerd-fonts/BlexMonoNerdFont-Light.ttf",
+						"./assets/fonts/nerd-fonts/BlexMonoNerdFont-Regular.ttf",
+						"./assets/fonts/nerd-fonts/BlexMonoNerdFont-Bold.ttf",
+						"./assets/fonts/nerd-fonts/JetBrainsMonoNerdFont-Light.ttf",
+						"./assets/fonts/nerd-fonts/JetBrainsMonoNerdFont-Regular.ttf",
+						"./assets/fonts/nerd-fonts/JetBrainsMonoNerdFont-Bold.ttf"
+					],
+					"android": {
+						"fonts": [
+							{
+								"fontFamily": "Inter",
+								"fontDefinitions": [
+									{
+										"path": "node_modules/@expo-google-fonts/inter/300Light/Inter_300Light.ttf",
+										"weight": 300
+									},
+									{
+										"path": "node_modules/@expo-google-fonts/inter/400Regular/Inter_400Regular.ttf",
+										"weight": 400
+									},
+									{
+										"path": "node_modules/@expo-google-fonts/inter/700Bold/Inter_700Bold.ttf",
+										"weight": 700
+									}
+								]
+							},
+							{
+								"fontFamily": "Manrope",
+								"fontDefinitions": [
+									{
+										"path": "node_modules/@expo-google-fonts/manrope/300Light/Manrope_300Light.ttf",
+										"weight": 300
+									},
+									{
+										"path": "node_modules/@expo-google-fonts/manrope/400Regular/Manrope_400Regular.ttf",
+										"weight": 400
+									},
+									{
+										"path": "node_modules/@expo-google-fonts/manrope/700Bold/Manrope_700Bold.ttf",
+										"weight": 700
+									}
+								]
+							},
+							{
+								"fontFamily": "IBMPlexMono",
+								"fontDefinitions": [
+									{
+										"path": "node_modules/@expo-google-fonts/ibm-plex-mono/300Light/IBMPlexMono_300Light.ttf",
+										"weight": 300
+									},
+									{
+										"path": "node_modules/@expo-google-fonts/ibm-plex-mono/400Regular/IBMPlexMono_400Regular.ttf",
+										"weight": 400
+									},
+									{
+										"path": "node_modules/@expo-google-fonts/ibm-plex-mono/700Bold/IBMPlexMono_700Bold.ttf",
+										"weight": 700
+									}
+								]
+							},
+							{
+								"fontFamily": "JetBrainsMono",
+								"fontDefinitions": [
+									{
+										"path": "node_modules/@expo-google-fonts/jetbrains-mono/300Light/JetBrainsMono_300Light.ttf",
+										"weight": 300
+									},
+									{
+										"path": "node_modules/@expo-google-fonts/jetbrains-mono/400Regular/JetBrainsMono_400Regular.ttf",
+										"weight": 400
+									},
+									{
+										"path": "node_modules/@expo-google-fonts/jetbrains-mono/700Bold/JetBrainsMono_700Bold.ttf",
+										"weight": 700
+									}
+								]
+							},
+							{
+								"fontFamily": "BlexMonoNerdFont",
+								"fontDefinitions": [
+									{
+										"path": "./assets/fonts/nerd-fonts/BlexMonoNerdFont-Light.ttf",
+										"weight": 300
+									},
+									{
+										"path": "./assets/fonts/nerd-fonts/BlexMonoNerdFont-Regular.ttf",
+										"weight": 400
+									},
+									{
+										"path": "./assets/fonts/nerd-fonts/BlexMonoNerdFont-Bold.ttf",
+										"weight": 700
+									}
+								]
+							},
+							{
+								"fontFamily": "JetBrainsMonoNerdFont",
+								"fontDefinitions": [
+									{
+										"path": "./assets/fonts/nerd-fonts/JetBrainsMonoNerdFont-Light.ttf",
+										"weight": 300
+									},
+									{
+										"path": "./assets/fonts/nerd-fonts/JetBrainsMonoNerdFont-Regular.ttf",
+										"weight": 400
+									},
+									{
+										"path": "./assets/fonts/nerd-fonts/JetBrainsMonoNerdFont-Bold.ttf",
+										"weight": 700
+									}
+								]
+							}
+						]
+					},
+					"ios": {
+						"fonts": [
+							"node_modules/@expo-google-fonts/inter/300Light/Inter_300Light.ttf",
+							"node_modules/@expo-google-fonts/inter/400Regular/Inter_400Regular.ttf",
+							"node_modules/@expo-google-fonts/inter/700Bold/Inter_700Bold.ttf",
+							"node_modules/@expo-google-fonts/manrope/300Light/Manrope_300Light.ttf",
+							"node_modules/@expo-google-fonts/manrope/400Regular/Manrope_400Regular.ttf",
+							"node_modules/@expo-google-fonts/manrope/700Bold/Manrope_700Bold.ttf",
+							"node_modules/@expo-google-fonts/ibm-plex-mono/300Light/IBMPlexMono_300Light.ttf",
+							"node_modules/@expo-google-fonts/ibm-plex-mono/400Regular/IBMPlexMono_400Regular.ttf",
+							"node_modules/@expo-google-fonts/ibm-plex-mono/700Bold/IBMPlexMono_700Bold.ttf",
+							"node_modules/@expo-google-fonts/jetbrains-mono/300Light/JetBrainsMono_300Light.ttf",
+							"node_modules/@expo-google-fonts/jetbrains-mono/400Regular/JetBrainsMono_400Regular.ttf",
+							"node_modules/@expo-google-fonts/jetbrains-mono/700Bold/JetBrainsMono_700Bold.ttf",
+							"./assets/fonts/nerd-fonts/BlexMonoNerdFont-Light.ttf",
+							"./assets/fonts/nerd-fonts/BlexMonoNerdFont-Regular.ttf",
+							"./assets/fonts/nerd-fonts/BlexMonoNerdFont-Bold.ttf",
+							"./assets/fonts/nerd-fonts/JetBrainsMonoNerdFont-Light.ttf",
+							"./assets/fonts/nerd-fonts/JetBrainsMonoNerdFont-Regular.ttf",
+							"./assets/fonts/nerd-fonts/JetBrainsMonoNerdFont-Bold.ttf"
+						]
+					}
+				}
+			]
 		],
 		"experiments": {
 			"typedRoutes": true,

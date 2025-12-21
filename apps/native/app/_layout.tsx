@@ -6,15 +6,17 @@ import {
 	ThemeProvider as NavigationThemeProvider,
 	type Theme,
 } from "@react-navigation/native";
+import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useRef } from "react";
 import { Platform, StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-
 import { setAndroidNavigationBar } from "@/lib/android-navigation-bar";
 import { SessionProvider, useSession } from "@/lib/auth";
+import { FontProvider } from "@/lib/font-context";
+import { getWebFontMap } from "@/lib/font-registry";
 import { ThemeProvider, useTheme } from "@/lib/theme-context";
 
 export const unstable_settings = {
@@ -39,6 +41,7 @@ function RootLayoutContent() {
 	const { mode, theme, themeName } = useTheme();
 	const [isThemeLoaded, setIsThemeLoaded] = React.useState(false);
 	const { isLoading } = useSession();
+	const [fontsLoaded] = useFonts(Platform.OS === "web" ? getWebFontMap() : {});
 
 	const navTheme: Theme = React.useMemo(
 		() => ({
@@ -57,12 +60,12 @@ function RootLayoutContent() {
 	}, [mode, themeName, theme.background.base]);
 
 	useEffect(() => {
-		if (isThemeLoaded && !isLoading) {
+		if (isThemeLoaded && !isLoading && (Platform.OS !== "web" || fontsLoaded)) {
 			SplashScreen.hideAsync();
 		}
-	}, [isThemeLoaded, isLoading]);
+	}, [isThemeLoaded, isLoading, fontsLoaded]);
 
-	if (!isThemeLoaded || isLoading) {
+	if (!isThemeLoaded || isLoading || (Platform.OS === "web" && !fontsLoaded)) {
 		return null;
 	}
 
@@ -89,9 +92,11 @@ function RootLayoutContent() {
 export default function RootLayout() {
 	return (
 		<SessionProvider>
-			<ThemeProvider>
-				<RootLayoutContent />
-			</ThemeProvider>
+			<FontProvider>
+				<ThemeProvider>
+					<RootLayoutContent />
+				</ThemeProvider>
+			</FontProvider>
 		</SessionProvider>
 	);
 }
