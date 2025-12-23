@@ -22,6 +22,12 @@ const TRACK_HEIGHT = 24;
 const THUMB_SIZE = 20;
 const PADDING = 2;
 
+const HEX_COLOR_REGEX = /^#([0-9A-Fa-f]{3,4}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$/;
+
+function isValidColor(color: string): boolean {
+	return HEX_COLOR_REGEX.test(color);
+}
+
 export function Switch({
 	checked = false,
 	onCheckedChange,
@@ -33,14 +39,27 @@ export function Switch({
 }: SwitchProps) {
 	const { theme } = useTheme();
 
-	const activeColor = theme.icon.interactive;
-	const inactiveColor = theme.input.disabled;
+	const rawActiveColor = theme.icon.interactive;
+	const rawInactiveColor = theme.input.disabled;
+
+	const activeColor = isValidColor(rawActiveColor) ? rawActiveColor : "#6366f1";
+	const inactiveColor = isValidColor(rawInactiveColor)
+		? rawInactiveColor
+		: "#9ca3af";
+
+	const canInterpolate = activeColor !== inactiveColor;
 
 	const progress = useDerivedValue(() => {
 		return withTiming(checked ? 1 : 0, { duration: 200 });
 	});
 
 	const trackStyle = useAnimatedStyle(() => {
+		if (!canInterpolate) {
+			return {
+				backgroundColor: disabled ? inactiveColor : activeColor,
+			};
+		}
+
 		const backgroundColor = interpolateColor(
 			progress.value,
 			[0, 1],
