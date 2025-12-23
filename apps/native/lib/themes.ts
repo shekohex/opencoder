@@ -2242,7 +2242,7 @@ const lucentorngTheme: ThemeDefinition = {
 			hover: "transparent",
 			active: "transparent",
 			selected: "#c94d2433",
-			disabled: "transpa80",
+			disabled: "#8a8a8a80",
 		},
 	},
 	dark: {
@@ -2311,7 +2311,7 @@ const lucentorngTheme: ThemeDefinition = {
 			hover: "transparent",
 			active: "transparent",
 			selected: "#FFF7F133",
-			disabled: "transpa80",
+			disabled: "#8a8a8a80",
 		},
 	},
 };

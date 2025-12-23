@@ -64,7 +64,7 @@
 			--input-hover: transparent;
 			--input-active: transparent;
 			--input-selected: #c94d2433;
-			--input-disabled: transpa80;
+			--input-disabled: #8a8a8a80;
 		}
 	}
 
@@ -133,7 +133,7 @@
 			--input-hover: transparent;
 			--input-active: transparent;
 			--input-selected: #fff7f133;
-			--input-disabled: transpa80;
+			--input-disabled: #8a8a8a80;
 		}
 	}
 }
