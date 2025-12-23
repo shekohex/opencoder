@@ -40,12 +40,10 @@ async function setContent(html: string): Promise<void> {
 async function getSnapshot(): Promise<string> {
 	const script = getSnapshotScript();
 	return await page.evaluate((s: string) => {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		// biome-ignore lint/suspicious/noExplicitAny: Accessing browser globals
+		// biome-ignore lint/suspicious/noExplicitAny: globalThis typing for browser context
 		const w = globalThis as any;
 		if (!w.__devBrowser_getAISnapshot) {
-			// eslint-disable-next-line no-eval
-			// biome-ignore lint/security/noGlobalEval: Injecting script into browser
+			// biome-ignore lint/security/noGlobalEval: Required for injecting browser script
 			eval(s);
 		}
 		return w.__devBrowser_getAISnapshot();
@@ -54,8 +52,7 @@ async function getSnapshot(): Promise<string> {
 
 async function selectRef(ref: string): Promise<unknown> {
 	return await page.evaluate((refId: string) => {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		// biome-ignore lint/suspicious/noExplicitAny: Accessing browser globals
+		// biome-ignore lint/suspicious/noExplicitAny: globalThis typing for browser context
 		const w = globalThis as any;
 		const element = w.__devBrowser_selectSnapshotRef(refId);
 		return {
@@ -113,8 +110,7 @@ describe("ARIA Snapshot", () => {
 
 		// Check that refs are stored
 		const hasRefs = await page.evaluate(() => {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			// biome-ignore lint/suspicious/noExplicitAny: Accessing browser globals
+			// biome-ignore lint/suspicious/noExplicitAny: globalThis typing for browser context
 			const w = globalThis as any;
 			return (
 				typeof w.__devBrowserRefs === "object" &&

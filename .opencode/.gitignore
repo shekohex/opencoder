@@ -1,0 +1,6 @@
+node_modules
+package.json
+bun.lock
+./skill/dev-browser/profiles
+./skill/dev-browser/tmp
+./skill/dev-browser/node_modules

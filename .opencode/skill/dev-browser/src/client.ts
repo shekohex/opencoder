@@ -126,15 +126,17 @@ export async function waitForPageLoad(
  */
 async function getPageLoadState(page: Page): Promise<PageLoadState> {
 	const result = await page.evaluate(() => {
-		// Access browser globals via globalThis for TypeScript compatibility
-		/* eslint-disable @typescript-eslint/no-explicit-any */
-		// biome-ignore lint/suspicious/noExplicitAny: Accessing browser globals
-		const g = globalThis as { document?: any; performance?: any };
-		/* eslint-enable @typescript-eslint/no-explicit-any */
-		// biome-ignore lint/style/noNonNullAssertion: Checked by runtime environment
-		const perf = g.performance!;
-		// biome-ignore lint/style/noNonNullAssertion: Checked by runtime environment
-		const doc = g.document!;
+		const g = globalThis as { document?: Document; performance?: Performance };
+		const perf = g.performance;
+		const doc = g.document;
+
+		if (!perf || !doc) {
+			return {
+				documentReadyState: "unknown",
+				documentLoading: true,
+				pendingRequests: [],
+			};
+		}
 
 		const now = perf.now();
 		const resources = perf.getEntriesByType("resource");
@@ -220,6 +222,13 @@ async function getPageLoadState(page: Page): Promise<PageLoadState> {
 	return result;
 }
 
+/** Server mode information */
+export interface ServerInfo {
+	wsEndpoint: string;
+	mode: "launch" | "extension";
+	extensionConnected?: boolean;
+}
+
 export interface DevBrowserClient {
 	page: (name: string) => Promise<Page>;
 	list: () => Promise<string[]>;
@@ -239,6 +248,10 @@ export interface DevBrowserClient {
 		name: string,
 		ref: string,
 	) => Promise<ElementHandle | null>;
+	/**
+	 * Get server information including mode and extension connection status.
+	 */
+	getServerInfo: () => Promise<ServerInfo>;
 }
 
 export async function connect(
@@ -288,8 +301,9 @@ export async function connect(
 	): Promise<Page | null> {
 		for (const context of b.contexts()) {
 			for (const page of context.pages()) {
-				// biome-ignore lint/suspicious/noImplicitAnyLet: CDPSession type is complex
-				let cdpSession;
+				let cdpSession: Awaited<
+					ReturnType<typeof context.newCDPSession>
+				> | null = null;
 				try {
 					cdpSession = await context.newCDPSession(page);
 					const { targetInfo } = await cdpSession.send("Target.getTargetInfo");
@@ -332,12 +346,48 @@ export async function connect(
 			throw new Error(`Failed to get page: ${await res.text()}`);
 		}
 
-		const { targetId } = (await res.json()) as GetPageResponse;
+		const pageInfo = (await res.json()) as GetPageResponse & { url?: string };
+		const { targetId } = pageInfo;
 
 		// Connect to browser
 		const b = await ensureConnected();
 
-		// Find the page by targetId
+		// Check if we're in extension mode
+		const infoRes = await fetch(serverUrl);
+		const info = (await infoRes.json()) as { mode?: string };
+		const isExtensionMode = info.mode === "extension";
+
+		if (isExtensionMode) {
+			// In extension mode, DON'T use findPageByTargetId as it corrupts page state
+			// Instead, find page by URL or use the only available page
+			const allPages = b.contexts().flatMap((ctx) => ctx.pages());
+
+			if (allPages.length === 0) {
+				throw new Error("No pages available in browser");
+			}
+
+			if (allPages.length === 1) {
+				const page = allPages[0];
+				if (page) return page;
+			}
+
+			// Multiple pages - try to match by URL if available
+			if (pageInfo.url) {
+				const matchingPage = allPages.find((p) => p.url() === pageInfo.url);
+				if (matchingPage) {
+					return matchingPage;
+				}
+			}
+
+			// Fall back to first page
+			const firstPage = allPages[0];
+			if (!firstPage) {
+				throw new Error("No pages available in browser");
+			}
+			return firstPage;
+		}
+
+		// In launch mode, use the original targetId-based lookup
 		const page = await findPageByTargetId(b, targetId);
 		if (!page) {
 			throw new Error(`Page "${name}" not found in browser contexts`);
@@ -384,13 +434,10 @@ export async function connect(
 			const snapshotScript = getSnapshotScript();
 			const snapshot = await page.evaluate((script: string) => {
 				// Inject script if not already present
-				// Note: page.evaluate runs in browser context where window exists
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				// biome-ignore lint/suspicious/noExplicitAny: Accessing browser globals
+				// biome-ignore lint/suspicious/noExplicitAny: globalThis typing for browser context
 				const w = globalThis as any;
 				if (!w.__devBrowser_getAISnapshot) {
-					// eslint-disable-next-line no-eval
-					// biome-ignore lint/security/noGlobalEval: Injecting script into browser
+					// biome-ignore lint/security/noGlobalEval: Required for injecting browser script
 					eval(script);
 				}
 				return w.__devBrowser_getAISnapshot();
@@ -408,9 +455,7 @@ export async function connect(
 
 			// Find the element using the stored refs
 			const elementHandle = await page.evaluateHandle((refId: string) => {
-				// Note: page.evaluateHandle runs in browser context where globalThis is the window
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				// biome-ignore lint/suspicious/noExplicitAny: Accessing browser globals
+				// biome-ignore lint/suspicious/noExplicitAny: globalThis typing for browser context
 				const w = globalThis as any;
 				const refs = w.__devBrowserRefs;
 				if (!refs) {
@@ -433,6 +478,23 @@ export async function connect(
 			}
 
 			return element;
+		},
+
+		async getServerInfo(): Promise<ServerInfo> {
+			const res = await fetch(serverUrl);
+			if (!res.ok) {
+				throw new Error(`Server returned ${res.status}: ${await res.text()}`);
+			}
+			const info = (await res.json()) as {
+				wsEndpoint: string;
+				mode?: string;
+				extensionConnected?: boolean;
+			};
+			return {
+				wsEndpoint: info.wsEndpoint,
+				mode: (info.mode as "launch" | "extension") ?? "launch",
+				extensionConnected: info.extensionConnected,
+			};
 		},
 	};
 }
