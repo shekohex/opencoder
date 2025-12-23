@@ -53,3 +53,4 @@ temp
 .bv/
 .agent/skills/dev-browser/profiles/
 .agent/skills/dev-browser/tmp/
+.opencode/skill/
