@@ -2247,9 +2247,9 @@ const lucentorngTheme: ThemeDefinition = {
 	},
 	dark: {
 		background: {
-			base: "transparent",
-			weak: "transparent",
-			strong: "transparent",
+			base: "#0a0a0a",
+			weak: "#101010",
+			strong: "#0a0a0a",
 			stronger: "#0c0c0c",
 		},
 		surface: {
@@ -2257,7 +2257,7 @@ const lucentorngTheme: ThemeDefinition = {
 			hover: "#eeeeee1f",
 			active: "#eeeeee29",
 			weak: "#eeeeee1a",
-			strong: "transparent",
+			strong: "#1a1a1a",
 			brand: "#EC5B2B",
 			brandHover: "#EC5B2B",
 			interactive: "#FFF7F133",
@@ -2307,9 +2307,9 @@ const lucentorngTheme: ThemeDefinition = {
 			info: "#56b6c2",
 		},
 		input: {
-			base: "transparent",
-			hover: "transparent",
-			active: "transparent",
+			base: "#141414",
+			hover: "#1a1a1a",
+			active: "#1a1a1a",
 			selected: "#FFF7F133",
 			disabled: "#8a8a8a80",
 		},

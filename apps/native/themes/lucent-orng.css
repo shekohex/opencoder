@@ -70,7 +70,7 @@
 
 	:root {
 		@variant lucent-orng-dark {
-			--smoke-1: transparent;
+			--smoke-1: #0a0a0a;
 			--smoke-2: #161616;
 			--smoke-3: #2b2b2b;
 			--smoke-4: #414141;
@@ -83,16 +83,16 @@
 			--smoke-11: #d8d8d8;
 			--smoke-12: #eeeeee;
 
-			--background: transparent;
-			--background-weak: transparent;
-			--background-strong: transparent;
+			--background: #0a0a0a;
+			--background-weak: #101010;
+			--background-strong: #0a0a0a;
 			--background-stronger: #0c0c0c;
 
 			--surface: #eeeeee12;
 			--surface-hover: #eeeeee1f;
 			--surface-active: #eeeeee29;
 			--surface-weak: #eeeeee1a;
-			--surface-strong: transparent;
+			--surface-strong: #1a1a1a;
 			--surface-brand: #ec5b2b;
 			--surface-interactive: #fff7f133;
 			--surface-success: #6ba1e633;
@@ -129,9 +129,9 @@
 			--icon-critical: #e06c75;
 			--icon-info: #56b6c2;
 
-			--input-bg: transparent;
-			--input-hover: transparent;
-			--input-active: transparent;
+			--input-bg: #141414;
+			--input-hover: #1a1a1a;
+			--input-active: #1a1a1a;
 			--input-selected: #fff7f133;
 			--input-disabled: #8a8a8a80;
 		}
