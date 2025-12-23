@@ -15,6 +15,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/dialog";
+import { Select } from "@/components/select";
 import { Switch } from "@/components/switch";
 import { TextField } from "@/components/text-field";
 
@@ -195,6 +196,63 @@ export default function PrimitivesScreen() {
 						/>
 
 						<Switch disabled checked={false} label="Disabled Unchecked" />
+					</View>
+
+					{/* Select Section */}
+					<View className="gap-4">
+						<Text className="font-bold text-foreground text-xl">Select</Text>
+
+						<View className="gap-4">
+							<Text className="font-semibold text-base text-foreground">
+								Single Selection
+							</Text>
+							<Select placeholder="Pick a theme" label="Theme">
+								<Select.Option value="light">Light</Select.Option>
+								<Select.Option value="dark">Dark</Select.Option>
+								<Select.Option value="system">System</Select.Option>
+								<Select.Content />
+							</Select>
+						</View>
+
+						<View className="gap-4">
+							<Text className="font-semibold text-base text-foreground">
+								With Default Value
+							</Text>
+							<Select defaultValue="dark" label="Theme">
+								<Select.Option value="light">Light</Select.Option>
+								<Select.Option value="dark">Dark</Select.Option>
+								<Select.Option value="system">System</Select.Option>
+								<Select.Content />
+							</Select>
+						</View>
+
+						<View className="gap-4">
+							<Text className="font-semibold text-base text-foreground">
+								Disabled
+							</Text>
+							<Select placeholder="Cannot select" disabled>
+								<Select.Option value="a">Option A</Select.Option>
+								<Select.Option value="b">Option B</Select.Option>
+								<Select.Content />
+							</Select>
+						</View>
+
+						<View className="gap-4">
+							<Text className="font-semibold text-base text-foreground">
+								Multiple Selection
+							</Text>
+							<Select
+								selectionMode="multiple"
+								defaultValue={["react"]}
+								label="Frameworks"
+							>
+								<Select.Option value="react">React</Select.Option>
+								<Select.Option value="vue">Vue</Select.Option>
+								<Select.Option value="angular">Angular</Select.Option>
+								<Select.Option value="svelte">Svelte</Select.Option>
+								<Select.Content />
+							</Select>
+						</View>
 					</View>
 
 					{/* CodeText Section */}

@@ -19,10 +19,10 @@
 - [ ] `Escape` key closes the dialog.
 
 ### Select / ListBox
-- [ ] Listbox can be opened with keyboard.
-- [ ] Focus moves to the active option.
-- [ ] Arrow keys navigate options.
-- [ ] `Enter` or `Space` selects an option.
+- [x] Listbox can be opened with keyboard.
+- [x] Focus moves to the active option.
+- [x] Arrow keys navigate options.
+- [x] `Enter` or `Space` selects an option.
 
 ### Tabs
 - [ ] Arrow keys navigate between tabs.
