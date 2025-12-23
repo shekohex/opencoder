@@ -8,7 +8,6 @@ build/
 # Runtime data
 profiles/
 tmp/
-references/
 screenshots/
 *.log
 .env
