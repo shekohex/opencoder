@@ -17,6 +17,7 @@ if (Platform.OS !== "web") {
 export const storage = {
 	getString: (key: string): string | undefined => {
 		if (Platform.OS === "web") {
+			if (typeof localStorage === "undefined") return undefined;
 			return localStorage.getItem(key) ?? undefined;
 		}
 		return mmkv?.getString(key);
@@ -24,6 +25,7 @@ export const storage = {
 
 	set: (key: string, value: string | boolean | number) => {
 		if (Platform.OS === "web") {
+			if (typeof localStorage === "undefined") return;
 			localStorage.setItem(key, String(value));
 			return;
 		}
@@ -32,6 +34,7 @@ export const storage = {
 
 	delete: (key: string) => {
 		if (Platform.OS === "web") {
+			if (typeof localStorage === "undefined") return;
 			localStorage.removeItem(key);
 			return;
 		}
@@ -40,6 +43,7 @@ export const storage = {
 
 	getBoolean: (key: string): boolean => {
 		if (Platform.OS === "web") {
+			if (typeof localStorage === "undefined") return false;
 			return localStorage.getItem(key) === "true";
 		}
 		return mmkv?.getBoolean(key) ?? false;

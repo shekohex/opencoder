@@ -17,6 +17,7 @@ import {
 } from "@/components/dialog";
 import { Select } from "@/components/select";
 import { Switch } from "@/components/switch";
+import { Tabs } from "@/components/tabs";
 import { TextField } from "@/components/text-field";
 
 export default function PrimitivesScreen() {
@@ -253,6 +254,86 @@ export default function PrimitivesScreen() {
 								<Select.Content />
 							</Select>
 						</View>
+					</View>
+
+					{/* Tabs Section */}
+					<View className="gap-4">
+						<Text className="font-bold text-foreground text-xl">Tabs</Text>
+
+						<Tabs defaultValue="account" className="w-full max-w-[400px]">
+							<Tabs.List>
+								<Tabs.Trigger value="account" className="flex-1">
+									Account
+								</Tabs.Trigger>
+								<Tabs.Trigger value="password" className="flex-1">
+									Password
+								</Tabs.Trigger>
+								<Tabs.Trigger value="settings" className="flex-1">
+									Settings
+								</Tabs.Trigger>
+							</Tabs.List>
+							<Tabs.Content value="account">
+								<View className="rounded-md border border-border bg-surface-weak p-4">
+									<Text className="font-semibold text-foreground text-lg">
+										Account
+									</Text>
+									<Text className="mt-1 text-foreground-weak">
+										Make changes to your account here. Click save when you're
+										done.
+									</Text>
+									<View className="mt-4 gap-2">
+										<TextField>
+											<TextField.Label>Name</TextField.Label>
+											<TextField.Input defaultValue="Pedro Duarte" />
+										</TextField>
+										<TextField>
+											<TextField.Label>Username</TextField.Label>
+											<TextField.Input defaultValue="@peduarte" />
+										</TextField>
+									</View>
+									<Button className="mt-4 self-end">Save changes</Button>
+								</View>
+							</Tabs.Content>
+							<Tabs.Content value="password">
+								<View className="rounded-md border border-border bg-surface-weak p-4">
+									<Text className="font-semibold text-foreground text-lg">
+										Password
+									</Text>
+									<Text className="mt-1 text-foreground-weak">
+										Change your password here. After saving, you'll be logged
+										out.
+									</Text>
+									<View className="mt-4 gap-2">
+										<TextField>
+											<TextField.Label>Current Password</TextField.Label>
+											<TextField.Input secureTextEntry />
+										</TextField>
+										<TextField>
+											<TextField.Label>New Password</TextField.Label>
+											<TextField.Input secureTextEntry />
+										</TextField>
+									</View>
+									<Button className="mt-4 self-end">Save password</Button>
+								</View>
+							</Tabs.Content>
+							<Tabs.Content value="settings">
+								<View className="rounded-md border border-border bg-surface-weak p-4">
+									<Text className="font-semibold text-foreground text-lg">
+										Settings
+									</Text>
+									<Text className="mt-1 text-foreground-weak">
+										Manage your preferences.
+									</Text>
+									<View className="mt-4">
+										<Switch
+											checked={switch1}
+											onCheckedChange={setSwitch1}
+											label="Notifications"
+										/>
+									</View>
+								</View>
+							</Tabs.Content>
+						</Tabs>
 					</View>
 
 					{/* CodeText Section */}
