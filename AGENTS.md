@@ -179,3 +179,9 @@ bd sync  # Force immediate export/commit/push
 2. You can find the full `coder` codebase at `/tmp/coder`
 
 </code_reference>
+
+<expo>
+
+You can access the list of all Expo docs at: `https://docs.expo.dev/llms.txt` you can use webfetch tool or curl + rg then fetch the page you are looking for.
+
+</expo>
