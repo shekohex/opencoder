@@ -1,6 +1,7 @@
 {
 	"name": "@coder/sdk",
 	"version": "0.0.0",
+	"main": "src/index.ts",
 	"private": true,
 	"scripts": {
 		"check": "biome check --write .",

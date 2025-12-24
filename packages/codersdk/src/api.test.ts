@@ -17,6 +17,33 @@ describe("api.ts", () => {
 		jest.restoreAllMocks();
 	});
 
+	describe("getExternalAuthDevice", () => {
+		it("gets external auth device by provider", async () => {
+			// given
+			const deviceResponse: TypesGen.ExternalAuthDevice = {
+				device_code: "d",
+				user_code: "u",
+				verification_uri: "https://example.com",
+				expires_in: 600,
+				interval: 5,
+			};
+
+			const mockFetch = jest.fn(() =>
+				Promise.resolve(
+					new Response(JSON.stringify(deviceResponse), { status: 200 }),
+				),
+			);
+			global.fetch = mockFetch as unknown as typeof fetch;
+
+			// when
+			const result = await API.getExternalAuthDevice("oidc");
+
+			// then
+			expect(mockFetch).toHaveBeenCalled();
+			expect(result).toStrictEqual(deviceResponse);
+		});
+	});
+
 	describe("login", () => {
 		it("should return LoginResponse", async () => {
 			// given
