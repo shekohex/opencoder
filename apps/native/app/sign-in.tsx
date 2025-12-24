@@ -1,18 +1,24 @@
-import { View } from "react-native";
+import { useState } from "react";
+import { AuthMethodsStep } from "@/components/auth/auth-methods-step";
 import { BaseUrlStep } from "@/components/auth/base-url-step";
 import { Container } from "@/components/container";
 import { useSession } from "@/lib/auth";
 
 export default function SignIn() {
 	const { baseUrl } = useSession();
+	const [_step, setStep] = useState<"base-url" | "auth-methods">("base-url");
 
 	const handleBaseUrlNext = () => {
-		// When base URL is set, the layout should handle redirection or we move to next step.
-		// For now, we are building iteratively. Next task is auth methods.
-		// If base URL is set, we show auth methods (next task).
-		// But for now, let's just log it or do nothing as per plan "on submit, store base URL and trigger auth methods query"
-		// The BaseUrlStep handles storing.
-		console.log("Base URL set to:", baseUrl);
+		setStep("auth-methods");
+	};
+
+	const handleAuthenticated = () => {
+		// Layout should redirect
+	};
+
+	const handleDeviceFlowStart = (provider: string) => {
+		// Next task
+		console.log("Start device flow for", provider);
 	};
 
 	return (
@@ -24,7 +30,14 @@ export default function SignIn() {
 				padding: 16,
 			}}
 		>
-			{!baseUrl ? <BaseUrlStep onNext={handleBaseUrlNext} /> : <View />}
+			{!baseUrl ? (
+				<BaseUrlStep onNext={handleBaseUrlNext} />
+			) : (
+				<AuthMethodsStep
+					onAuthenticated={handleAuthenticated}
+					onDeviceFlowStart={handleDeviceFlowStart}
+				/>
+			)}
 		</Container>
 	);
 }
