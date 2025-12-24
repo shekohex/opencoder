@@ -17,6 +17,7 @@ import { setAndroidNavigationBar } from "@/lib/android-navigation-bar";
 import { SessionProvider, useSession } from "@/lib/auth";
 import { FontProvider } from "@/lib/font-context";
 import { getWebFontMap } from "@/lib/font-registry";
+import { HotkeysProvider } from "@/lib/hotkeys";
 import { ThemeProvider, useTheme } from "@/lib/theme-context";
 
 export const unstable_settings = {
@@ -94,7 +95,9 @@ export default function RootLayout() {
 		<SessionProvider>
 			<FontProvider>
 				<ThemeProvider>
-					<RootLayoutContent />
+					<HotkeysProvider>
+						<RootLayoutContent />
+					</HotkeysProvider>
 				</ThemeProvider>
 			</FontProvider>
 		</SessionProvider>

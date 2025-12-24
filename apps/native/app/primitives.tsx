@@ -19,10 +19,26 @@ import { Select } from "@/components/select";
 import { Switch } from "@/components/switch";
 import { Tabs } from "@/components/tabs";
 import { TextField } from "@/components/text-field";
+import { HotkeysScope, useHotkeys } from "@/lib/hotkeys";
+
+function ScopedHotkeyDemo() {
+	useHotkeys("demo.scoped_alert", () => {
+		window.alert("Scoped demo hotkey triggered!");
+	});
+	return (
+		<Text className="text-foreground-weak italic">
+			(Scoped component active - press 's')
+		</Text>
+	);
+}
 
 export default function PrimitivesScreen() {
 	const [switch1, setSwitch1] = useState(false);
 	const [switch2, setSwitch2] = useState(true);
+
+	useHotkeys("demo.global_alert", () => {
+		window.alert("Global demo hotkey triggered!");
+	});
 
 	return (
 		<>
@@ -366,6 +382,35 @@ export default function PrimitivesScreen() {
 								>
 									Without Nerd:    
 								</CodeText>
+							</View>
+						</View>
+					</View>
+
+					{/* Hotkeys Section */}
+					<View className="gap-4">
+						<Text className="font-bold text-foreground text-xl">Hotkeys</Text>
+						<View className="gap-4 rounded-md border border-border bg-surface-weak p-4">
+							<Text className="text-foreground">
+								Press <CodeText>t</CodeText> for a global alert.
+							</Text>
+
+							<HotkeysScope name="demo-scope">
+								<View className="gap-2 rounded-lg border border-border bg-surface p-3">
+									<Text className="font-semibold text-foreground">
+										Scoped Area (demo-scope)
+									</Text>
+									<ScopedHotkeyDemo />
+								</View>
+							</HotkeysScope>
+
+							<View className="mt-2 gap-2">
+								<TextField>
+									<TextField.Label>Input Safety Check</TextField.Label>
+									<TextField.Input placeholder="Type 't' or 's' here..." />
+									<TextField.Description>
+										Hotkeys should be disabled while typing in this input.
+									</TextField.Description>
+								</TextField>
 							</View>
 						</View>
 					</View>
