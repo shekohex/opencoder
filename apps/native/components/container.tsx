@@ -3,12 +3,22 @@ import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "@/lib/theme-context";
 
-export function Container({ children }: { children: React.ReactNode }) {
+export function Container({
+	children,
+	style,
+}: {
+	children: React.ReactNode;
+	style?: any;
+}) {
 	const { theme } = useTheme();
 
 	return (
 		<SafeAreaView
-			style={[styles.container, { backgroundColor: theme.background.base }]}
+			style={[
+				styles.container,
+				{ backgroundColor: theme.background.base },
+				style,
+			]}
 		>
 			{children}
 		</SafeAreaView>
