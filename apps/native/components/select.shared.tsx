@@ -1,5 +1,6 @@
 import type React from "react";
 import { createContext, useContext } from "react";
+import type { View } from "react-native";
 import type { ListState, Node } from "react-stately";
 
 export type SelectValue = string;
@@ -20,6 +21,7 @@ export interface SelectContextValue<T = unknown> {
 	listState: ListState<T> | null;
 	onSelectionChange: (values: Set<SelectValue>) => void;
 	label?: string;
+	triggerRef: React.RefObject<View | null>;
 }
 
 export const SelectContext = createContext<SelectContextValue | null>(null);

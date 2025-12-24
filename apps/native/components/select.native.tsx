@@ -75,6 +75,7 @@ export function Select<T = unknown>({
 		: internalValues;
 
 	const [isOpen, setIsOpen] = useState(false);
+	const triggerRef = useRef<View>(null);
 
 	const handleSelectionChange = useCallback(
 		(newValues: Set<SelectValue>) => {
@@ -116,6 +117,7 @@ export function Select<T = unknown>({
 			listState: listState as unknown as ListState<T>,
 			onSelectionChange: handleSelectionChange,
 			label,
+			triggerRef,
 		}),
 		[
 			isOpen,
@@ -140,8 +142,15 @@ export function Select<T = unknown>({
 }
 
 export function SelectTrigger({ children, className }: SelectTriggerProps) {
-	const { isOpen, setOpen, selectedValues, placeholder, disabled, listState } =
-		useSelectContext();
+	const {
+		isOpen,
+		setOpen,
+		selectedValues,
+		placeholder,
+		disabled,
+		listState,
+		triggerRef,
+	} = useSelectContext();
 
 	const displayText = listState
 		? getDisplayValue(selectedValues, listState.collection, placeholder)
@@ -149,6 +158,7 @@ export function SelectTrigger({ children, className }: SelectTriggerProps) {
 
 	return (
 		<Pressable
+			ref={triggerRef}
 			onPress={() => setOpen(!isOpen)}
 			disabled={disabled}
 			accessibilityRole="button"

@@ -9,14 +9,15 @@ import React, {
 	useRef,
 	useState,
 } from "react";
-import type { LayoutRectangle, ViewStyle } from "react-native";
-import { Pressable, Text, View } from "react-native";
-import Animated, {
-	FadeIn,
-	FadeOut,
-	ZoomIn,
-	ZoomOut,
-} from "react-native-reanimated";
+import {
+	Modal,
+	Platform,
+	Pressable,
+	Text,
+	View,
+	type ViewStyle,
+} from "react-native";
+import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import type { ListState, Node } from "react-stately";
 import { Item, useListState } from "react-stately";
 
@@ -83,6 +84,7 @@ export function Select<T = unknown>({
 		: internalValues;
 
 	const [isOpen, setIsOpen] = useState(false);
+	const triggerRef = useRef<View>(null);
 
 	const handleSelectionChange = useCallback(
 		(newValues: Set<SelectValue>) => {
@@ -124,6 +126,7 @@ export function Select<T = unknown>({
 			listState: listState as unknown as ListState<T>,
 			onSelectionChange: handleSelectionChange,
 			label,
+			triggerRef,
 		}),
 		[
 			isOpen,
@@ -148,8 +151,15 @@ export function Select<T = unknown>({
 }
 
 export function SelectTrigger({ children, className }: SelectTriggerProps) {
-	const { isOpen, setOpen, selectedValues, placeholder, disabled, listState } =
-		useSelectContext();
+	const {
+		isOpen,
+		setOpen,
+		selectedValues,
+		placeholder,
+		disabled,
+		listState,
+		triggerRef,
+	} = useSelectContext();
 
 	const displayText = listState
 		? getDisplayValue(selectedValues, listState.collection, placeholder)
@@ -164,6 +174,7 @@ export function SelectTrigger({ children, className }: SelectTriggerProps) {
 
 	return (
 		<Pressable
+			ref={triggerRef}
 			onPress={() => setOpen(!isOpen)}
 			disabled={disabled}
 			accessibilityRole="button"
@@ -187,53 +198,66 @@ export function SelectTrigger({ children, className }: SelectTriggerProps) {
 	);
 }
 
+interface TriggerLayout {
+	top: number;
+	left: number;
+	width: number;
+	height: number;
+}
+
 export function SelectContent({ className }: SelectContentProps) {
-	const { isOpen, setOpen, listState, label } = useSelectContext();
-	const triggerRef = useRef<View>(null);
-	const overlayRef = useRef<View>(null);
-	const [triggerLayout, setTriggerLayout] = useState<LayoutRectangle | null>(
+	const { isOpen, setOpen, listState, label, triggerRef } = useSelectContext();
+	const ref = useRef<View>(null);
+	const [triggerLayout, setTriggerLayout] = useState<TriggerLayout | null>(
 		null,
 	);
 
 	useEffect(() => {
-		if (isOpen && triggerRef.current) {
-			triggerRef.current.measureInWindow((x, y, width, height) => {
-				setTriggerLayout({ x, y, width, height });
+		if (isOpen && triggerRef?.current && Platform.OS === "web") {
+			const element = triggerRef.current as unknown as HTMLElement;
+			const rect = element.getBoundingClientRect();
+			setTriggerLayout({
+				top: rect.bottom + window.scrollY,
+				left: rect.left + window.scrollX,
+				width: rect.width,
+				height: rect.height,
 			});
 		}
-	}, [isOpen]);
+	}, [isOpen, triggerRef]);
 
 	const { overlayProps } = useOverlay(
 		{
 			isOpen,
 			onClose: () => setOpen(false),
 			isDismissable: true,
-			shouldCloseOnBlur: true,
+			shouldCloseOnBlur: false,
+			shouldCloseOnInteractOutside: () => false,
 		},
-		overlayRef as unknown as React.RefObject<HTMLElement>,
+		ref as unknown as React.RefObject<HTMLElement>,
 	);
 
 	if (!isOpen || !listState) return null;
 
-	const popoverStyle: ViewStyle = {
-		position: "absolute",
-		top: triggerLayout ? triggerLayout.y + triggerLayout.height + 4 : 0,
-		left: triggerLayout?.x ?? 0,
-		width: triggerLayout?.width ?? 200,
-		zIndex: 1000,
-	};
+	const dropdownStyle: ViewStyle = triggerLayout
+		? {
+				top: triggerLayout.top,
+				left: triggerLayout.left,
+				minWidth: triggerLayout.width,
+			}
+		: {};
 
 	return (
-		<>
+		<Modal
+			transparent
+			visible={isOpen}
+			animationType="none"
+			onRequestClose={() => setOpen(false)}
+			statusBarTranslucent
+		>
 			<Animated.View
 				entering={FadeIn.duration(150)}
 				exiting={FadeOut.duration(100)}
-				className="fixed inset-0 z-50"
-				style={{
-					position: "fixed" as unknown as undefined,
-					inset: 0,
-					zIndex: 50,
-				}}
+				className="absolute inset-0 bg-black/50"
 			>
 				<Pressable
 					className="absolute inset-0"
@@ -241,18 +265,36 @@ export function SelectContent({ className }: SelectContentProps) {
 					accessibilityRole="none"
 				/>
 			</Animated.View>
-			<View ref={overlayRef} {...(overlayProps as object)} style={popoverStyle}>
+
+			<View className="pointer-events-box-none flex-1" pointerEvents="box-none">
 				<FocusScope contain restoreFocus autoFocus>
-					<Animated.View
-						entering={ZoomIn.duration(150).springify().damping(20)}
-						exiting={ZoomOut.duration(100)}
-						className={`rounded-md border border-border bg-background shadow-lg ${className ?? ""}`}
+					<View
+						ref={ref}
+						{...(overlayProps as object)}
+						onStartShouldSetResponder={() => true}
+						{...(Platform.OS === "web"
+							? {
+									onPointerDown: (e: { stopPropagation: () => void }) =>
+										e.stopPropagation(),
+									onMouseDown: (e: { stopPropagation: () => void }) =>
+										e.stopPropagation(),
+									onClick: (e: { stopPropagation: () => void }) =>
+										e.stopPropagation(),
+								}
+							: {})}
 					>
-						<SelectListBox listState={listState} label={label} />
-					</Animated.View>
+						<Animated.View
+							entering={FadeIn.duration(80)}
+							exiting={FadeOut.duration(60)}
+							style={dropdownStyle}
+							className={`absolute overflow-hidden rounded-md border border-border bg-background shadow-xl ${className ?? ""}`}
+						>
+							<SelectListBox listState={listState} label={label} />
+						</Animated.View>
+					</View>
 				</FocusScope>
 			</View>
-		</>
+		</Modal>
 	);
 }
 
@@ -313,7 +355,7 @@ function OptionItem<T>({
 			{...(optionProps as object)}
 			accessibilityRole="menuitem"
 			accessibilityState={{ selected: isSelected, disabled: isDisabled }}
-			className={`flex-row items-center justify-between px-3 py-2 ${isFocused ? "bg-surface-interactive" : ""} ${isDisabled ? "opacity-50" : ""}`}
+			className={`web:cursor-pointer flex-row items-center justify-between px-3 py-2 web:hover:bg-surface-hover ${isFocused ? "bg-surface-interactive" : ""} ${isDisabled ? "web:cursor-not-allowed opacity-50" : ""}`}
 		>
 			<Text className={`text-foreground ${isSelected ? "font-semibold" : ""}`}>
 				{item.rendered}
