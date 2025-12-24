@@ -6,6 +6,8 @@ import {
 	ThemeProvider as NavigationThemeProvider,
 	type Theme,
 } from "@react-navigation/native";
+import { type QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -18,6 +20,7 @@ import { SessionProvider, useSession } from "@/lib/auth";
 import { FontProvider } from "@/lib/font-context";
 import { getWebFontMap } from "@/lib/font-registry";
 import { HotkeysProvider } from "@/lib/hotkeys";
+import { createQueryClient } from "@/lib/query-client";
 import { ThemeProvider, useTheme } from "@/lib/theme-context";
 
 export const unstable_settings = {
@@ -91,15 +94,26 @@ function RootLayoutContent() {
 }
 
 export default function RootLayout() {
+	const queryClientRef = useRef<QueryClient | null>(null);
+
+	if (!queryClientRef.current) {
+		queryClientRef.current = createQueryClient();
+	}
+
 	return (
-		<SessionProvider>
-			<FontProvider>
-				<ThemeProvider>
-					<HotkeysProvider>
-						<RootLayoutContent />
-					</HotkeysProvider>
-				</ThemeProvider>
-			</FontProvider>
-		</SessionProvider>
+		<QueryClientProvider client={queryClientRef.current}>
+			{Platform.OS === "web" && __DEV__ ? (
+				<ReactQueryDevtools initialIsOpen={false} />
+			) : null}
+			<SessionProvider>
+				<FontProvider>
+					<ThemeProvider>
+						<HotkeysProvider>
+							<RootLayoutContent />
+						</HotkeysProvider>
+					</ThemeProvider>
+				</FontProvider>
+			</SessionProvider>
+		</QueryClientProvider>
 	);
 }
