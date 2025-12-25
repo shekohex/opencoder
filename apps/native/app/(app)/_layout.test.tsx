@@ -1,4 +1,3 @@
-import { beforeEach, describe, expect, it, jest } from "bun:test";
 import { render } from "@testing-library/react-native";
 import { Redirect } from "expo-router";
 import { useSession } from "@/lib/auth";
@@ -33,7 +32,7 @@ describe("AppLayout", () => {
 		});
 
 		render(<AppLayout />);
-		expect(Redirect).toHaveBeenCalledWith({ href: "/sign-in" }, {});
+		expect(Redirect).toHaveBeenCalledWith({ href: "/sign-in" }, undefined);
 	});
 
 	it("renders stack if authenticated", () => {

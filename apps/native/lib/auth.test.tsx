@@ -1,7 +1,12 @@
-import { describe, expect, it } from "bun:test";
-import { act, renderHook } from "@testing-library/react-native";
+import { act, renderHook, waitFor } from "@testing-library/react-native";
 import type React from "react";
 import { SessionProvider, useSession } from "./auth";
+
+jest.mock("expo-secure-store", () => ({
+	getItemAsync: jest.fn(async () => null),
+	setItemAsync: jest.fn(async () => undefined),
+	deleteItemAsync: jest.fn(async () => undefined),
+}));
 
 describe("SessionProvider", () => {
 	it("should provide baseUrl and session token", async () => {
@@ -14,19 +19,18 @@ describe("SessionProvider", () => {
 		expect(result.current.baseUrl).toBeNull();
 		expect(result.current.session).toBeNull();
 
-		act(() => {
-			// @ts-expect-error - baseUrl not implemented yet
+		await waitFor(() => {
+			expect(result.current.isLoading).toBe(false);
+		});
+
+		await act(async () => {
 			result.current.setBaseUrl("https://coder.example.com");
 			result.current.signIn("token-123");
 		});
 
-		// We expect these to update (after async storage maybe?)
-		// For now we just check if the methods exist and update state eventually.
-		// Since useStorageState is async/effect based, we might need waitFor or similar if we were being strict.
-		// But failing test first: type error above or runtime undefined check.
-
-		// This part will fail because setBaseUrl doesn't exist on the context
-		expect(result.current.baseUrl).toBe("https://coder.example.com");
-		expect(result.current.session).toBe("token-123");
+		await waitFor(() => {
+			expect(result.current.baseUrl).toBe("https://coder.example.com");
+			expect(result.current.session).toBe("token-123");
+		});
 	});
 });

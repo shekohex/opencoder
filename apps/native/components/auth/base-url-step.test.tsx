@@ -1,7 +1,10 @@
-import { beforeEach, describe, expect, it, jest } from "bun:test";
 import { API } from "@coder/sdk";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, waitFor } from "@testing-library/react-native";
+import type React from "react";
 import { SessionProvider } from "@/lib/auth";
+import { FontProvider } from "@/lib/font-context";
+import { ThemeProvider } from "@/lib/theme-context";
 import { BaseUrlStep } from "./base-url-step";
 
 // Mock API
@@ -12,20 +15,39 @@ jest.mock("@coder/sdk", () => ({
 	},
 }));
 
+const createWrapper = () => {
+	const queryClient = new QueryClient({
+		defaultOptions: {
+			queries: {
+				retry: false,
+			},
+		},
+	});
+
+	return ({ children }: { children: React.ReactNode }) => (
+		<QueryClientProvider client={queryClient}>
+			<ThemeProvider>
+				<FontProvider>
+					<SessionProvider>{children}</SessionProvider>
+				</FontProvider>
+			</ThemeProvider>
+		</QueryClientProvider>
+	);
+};
+
 describe("BaseUrlStep", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 	});
 
 	it("validates invalid URL", async () => {
-		const { getByPlaceholderText, getByText, queryByText } = render(
-			<SessionProvider>
-				<BaseUrlStep onNext={jest.fn()} />
-			</SessionProvider>,
+		const { getByPlaceholderText, getByText } = render(
+			<BaseUrlStep onNext={jest.fn()} />,
+			{ wrapper: createWrapper() },
 		);
 
 		const input = getByPlaceholderText("https://coder.example.com");
-		fireEvent.changeText(input, "invalid-url");
+		fireEvent.changeText(input, "https://");
 		fireEvent.press(getByText("Continue"));
 
 		await waitFor(() => {
@@ -38,9 +60,8 @@ describe("BaseUrlStep", () => {
 		const onNext = jest.fn();
 
 		const { getByPlaceholderText, getByText } = render(
-			<SessionProvider>
-				<BaseUrlStep onNext={onNext} />
-			</SessionProvider>,
+			<BaseUrlStep onNext={onNext} />,
+			{ wrapper: createWrapper() },
 		);
 
 		const input = getByPlaceholderText("https://coder.example.com");

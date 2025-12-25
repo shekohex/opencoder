@@ -1,7 +1,10 @@
-import { beforeEach, describe, expect, it, jest } from "bun:test";
 import { API } from "@coder/sdk";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, waitFor } from "@testing-library/react-native";
+import type React from "react";
 import { SessionProvider } from "@/lib/auth";
+import { FontProvider } from "@/lib/font-context";
+import { ThemeProvider } from "@/lib/theme-context";
 import { AuthMethodsStep } from "./auth-methods-step";
 
 // Mock API
@@ -12,6 +15,26 @@ jest.mock("@coder/sdk", () => ({
 		setSessionToken: jest.fn(),
 	},
 }));
+
+const createWrapper = () => {
+	const queryClient = new QueryClient({
+		defaultOptions: {
+			queries: {
+				retry: false,
+			},
+		},
+	});
+
+	return ({ children }: { children: React.ReactNode }) => (
+		<QueryClientProvider client={queryClient}>
+			<ThemeProvider>
+				<FontProvider>
+					<SessionProvider>{children}</SessionProvider>
+				</FontProvider>
+			</ThemeProvider>
+		</QueryClientProvider>
+	);
+};
 
 describe("AuthMethodsStep", () => {
 	beforeEach(() => {
@@ -25,17 +48,16 @@ describe("AuthMethodsStep", () => {
 		});
 
 		const { findByText, getByPlaceholderText } = render(
-			<SessionProvider>
-				<AuthMethodsStep
-					onAuthenticated={jest.fn()}
-					onDeviceFlowStart={jest.fn()}
-				/>
-			</SessionProvider>,
+			<AuthMethodsStep
+				onAuthenticated={jest.fn()}
+				onDeviceFlowStart={jest.fn()}
+			/>,
+			{ wrapper: createWrapper() },
 		);
 
 		expect(await findByText("GitHub")).toBeTruthy();
-		expect(getByPlaceholderText("Email")).toBeTruthy();
-		expect(getByPlaceholderText("Password")).toBeTruthy();
+		expect(getByPlaceholderText("user@example.com")).toBeTruthy();
+		expect(getByPlaceholderText("password")).toBeTruthy();
 	});
 
 	it("calls login on password submit", async () => {
@@ -47,19 +69,21 @@ describe("AuthMethodsStep", () => {
 		const onAuthenticated = jest.fn();
 
 		const { getByText, getByPlaceholderText, findByText } = render(
-			<SessionProvider>
-				<AuthMethodsStep
-					onAuthenticated={onAuthenticated}
-					onDeviceFlowStart={jest.fn()}
-				/>
-			</SessionProvider>,
+			<AuthMethodsStep
+				onAuthenticated={onAuthenticated}
+				onDeviceFlowStart={jest.fn()}
+			/>,
+			{ wrapper: createWrapper() },
 		);
 
 		// Wait for auth methods to load
 		await findByText("Sign In");
 
-		fireEvent.changeText(getByPlaceholderText("Email"), "test@example.com");
-		fireEvent.changeText(getByPlaceholderText("Password"), "password");
+		fireEvent.changeText(
+			getByPlaceholderText("user@example.com"),
+			"test@example.com",
+		);
+		fireEvent.changeText(getByPlaceholderText("password"), "password");
 		fireEvent.press(getByText("Sign In"));
 
 		await waitFor(() => {
@@ -76,12 +100,11 @@ describe("AuthMethodsStep", () => {
 		const onDeviceFlowStart = jest.fn();
 
 		const { findByText } = render(
-			<SessionProvider>
-				<AuthMethodsStep
-					onAuthenticated={jest.fn()}
-					onDeviceFlowStart={onDeviceFlowStart}
-				/>
-			</SessionProvider>,
+			<AuthMethodsStep
+				onAuthenticated={jest.fn()}
+				onDeviceFlowStart={onDeviceFlowStart}
+			/>,
+			{ wrapper: createWrapper() },
 		);
 
 		const githubBtn = await findByText("GitHub");

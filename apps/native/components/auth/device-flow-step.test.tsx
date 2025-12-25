@@ -1,9 +1,12 @@
-import { beforeEach, describe, expect, it, jest } from "bun:test";
 import { API } from "@coder/sdk";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render } from "@testing-library/react-native";
 import * as Clipboard from "expo-clipboard";
+import type React from "react";
 import { Linking } from "react-native";
 import { SessionProvider } from "@/lib/auth";
+import { FontProvider } from "@/lib/font-context";
+import { ThemeProvider } from "@/lib/theme-context";
 import { DeviceFlowStep } from "./device-flow-step";
 
 // Mock dependencies
@@ -19,13 +22,32 @@ jest.mock("expo-clipboard", () => ({
 	setStringAsync: jest.fn(),
 }));
 
-jest.mock("react-native/Libraries/Linking/Linking", () => ({
-	openURL: jest.fn(),
-}));
+const mockOpenURL = jest.fn();
+
+const createWrapper = () => {
+	const queryClient = new QueryClient({
+		defaultOptions: {
+			queries: {
+				retry: false,
+			},
+		},
+	});
+
+	return ({ children }: { children: React.ReactNode }) => (
+		<QueryClientProvider client={queryClient}>
+			<ThemeProvider>
+				<FontProvider>
+					<SessionProvider>{children}</SessionProvider>
+				</FontProvider>
+			</ThemeProvider>
+		</QueryClientProvider>
+	);
+};
 
 describe("DeviceFlowStep", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
+		(Linking as unknown as { openURL: jest.Mock }).openURL = mockOpenURL;
 	});
 
 	it("starts device flow and shows code", async () => {
@@ -38,14 +60,13 @@ describe("DeviceFlowStep", () => {
 		});
 
 		const { findByText } = render(
-			<SessionProvider>
-				<DeviceFlowStep
-					provider="github"
-					providerName="GitHub"
-					onAuthenticated={jest.fn()}
-					onCancel={jest.fn()}
-				/>
-			</SessionProvider>,
+			<DeviceFlowStep
+				provider="github"
+				providerName="GitHub"
+				onAuthenticated={jest.fn()}
+				onCancel={jest.fn()}
+			/>,
+			{ wrapper: createWrapper() },
 		);
 
 		expect(await findByText("ABCD-1234")).toBeTruthy();
@@ -62,14 +83,13 @@ describe("DeviceFlowStep", () => {
 		});
 
 		const { findByText, getByLabelText } = render(
-			<SessionProvider>
-				<DeviceFlowStep
-					provider="github"
-					providerName="GitHub"
-					onAuthenticated={jest.fn()}
-					onCancel={jest.fn()}
-				/>
-			</SessionProvider>,
+			<DeviceFlowStep
+				provider="github"
+				providerName="GitHub"
+				onAuthenticated={jest.fn()}
+				onCancel={jest.fn()}
+			/>,
+			{ wrapper: createWrapper() },
 		);
 
 		await findByText("ABCD-1234");
@@ -91,14 +111,13 @@ describe("DeviceFlowStep", () => {
 		});
 
 		const { findByText } = render(
-			<SessionProvider>
-				<DeviceFlowStep
-					provider="github"
-					providerName="GitHub"
-					onAuthenticated={jest.fn()}
-					onCancel={jest.fn()}
-				/>
-			</SessionProvider>,
+			<DeviceFlowStep
+				provider="github"
+				providerName="GitHub"
+				onAuthenticated={jest.fn()}
+				onCancel={jest.fn()}
+			/>,
+			{ wrapper: createWrapper() },
 		);
 
 		await findByText("ABCD-1234");

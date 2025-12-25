@@ -1,4 +1,3 @@
-import { beforeEach, describe, expect, it, jest } from "bun:test";
 import { API } from "@coder/sdk";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react-native";
@@ -41,7 +40,7 @@ describe("auth-queries", () => {
 	it("useAuthMethods calls API.getAuthMethods", async () => {
 		(API.getAuthMethods as jest.Mock).mockResolvedValue({
 			password: { enabled: true },
-			github: { enabled: false },
+			github: { enabled: false, default_provider_configured: false },
 			oidc: { enabled: false },
 		});
 
@@ -52,7 +51,7 @@ describe("auth-queries", () => {
 		await waitFor(() => expect(result.current.isSuccess).toBe(true));
 		expect(result.current.data).toEqual({
 			password: { enabled: true },
-			github: { enabled: false },
+			github: { enabled: false, default_provider_configured: false },
 			oidc: { enabled: false },
 		});
 	});
