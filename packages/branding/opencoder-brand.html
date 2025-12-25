@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>opencoder | Brand Identity v5.5</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Turret+Road:wght@800&family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;700&display=swap');
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f2f4f7;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body.dark {
+            background-color: #0a0c10;
+            color: #f2f4f7;
+        }
+
+        body.dark .bg-white { background-color: #161b22; border-color: #30363d; }
+        body.dark .text-slate-900 { color: #f2f4f7; }
+        body.dark .text-slate-800 { color: #e6edf3; }
+        body.dark .text-slate-500 { color: #8b949e; }
+        body.dark .text-slate-400 { color: #6e7681; }
+        body.dark .border-slate-200, body.dark .border-slate-300 { border-color: #30363d; }
+        body.dark .bg-slate-900 { background-color: #f2f4f7; color: #0a0c10; }
+        body.dark .bg-slate-300 { background-color: #30363d; }
+        body.dark .selection\:bg-blue-100::selection { background-color: #1f6feb; color: white; }
+
+        .theme-toggle {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 1000;
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 0.5rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        body.dark .theme-toggle {
+            background: #161b22;
+            border-color: #30363d;
+            color: white;
+        }
+
+        .theme-toggle:hover { transform: translateY(-1px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+
+        .copy-hint { transition: opacity 0.2s; opacity: 0; pointer-events: none; }
+        .logo-card:hover .copy-hint { opacity: 1; }
+        
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #10B981;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            display: none;
+            z-index: 2000;
+            box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.4);
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .turret { font-family: 'Turret Road', sans-serif; }
+
+        /* Animation Previews */
+        .swatch-card { cursor: pointer; transition: all 0.2s; }
+        .swatch-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body class="text-slate-900 selection:bg-blue-100">
+
+    <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()">
+        <span class="text-xs font-bold uppercase tracking-tighter mono">Theme</span>
+        <div class="w-8 h-4 bg-slate-200 rounded-full relative transition-colors body-dark:bg-slate-700">
+            <div id="toggle-dot" class="w-3 h-3 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform"></div>
+        </div>
+    </button>
+
+    <div id="toast" class="toast">Copied to Clipboard!</div>
+
+    <div class="max-w-6xl mx-auto py-16 px-6">
+        <header class="mb-16 text-center">
+            <div class="inline-block px-3 py-1 bg-slate-900 text-white rounded text-[10px] font-bold uppercase tracking-widest mb-4">Engineering Assets v5.5</div>
+            <h1 class="text-5xl font-extrabold tracking-tight text-slate-900 turret">opencoder</h1>
+        </header>
+
+        <!-- Logotype Section -->
+        <h2 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-8 flex items-center gap-4">
+            Branding: Logotypes <span class="h-[1px] bg-slate-300 flex-grow"></span>
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
+            <div class="group relative cursor-pointer logo-card" onclick="copyValue(this, 'svg')">
+                <div class="bg-white p-20 rounded-3xl border border-slate-300 flex justify-center items-center shadow-sm hover:shadow-md transition-shadow h-64">
+                    <opencoder-logo mode="light" class="w-full"></opencoder-logo>
+                </div>
+                <div class="copy-hint absolute top-6 right-6 text-[10px] font-bold text-slate-400 uppercase">Click to Copy SVG</div>
+            </div>
+
+            <div class="group relative cursor-pointer logo-card" onclick="copyValue(this, 'svg')">
+                <div class="bg-black p-20 rounded-3xl flex justify-center items-center shadow-2xl hover:ring-2 hover:ring-slate-800 transition-all h-64">
+                    <opencoder-logo mode="dark" class="w-full"></opencoder-logo>
+                </div>
+                <div class="copy-hint absolute top-6 right-6 text-[10px] font-bold text-slate-500 uppercase">Click to Copy SVG</div>
+            </div>
+        </div>
+
+        <!-- Animation Showcase -->
+        <h2 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-8 flex items-center gap-4">
+            Component: Animated Icons <span class="h-[1px] bg-slate-300 flex-grow"></span>
+        </h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
+            <div class="bg-white p-10 rounded-2xl border border-slate-200 text-center">
+                <div class="h-24 flex justify-center items-center mb-6">
+                    <opencoder-icon animation="rotate" size="64"></opencoder-icon>
+                </div>
+                <h3 class="font-bold text-slate-800 uppercase text-[10px] tracking-wider">Vortex</h3>
+            </div>
+
+            <div class="bg-white p-10 rounded-2xl border border-slate-200 text-center">
+                <div class="h-24 flex justify-center items-center mb-6">
+                    <opencoder-icon animation="jump" size="64"></opencoder-icon>
+                </div>
+                <h3 class="font-bold text-slate-800 uppercase text-[10px] tracking-wider">Physics Jump</h3>
+            </div>
+
+            <div class="bg-white p-10 rounded-2xl border border-slate-200 text-center overflow-hidden">
+                <div class="h-24 flex justify-center items-center mb-6">
+                    <opencoder-icon animation="shift" size="64"></opencoder-icon>
+                </div>
+                <h3 class="font-bold text-slate-800 uppercase text-[10px] tracking-wider">Cycle Shift</h3>
+            </div>
+
+            <div class="bg-white p-10 rounded-2xl border border-slate-200 text-center overflow-hidden">
+                <div class="h-24 flex justify-center items-center mb-6">
+                    <opencoder-icon animation="tumble" size="64"></opencoder-icon>
+                </div>
+                <h3 class="font-bold text-slate-800 uppercase text-[10px] tracking-wider">Double Tumble</h3>
+            </div>
+        </div>
+
+        <!-- Theme Integration Showcase -->
+        <h2 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-8 flex items-center gap-4">
+            Showcase: Theme Backgrounds <span class="h-[1px] bg-slate-300 flex-grow"></span>
+        </h2>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-20" id="theme-showcase">
+            <!-- Aura -->
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center">Aura</h3>
+                <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div style="background-color: #f5f4f7;" class="p-6 flex justify-center items-center"><opencoder-logo mode="light" class="w-24"></opencoder-logo></div>
+                    <div style="background-color: #15141b;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                </div>
+            </div>
+            <!-- Dracula -->
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center">Dracula</h3>
+                <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div style="background-color: #f8f8f2;" class="p-6 flex justify-center items-center"><opencoder-logo mode="light" class="w-24"></opencoder-logo></div>
+                    <div style="background-color: #282a36;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                </div>
+            </div>
+            <!-- GitHub -->
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center">GitHub</h3>
+                <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div style="background-color: #ffffff;" class="p-6 flex justify-center items-center"><opencoder-logo mode="light" class="w-24"></opencoder-logo></div>
+                    <div style="background-color: #0d1117;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                </div>
+            </div>
+            <!-- One Dark -->
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center">One Dark</h3>
+                <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div style="background-color: #fafafa;" class="p-6 flex justify-center items-center"><opencoder-logo mode="light" class="w-24"></opencoder-logo></div>
+                    <div style="background-color: #282c34;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                </div>
+            </div>
+            <!-- Ayu -->
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center">Ayu</h3>
+                <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div style="background-color: #fcfcfc;" class="p-6 flex justify-center items-center"><opencoder-logo mode="light" class="w-24"></opencoder-logo></div>
+                    <div style="background-color: #0d1017;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                </div>
+            </div>
+            <!-- Nord -->
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center">Nord</h3>
+                <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div style="background-color: #eceff4;" class="p-6 flex justify-center items-center"><opencoder-logo mode="light" class="w-24"></opencoder-logo></div>
+                    <div style="background-color: #2e3440;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                </div>
+            </div>
+            <!-- Gruvbox -->
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center">Gruvbox</h3>
+                <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div style="background-color: #fbf1c7;" class="p-6 flex justify-center items-center"><opencoder-logo mode="light" class="w-24"></opencoder-logo></div>
+                    <div style="background-color: #282828;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                </div>
+            </div>
+            <!-- Catppuccin -->
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center">Catppuccin</h3>
+                <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div style="background-color: #eff1f5;" class="p-6 flex justify-center items-center"><opencoder-logo mode="light" class="w-24"></opencoder-logo></div>
+                    <div style="background-color: #1e1e2e;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                </div>
+            </div>
+            <!-- Tokyo Night -->
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center">Tokyo Night</h3>
+                <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div style="background-color: #e1e2e7;" class="p-6 flex justify-center items-center"><opencoder-logo mode="light" class="w-24"></opencoder-logo></div>
+                    <div style="background-color: #1a1b26;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                </div>
+            </div>
+            <!-- Rose Pine -->
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center">Rose Pine</h3>
+                <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div style="background-color: #faf4ed;" class="p-6 flex justify-center items-center"><opencoder-logo mode="light" class="w-24"></opencoder-logo></div>
+                    <div style="background-color: #191724;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                </div>
+            </div>
+            <!-- Monokai -->
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center">Monokai</h3>
+                <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div style="background-color: #fafafa;" class="p-6 flex justify-center items-center"><opencoder-logo mode="light" class="w-24"></opencoder-logo></div>
+                    <div style="background-color: #272822;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                </div>
+            </div>
+            <!-- Everforest -->
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center">Everforest</h3>
+                <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div style="background-color: #fdf6e3;" class="p-6 flex justify-center items-center"><opencoder-logo mode="light" class="w-24"></opencoder-logo></div>
+                    <div style="background-color: #2d353b;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                </div>
+            </div>
+            <!-- Kanagawa -->
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center">Kanagawa</h3>
+                <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div style="background-color: #f2e9de;" class="p-6 flex justify-center items-center"><opencoder-logo mode="light" class="w-24"></opencoder-logo></div>
+                    <div style="background-color: #1f1f28;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                </div>
+            </div>
+            <!-- Solarized -->
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center">Solarized</h3>
+                <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div style="background-color: #eee8d5;" class="p-6 flex justify-center items-center"><opencoder-logo mode="light" class="w-24"></opencoder-logo></div>
+                    <div style="background-color: #002b36;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                </div>
+            </div>
+            <!-- Night Owl -->
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center">Night Owl</h3>
+                <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div style="background-color: #0b253a;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                    <div style="background-color: #011627;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                </div>
+            </div>
+            <!-- Material -->
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center">Material</h3>
+                <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div style="background-color: #fafafa;" class="p-6 flex justify-center items-center"><opencoder-logo mode="light" class="w-24"></opencoder-logo></div>
+                    <div style="background-color: #263238;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                </div>
+            </div>
+            <!-- Cobalt2 -->
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center">Cobalt2</h3>
+                <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div style="background-color: #ffffff;" class="p-6 flex justify-center items-center"><opencoder-logo mode="light" class="w-24"></opencoder-logo></div>
+                    <div style="background-color: #193549;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                </div>
+            </div>
+            <!-- Matrix -->
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center">Matrix</h3>
+                <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div style="background-color: #eef3ea;" class="p-6 flex justify-center items-center"><opencoder-logo mode="light" class="w-24"></opencoder-logo></div>
+                    <div style="background-color: #0a0e0a;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                </div>
+            </div>
+            <!-- Vesper -->
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center">Vesper</h3>
+                <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div style="background-color: #ffffff;" class="p-6 flex justify-center items-center"><opencoder-logo mode="light" class="w-24"></opencoder-logo></div>
+                    <div style="background-color: #101010;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                </div>
+            </div>
+            <!-- Synthwave '84 -->
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center">Synthwave '84</h3>
+                <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div style="background-color: #fafafa;" class="p-6 flex justify-center items-center"><opencoder-logo mode="light" class="w-24"></opencoder-logo></div>
+                    <div style="background-color: #262335;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                </div>
+            </div>
+            <!-- Vercel -->
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center">Vercel</h3>
+                <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div style="background-color: #ffffff;" class="p-6 flex justify-center items-center"><opencoder-logo mode="light" class="w-24"></opencoder-logo></div>
+                    <div style="background-color: #000000;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                </div>
+            </div>
+            <!-- Zenburn -->
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center">Zenburn</h3>
+                <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div style="background-color: #ffffef;" class="p-6 flex justify-center items-center"><opencoder-logo mode="light" class="w-24"></opencoder-logo></div>
+                    <div style="background-color: #3f3f3f;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                </div>
+            </div>
+            <!-- Cursor -->
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center">Cursor</h3>
+                <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div style="background-color: #fcfcfc;" class="p-6 flex justify-center items-center"><opencoder-logo mode="light" class="w-24"></opencoder-logo></div>
+                    <div style="background-color: #181818;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                </div>
+            </div>
+            <!-- Flexoki -->
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center">Flexoki</h3>
+                <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div style="background-color: #fffcf0;" class="p-6 flex justify-center items-center"><opencoder-logo mode="light" class="w-24"></opencoder-logo></div>
+                    <div style="background-color: #100f0f;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                </div>
+            </div>
+            <!-- Lucent Orng -->
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center">Lucent Orng</h3>
+                <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div style="background-color: #1a1a1a;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                    <div style="background-color: #0a0a0a;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                </div>
+            </div>
+            <!-- Mercury -->
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center">Mercury</h3>
+                <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div style="background-color: #ffffff;" class="p-6 flex justify-center items-center"><opencoder-logo mode="light" class="w-24"></opencoder-logo></div>
+                    <div style="background-color: #171721;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                </div>
+            </div>
+            <!-- Orng -->
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center">Orng</h3>
+                <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div style="background-color: #ffffff;" class="p-6 flex justify-center items-center"><opencoder-logo mode="light" class="w-24"></opencoder-logo></div>
+                    <div style="background-color: #0a0a0a;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                </div>
+            </div>
+            <!-- Palenight -->
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center">Palenight</h3>
+                <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div style="background-color: #fafafa;" class="p-6 flex justify-center items-center"><opencoder-logo mode="light" class="w-24"></opencoder-logo></div>
+                    <div style="background-color: #292d3e;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                </div>
+            </div>
+            <!-- Catppuccin Frappe -->
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center">Catppuccin Frappe</h3>
+                <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div style="background-color: #303446;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                    <div style="background-color: #232634;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                </div>
+            </div>
+            <!-- Catppuccin Macchiato -->
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center">Catppuccin Macchiato</h3>
+                <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div style="background-color: #24273a;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                    <div style="background-color: #181926;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                </div>
+            </div>
+            <!-- Opencode Default -->
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 text-center">Opencode</h3>
+                <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div style="background-color: #ffffff;" class="p-6 flex justify-center items-center"><opencoder-logo mode="light" class="w-24"></opencoder-logo></div>
+                    <div style="background-color: #0a0a0a;" class="p-6 flex justify-center items-center"><opencoder-logo mode="dark" class="w-24"></opencoder-logo></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Style Guide Section -->
+        <h2 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-8 flex items-center gap-4">
+            Style Guide: Specs & Resources <span class="h-[1px] bg-slate-300 flex-grow"></span>
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Palette -->
+            <div class="md:col-span-2 space-y-4">
+                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest px-2">Color Palette</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 swatch-card" onclick="copyText('#000000')">
+                        <div class="w-full h-12 rounded-lg bg-[#000000] mb-3"></div>
+                        <p class="text-xs font-bold">Absolute Black</p>
+                        <p class="text-[10px] text-slate-400 mono">#000000</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 swatch-card" onclick="copyText('#FFFFFF')">
+                        <div class="w-full h-12 rounded-lg bg-[#FFFFFF] border border-slate-100 mb-3"></div>
+                        <p class="text-xs font-bold">Pure White</p>
+                        <p class="text-[10px] text-slate-400 mono">#FFFFFF</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 swatch-card" onclick="copyText('#888888')">
+                        <div class="w-full h-12 rounded-lg bg-[#888888] mb-3"></div>
+                        <p class="text-xs font-bold">Mid Gray</p>
+                        <p class="text-[10px] text-slate-400 mono">#888888</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 swatch-card" onclick="copyText('#BBBBBB')">
+                        <div class="w-full h-12 rounded-lg bg-[#BBBBBB] mb-3"></div>
+                        <p class="text-xs font-bold">Prefix Light</p>
+                        <p class="text-[10px] text-slate-400 mono">#BBBBBB</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 swatch-card" onclick="copyText('#444444')">
+                        <div class="w-full h-12 rounded-lg bg-[#444444] mb-3"></div>
+                        <p class="text-xs font-bold">Dark Gray</p>
+                        <p class="text-[10px] text-slate-400 mono">#444444</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 swatch-card" onclick="copyText('#D1D1D1')">
+                        <div class="w-full h-12 rounded-lg bg-[#D1D1D1] mb-3"></div>
+                        <p class="text-xs font-bold">Highlight</p>
+                        <p class="text-[10px] text-slate-400 mono">#D1D1D1</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Typography -->
+            <div class="space-y-4">
+                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest px-2">Typography</h3>
+                <div class="bg-white rounded-3xl p-6 border border-slate-200 space-y-6">
+                    <div class="cursor-pointer group" onclick="copyText('Turret Road')">
+                        <p class="text-3xl font-black turret group-hover:text-slate-600 transition-colors">Turret Road</p>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Weight 800 (Bold)</p>
+                    </div>
+                    <div class="cursor-pointer group border-t border-slate-100 pt-6" onclick="copyText('Inter')">
+                        <p class="text-2xl font-bold group-hover:text-slate-600 transition-colors">Inter</p>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Weight 400-700</p>
+                    </div>
+                    <div class="cursor-pointer group border-t border-slate-100 pt-6" onclick="copyText('JetBrains Mono')">
+                        <p class="text-lg mono group-hover:text-slate-600 transition-colors">JetBrains Mono</p>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Code & Tech Specs</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Web Component Script -->
+    <script>
+        class OpenCoderLogo extends HTMLElement {
+            static get observedAttributes() { return ['mode']; }
+            constructor() { super(); this.attachShadow({ mode: 'open' }); }
+            attributeChangedCallback() { this.render(); }
+            connectedCallback() { this.render(); }
+            render() {
+                const mode = this.getAttribute('mode') || 'light';
+                const openCol = mode === 'light' ? '#888888' : '#BBBBBB';
+                const coderCol = mode === 'light' ? '#000000' : '#FFFFFF';
+                
+                this.shadowRoot.innerHTML = `
+                    <style>
+                        :host { display: block; width: 100%; }
+                        svg { width: 100%; height: auto; display: block; }
+                        text { font-family: 'Turret Road', sans-serif; font-weight: 800; }
+                    </style>
+                    <svg viewBox="0 0 500 100" xmlns="http://www.w3.org/2000/svg">
+                        <text x="50%" y="68" text-anchor="middle" font-size="74" letter-spacing="-2">
+                            <tspan fill="${openCol}">open</tspan><tspan fill="${coderCol}">coder</tspan>
+                        </text>
+                    </svg>
+                `;
+            }
+        }
+
+        class OpenCoderIcon extends HTMLElement {
+            static get observedAttributes() { return ['mode', 'animation', 'size']; }
+            constructor() { super(); this.attachShadow({ mode: 'open' }); }
+            attributeChangedCallback() { this.render(); }
+            connectedCallback() { this.render(); }
+            render() {
+                const anim = this.getAttribute('animation') || '';
+                const mode = this.getAttribute('mode') || 'light';
+                const size = this.getAttribute('size') || '48';
+                const outer = mode === 'light' ? '#000000' : '#FFFFFF';
+                const inner = mode === 'light' ? '#FFFFFF' : '#000000';
+
+                this.shadowRoot.innerHTML = `
+                    <style>
+                        :host { display: inline-block; vertical-align: middle; line-height: 0; }
+                        .frame { width: ${size}px; height: ${size}px; }
+                        svg { width: 100%; height: 100%; display: block; overflow: visible; }
+
+                        /* ROTATE (FIXED VORTEX) */
+                        @keyframes vortex { from { transform: rotate(0deg); } to { transform: rotate(720deg); } }
+                        .rotate { animation: vortex 3s cubic-bezier(0.65, 0, 0.35, 1) infinite; transform-origin: center; }
+
+                        /* JUMP */
+                        @keyframes jump {
+                            0%, 100% { transform: translateY(0) scale(1, 1); }
+                            30% { transform: translateY(-30%) scale(0.9, 1.1); }
+                            50% { transform: translateY(0) scale(1.1, 0.9); }
+                        }
+                        .jump { animation: jump 1.8s ease-in-out infinite; transform-origin: bottom; }
+
+                        /* CYCLE SHIFT (CONVEYOR PHYSICS) */
+                        @keyframes shift-1 { 
+                            0%, 15% { transform: translate(0, 0) scale(1); } 
+                            20% { transform: translate(9px, 0) scale(0.5); } 
+                            25%, 40% { transform: translate(18px, 0) scale(1); } 
+                            45% { transform: translate(18px, 9px) scale(0.5); } 
+                            50%, 65% { transform: translate(18px, 18px) scale(1); } 
+                            70% { transform: translate(9px, 18px) scale(0.5); } 
+                            75%, 90% { transform: translate(0, 18px) scale(1); } 
+                            95% { transform: translate(0, 9px) scale(0.5); } 
+                            100% { transform: translate(0, 0) scale(1); } 
+                        }
+                        @keyframes shift-2 { 
+                            0%, 15% { transform: translate(0, 0) scale(1); } 
+                            20% { transform: translate(0, 9px) scale(0.5); } 
+                            25%, 40% { transform: translate(0, 18px) scale(1); } 
+                            45% { transform: translate(-9px, 18px) scale(0.5); } 
+                            50%, 65% { transform: translate(-18px, 18px) scale(1); } 
+                            70% { transform: translate(-18px, 9px) scale(0.5); } 
+                            75%, 90% { transform: translate(-18px, 0) scale(1); } 
+                            95% { transform: translate(-9px, 0) scale(0.5); } 
+                            100% { transform: translate(0, 0) scale(1); } 
+                        }
+                        @keyframes shift-3 { 
+                            0%, 15% { transform: translate(0, 0) scale(1); } 
+                            20% { transform: translate(-9px, 0) scale(0.5); } 
+                            25%, 40% { transform: translate(-18px, 0) scale(1); } 
+                            45% { transform: translate(-18px, -9px) scale(0.5); } 
+                            50%, 65% { transform: translate(-18px, -18px) scale(1); } 
+                            70% { transform: translate(-9px, -18px) scale(0.5); } 
+                            75%, 90% { transform: translate(0, -18px) scale(1); } 
+                            95% { transform: translate(0, -9px) scale(0.5); } 
+                            100% { transform: translate(0, 0) scale(1); } 
+                        }
+                        @keyframes shift-4 { 
+                            0%, 15% { transform: translate(0, 0) scale(1); } 
+                            20% { transform: translate(0, -9px) scale(0.5); } 
+                            25%, 40% { transform: translate(0, -18px) scale(1); } 
+                            45% { transform: translate(9px, -18px) scale(0.5); } 
+                            50%, 65% { transform: translate(18px, -18px) scale(1); } 
+                            70% { transform: translate(18px, -9px) scale(0.5); } 
+                            75%, 90% { transform: translate(18px, 0) scale(1); } 
+                            95% { transform: translate(9px, 0) scale(0.5); } 
+                            100% { transform: translate(0, 0) scale(1); } 
+                        }
+
+                        .q1, .q2, .q3, .q4 { transform-box: fill-box; transform-origin: center; }
+                        .q1 { animation: shift-1 3s cubic-bezier(0.7, 0, 0.3, 1) infinite; }
+                        .q2 { animation: shift-2 3s cubic-bezier(0.7, 0, 0.3, 1) infinite; }
+                        .q3 { animation: shift-3 3s cubic-bezier(0.7, 0, 0.3, 1) infinite; }
+                        .q4 { animation: shift-4 3s cubic-bezier(0.7, 0, 0.3, 1) infinite; }
+
+                        /* TUMBLE */
+                        @keyframes tumble {
+                            0% { transform: translateX(-30%) rotate(0deg); }
+                            20% { transform: translateX(0) rotate(90deg); }
+                            35% { transform: translateX(5%) rotate(105deg) translateY(-5%); }
+                            50% { transform: translateX(25%) rotate(180deg); }
+                            65% { transform: translateX(25%) rotate(180deg); }
+                            100% { transform: translateX(-30%) rotate(0deg); }
+                        }
+                        .tumble { animation: tumble 4s cubic-bezier(0.7, 0, 0.3, 1) infinite; transform-origin: center; }
+                    </style>
+                    <div class="frame ${anim === 'shift' ? '' : anim}">
+                        <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="1" y="1" width="46" height="46" rx="12" fill="${outer}" />
+                            <rect x="4" y="4" width="40" height="40" rx="9" fill="${inner}" />
+                            <g transform="translate(6, 6)">
+                                <clipPath id="c"><rect width="36" height="36" rx="6" /></clipPath>
+                                <g clip-path="url(#c)">
+                                    <rect class="${anim === 'shift' ? 'q1' : ''}" width="18" height="18" fill="#D1D1D1"/>
+                                    <rect class="${anim === 'shift' ? 'q2' : ''}" x="18" y="0" width="18" height="18" fill="${outer}" />
+                                    <rect class="${anim === 'shift' ? 'q3' : ''}" x="18" y="18" width="18" height="18" fill="#888888" />
+                                    <rect class="${anim === 'shift' ? 'q4' : ''}" x="0" y="18" width="18" height="18" fill="#444444" />
+                                </g>
+                            </g>
+                        </svg>
+                    </div>
+                `;
+            }
+        }
+
+        customElements.define('opencoder-logo', OpenCoderLogo);
+        customElements.define('opencoder-icon', OpenCoderIcon);
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 2000);
+        }
+
+        function _toggleTheme() {
+            const body = document.body;
+            const dot = document.getElementById('toggle-dot');
+            const isDark = body.classList.toggle('dark');
+            
+            // Update dot position
+            if (isDark) {
+                dot.style.transform = 'translateX(1rem)';
+            } else {
+                dot.style.transform = 'translateX(0)';
+            }
+
+            // Update all opencoder-logo and opencoder-icon components
+            // But skip those that are explicitly on a permanent themed or black background
+            document.querySelectorAll('opencoder-logo, opencoder-icon').forEach(el => {
+                if (el.closest('.bg-black') || el.closest('#theme-showcase')) return; 
+                el.setAttribute('mode', isDark ? 'dark' : 'light');
+            });
+        }
+
+        function copyText(val) {
+            const el = document.createElement('textarea');
+            el.value = val;
+            document.body.appendChild(el); el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            showToast(`Copied: ${val}`);
+        }
+
+        function _copyValue(container, _type) {
+            const component = container.querySelector('opencoder-logo, opencoder-icon');
+            const content = component.shadowRoot.querySelector('svg').outerHTML;
+            copyText(content);
+            showToast("SVG Code Copied!");
+        }
+    </script>
+</body>
+</html>
