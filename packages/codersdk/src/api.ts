@@ -2790,22 +2790,21 @@ export class Api extends ApiMethods implements ClientApi {
 	constructor() {
 		const headers: Record<string, string> = {};
 
+		const isDevelopment =
+			typeof process !== "undefined" && process.env.NODE_ENV === "development";
+
 		const metadataIsAvailable =
 			tokenMetadataElement !== null &&
 			tokenMetadataElement.getAttribute("content") !== null;
 
-		if (metadataIsAvailable) {
-			if (
-				typeof process !== "undefined" &&
-				process.env.NODE_ENV === "development"
-			) {
-				// Development mode uses a hard-coded CSRF token
-				headers["X-CSRF-TOKEN"] = csrfToken;
+		if (isDevelopment) {
+			headers["X-CSRF-TOKEN"] = csrfToken;
+			if (tokenMetadataElement) {
 				tokenMetadataElement.setAttribute("content", csrfToken);
-			} else {
-				headers["X-CSRF-TOKEN"] =
-					tokenMetadataElement.getAttribute("content") ?? "";
 			}
+		} else if (metadataIsAvailable) {
+			headers["X-CSRF-TOKEN"] =
+				tokenMetadataElement?.getAttribute("content") ?? "";
 		} else {
 			// Do not write error logs if we are in a FE unit test or if there is no document (e.g., Electron)
 			if (
