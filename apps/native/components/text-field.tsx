@@ -6,13 +6,16 @@ import {
 	useState,
 } from "react";
 import {
-	Text,
+	Platform,
 	TextInput,
 	type TextInputProps,
 	type TextProps,
 	View,
 	type ViewProps,
 } from "react-native";
+
+import { AppText } from "@/components/app-text";
+import { useFontsConfig } from "@/lib/font-context";
 
 interface TextFieldContextValue {
 	labelId: string;
@@ -79,7 +82,7 @@ export interface LabelProps extends TextProps {
 function Label({ children, className, ...props }: LabelProps) {
 	const { labelId, isDisabled } = useTextFieldContext();
 	return (
-		<Text
+		<AppText
 			nativeID={labelId}
 			className={`font-medium text-foreground text-sm ${
 				isDisabled ? "text-foreground-weak" : ""
@@ -87,7 +90,7 @@ function Label({ children, className, ...props }: LabelProps) {
 			{...props}
 		>
 			{children}
-		</Text>
+		</AppText>
 	);
 }
 
@@ -104,6 +107,7 @@ function Input({ className, ...props }: InputProps) {
 		isInvalid,
 		isDisabled,
 	} = useTextFieldContext();
+	const { resolveFont } = useFontsConfig();
 	const [isFocused, setIsFocused] = useState(false);
 
 	const baseStyles =
@@ -124,6 +128,8 @@ function Input({ className, ...props }: InputProps) {
 		.filter(Boolean)
 		.join(" ");
 
+	const fontFamily = resolveFont("sans", 400);
+
 	return (
 		<TextInput
 			nativeID={inputId}
@@ -131,6 +137,11 @@ function Input({ className, ...props }: InputProps) {
 			editable={!isDisabled}
 			className={`${baseStyles} ${focusStyles} ${invalidStyles} ${disabledStyles} ${className}`}
 			placeholderTextColor="var(--text-weak)"
+			style={[
+				{ fontFamily },
+				Platform.OS === "android" && { fontWeight: "400" },
+				props.style,
+			]}
 			onFocus={(e) => {
 				setIsFocused(true);
 				props.onFocus?.(e);
@@ -151,13 +162,13 @@ export interface DescriptionProps extends TextProps {
 function Description({ children, className, ...props }: DescriptionProps) {
 	const { descriptionId } = useTextFieldContext();
 	return (
-		<Text
+		<AppText
 			nativeID={descriptionId}
 			className={`text-foreground-weak text-sm ${className}`}
 			{...props}
 		>
 			{children}
-		</Text>
+		</AppText>
 	);
 }
 
@@ -171,13 +182,13 @@ function ErrorMessage({ children, className, ...props }: ErrorMessageProps) {
 	if (!isInvalid) return null;
 
 	return (
-		<Text
+		<AppText
 			nativeID={errorMessageId}
 			className={`font-medium text-foreground-critical text-sm ${className}`}
 			{...props}
 		>
 			{children}
-		</Text>
+		</AppText>
 	);
 }
 

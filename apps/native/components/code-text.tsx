@@ -45,6 +45,44 @@ export function CodeText({
 		return true;
 	});
 
+	const hasColor = cleanTokens.some((token) => {
+		return (
+			token.startsWith("text-") &&
+			!token.startsWith("text-opacity-") &&
+			![
+				"text-xs",
+				"text-sm",
+				"text-base",
+				"text-lg",
+				"text-xl",
+				"text-2xl",
+				"text-3xl",
+				"text-4xl",
+				"text-5xl",
+				"text-6xl",
+				"text-7xl",
+				"text-8xl",
+				"text-9xl",
+				"text-left",
+				"text-center",
+				"text-right",
+				"text-justify",
+				"text-start",
+				"text-end",
+				"text-wrap",
+				"text-nowrap",
+				"text-balance",
+				"text-pretty",
+				"text-clip",
+				"text-ellipsis",
+			].includes(token)
+		);
+	});
+
+	if (!hasColor) {
+		cleanTokens.push("text-foreground");
+	}
+
 	const cleanClassName = cleanTokens.join(" ");
 
 	const flavor =
