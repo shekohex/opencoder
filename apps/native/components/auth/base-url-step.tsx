@@ -1,5 +1,3 @@
-import { API } from "@coder/sdk";
-import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { View } from "react-native";
 import { useSession } from "@/lib/auth";
@@ -15,20 +13,6 @@ export function BaseUrlStep({ onNext }: BaseUrlStepProps) {
 	const { setBaseUrl } = useSession();
 	const [url, setUrl] = useState("");
 	const [error, setError] = useState<string | undefined>();
-
-	const checkAuthMethods = useMutation({
-		mutationFn: async (host: string) => {
-			API.setHost(host);
-			return API.getAuthMethods();
-		},
-		onSuccess: (_, host) => {
-			setBaseUrl(host);
-			onNext();
-		},
-		onError: () => {
-			setError("Failed to connect to Coder");
-		},
-	});
 
 	const handleSubmit = () => {
 		setError(undefined);
@@ -52,7 +36,9 @@ export function BaseUrlStep({ onNext }: BaseUrlStepProps) {
 			return;
 		}
 
-		checkAuthMethods.mutate(normalizedUrl);
+		// Skip API validation to avoid CORS issues on web
+		setBaseUrl(normalizedUrl);
+		onNext();
 	};
 
 	return (
@@ -82,11 +68,7 @@ export function BaseUrlStep({ onNext }: BaseUrlStepProps) {
 				<TextField.ErrorMessage>{error}</TextField.ErrorMessage>
 			</TextField>
 
-			<Button
-				onPress={handleSubmit}
-				loading={checkAuthMethods.isPending}
-				className="w-full"
-			>
+			<Button onPress={handleSubmit} className="w-full">
 				Continue
 			</Button>
 		</View>
