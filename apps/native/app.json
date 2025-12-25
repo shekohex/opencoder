@@ -194,6 +194,12 @@
 						]
 					}
 				}
+			],
+			[
+				"expo-web-browser",
+				{
+					"experimentalLauncherActivity": true
+				}
 			]
 		],
 		"experiments": {
