@@ -433,7 +433,6 @@ export type RequestParams = Record<
 export type RequestConfig = {
 	baseURL?: string;
 	headers?: Record<string, string>;
-	params?: Record<string, string>;
 };
 
 /**
@@ -458,13 +457,13 @@ class ApiMethods {
 		} = {},
 	): Promise<T> {
 		const fullUrl = new URL(
-			getURLWithSearchParams(url, {
-				...(this.config.params as Record<string, string>),
-				...(options.params as Record<
+			getURLWithSearchParams(
+				url,
+				options.params as Record<
 					string,
 					string | number | boolean | undefined | null
-				>),
-			}),
+				>,
+			),
 			this.config.baseURL ||
 				(typeof location !== "undefined"
 					? location.origin
@@ -2826,15 +2825,10 @@ export class Api extends ApiMethods implements ClientApi {
 	};
 
 	setSessionToken = (token: string): void => {
-		// Use query param to avoid CORS preflight issues on web
-		this.config.params = {
-			...this.config.params,
-			coder_session_token: token,
+		this.config.headers = {
+			...this.config.headers,
+			"Coder-Session-Token": token,
 		};
-		// Ensure header is removed if it was there
-		if (this.config.headers) {
-			delete this.config.headers["Coder-Session-Token"];
-		}
 	};
 
 	setHost = (host: string | undefined): void => {
