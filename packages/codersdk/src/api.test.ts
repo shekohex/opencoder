@@ -80,6 +80,18 @@ describe("api.ts", () => {
 
 			// then
 			expect(mockFetch).toHaveBeenCalledTimes(2);
+			// Check first call (handshake)
+			expect(mockFetch).toHaveBeenNthCalledWith(
+				1,
+				expect.stringContaining("/callback"),
+				expect.objectContaining({ credentials: "include" }),
+			);
+			// Check second call (device)
+			expect(mockFetch).toHaveBeenNthCalledWith(
+				2,
+				expect.stringContaining("/device"),
+				expect.objectContaining({ credentials: "include" }),
+			);
 			expect(result).toStrictEqual({ ...deviceResponse, state });
 		});
 	});

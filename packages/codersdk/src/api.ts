@@ -454,6 +454,7 @@ class ApiMethods {
 			headers?: Record<string, string>;
 			signal?: AbortSignal;
 			responseType?: "json" | "text" | "blob" | "arraybuffer";
+			credentials?: RequestCredentials;
 		} = {},
 	): Promise<T> {
 		const fullUrl = new URL(
@@ -490,7 +491,7 @@ class ApiMethods {
 			headers,
 			body,
 			signal: options.signal,
-			credentials: "include",
+			credentials: options.credentials,
 		});
 
 		if (!response.ok && response.status !== 304) {
@@ -1713,7 +1714,7 @@ class ApiMethods {
 		const res = await this.request<TypesGen.OAuth2DeviceFlowCallbackResponse>(
 			"GET",
 			"/api/v2/users/oauth2/github/callback",
-			{ params: { code, state } },
+			{ params: { code, state }, credentials: "include" },
 		);
 		if (typeof res !== "object" || typeof res.redirect_url !== "string") {
 			console.error("Invalid response from OAuth2 GitHub callback", res);
@@ -1750,6 +1751,7 @@ class ApiMethods {
 		const device = await this.request<TypesGen.ExternalAuthDevice>(
 			"GET",
 			"/api/v2/users/oauth2/github/device",
+			{ credentials: "include" },
 		);
 
 		return { ...device, state };
