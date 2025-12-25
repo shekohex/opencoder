@@ -2,19 +2,12 @@ import { API } from "@coder/sdk";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react-native";
 import type React from "react";
-import {
-	useAuthMethods,
-	useGitHubDeviceCallback,
-	useGitHubDeviceStart,
-	useLogin,
-} from "./auth-queries";
+import { useAuthMethods, useLogin } from "./auth-queries";
 
 jest.mock("@coder/sdk", () => ({
 	API: {
 		getAuthMethods: jest.fn(),
 		login: jest.fn(),
-		getOAuth2GitHubDevice: jest.fn(),
-		getOAuth2GitHubDeviceFlowCallback: jest.fn(),
 	},
 }));
 
@@ -66,36 +59,5 @@ describe("auth-queries", () => {
 
 		await waitFor(() => expect(result.current.isSuccess).toBe(true));
 		expect(API.login).toHaveBeenCalledWith("user", "pwd");
-	});
-
-	it("useGitHubDeviceStart calls API.getOAuth2GitHubDevice", async () => {
-		(API.getOAuth2GitHubDevice as jest.Mock).mockResolvedValue({
-			user_code: "123",
-		});
-
-		const { result } = renderHook(() => useGitHubDeviceStart(), {
-			wrapper: createWrapper(),
-		});
-
-		await waitFor(() => expect(result.current.isSuccess).toBe(true));
-		expect(API.getOAuth2GitHubDevice).toHaveBeenCalled();
-	});
-
-	it("useGitHubDeviceCallback calls API.getOAuth2GitHubDeviceFlowCallback", async () => {
-		(API.getOAuth2GitHubDeviceFlowCallback as jest.Mock).mockResolvedValue({
-			redirect_url: "/",
-		});
-
-		const { result } = renderHook(() => useGitHubDeviceCallback(), {
-			wrapper: createWrapper(),
-		});
-
-		result.current.mutate({ deviceCode: "device-code", state: "state-123" });
-
-		await waitFor(() => expect(result.current.isSuccess).toBe(true));
-		expect(API.getOAuth2GitHubDeviceFlowCallback).toHaveBeenCalledWith(
-			"device-code",
-			"state-123",
-		);
 	});
 });

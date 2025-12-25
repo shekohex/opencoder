@@ -50,12 +50,12 @@ describe("AuthMethodsStep", () => {
 		const { findByText, getByPlaceholderText } = render(
 			<AuthMethodsStep
 				onAuthenticated={jest.fn()}
-				onDeviceFlowStart={jest.fn()}
+				onTokenAuthStart={jest.fn()}
 			/>,
 			{ wrapper: createWrapper() },
 		);
 
-		expect(await findByText("GitHub")).toBeTruthy();
+		expect(await findByText("Login via Browser")).toBeTruthy();
 		expect(getByPlaceholderText("user@example.com")).toBeTruthy();
 		expect(getByPlaceholderText("password")).toBeTruthy();
 	});
@@ -71,7 +71,7 @@ describe("AuthMethodsStep", () => {
 		const { getByText, getByPlaceholderText, findByText } = render(
 			<AuthMethodsStep
 				onAuthenticated={onAuthenticated}
-				onDeviceFlowStart={jest.fn()}
+				onTokenAuthStart={jest.fn()}
 			/>,
 			{ wrapper: createWrapper() },
 		);
@@ -92,24 +92,24 @@ describe("AuthMethodsStep", () => {
 		});
 	});
 
-	it("calls onDeviceFlowStart when clicking oauth provider", async () => {
+	it("calls onTokenAuthStart when clicking login via browser", async () => {
 		(API.getAuthMethods as jest.Mock).mockResolvedValue({
 			password: { enabled: true },
 			github: { enabled: true, name: "GitHub" },
 		});
-		const onDeviceFlowStart = jest.fn();
+		const onTokenAuthStart = jest.fn();
 
 		const { findByText } = render(
 			<AuthMethodsStep
 				onAuthenticated={jest.fn()}
-				onDeviceFlowStart={onDeviceFlowStart}
+				onTokenAuthStart={onTokenAuthStart}
 			/>,
 			{ wrapper: createWrapper() },
 		);
 
-		const githubBtn = await findByText("GitHub");
-		fireEvent.press(githubBtn);
+		const btn = await findByText("Login via Browser");
+		fireEvent.press(btn);
 
-		expect(onDeviceFlowStart).toHaveBeenCalledWith("github");
+		expect(onTokenAuthStart).toHaveBeenCalled();
 	});
 });

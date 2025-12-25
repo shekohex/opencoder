@@ -21,24 +21,3 @@ export function useLogin() {
 		},
 	});
 }
-
-export function useDeviceStart(provider: string) {
-	return useQuery({
-		queryKey: ["deviceStart", provider],
-		queryFn: async () => {
-			return API.getExternalAuthDevice(provider);
-		},
-		enabled: !!provider,
-	});
-}
-
-export function useDevicePoll(provider: string) {
-	return useMutation({
-		mutationFn: async (deviceCode: string) => {
-			// Cast the void return to what we actually get from JSON
-			return (await API.exchangeExternalAuthDevice(provider, {
-				device_code: deviceCode,
-			})) as unknown as { session_token: string };
-		},
-	});
-}

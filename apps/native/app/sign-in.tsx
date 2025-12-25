@@ -1,48 +1,38 @@
 import { useState } from "react";
 import { AuthMethodsStep } from "@/components/auth/auth-methods-step";
 import { BaseUrlStep } from "@/components/auth/base-url-step";
-import { DeviceFlowStep } from "@/components/auth/device-flow-step";
+import { TokenAuthStep } from "@/components/auth/token-auth-step";
 import { Container } from "@/components/container";
 import { useSession } from "@/lib/auth";
 
-type Step = "base-url" | "auth-methods" | "device-flow";
-
-interface DeviceFlowState {
-	providerName: string;
-}
+type Step = "base-url" | "auth-methods" | "token-auth";
 
 export default function SignIn() {
 	const { baseUrl } = useSession();
 	const [_step, setStep] = useState<Step>("base-url");
-	const [deviceFlowState, setDeviceFlowState] =
-		useState<DeviceFlowState | null>(null);
 
 	const handleBaseUrlNext = () => {
 		setStep("auth-methods");
 	};
 
 	const handleAuthenticated = () => {
-		setDeviceFlowState(null);
+		// Navigation handled by layout when session changes
 	};
 
-	const handleDeviceFlowStart = (provider: string) => {
-		const providerName = provider === "github" ? "GitHub" : provider;
-		setDeviceFlowState({ providerName });
-		setStep("device-flow");
+	const handleTokenAuthStart = () => {
+		setStep("token-auth");
 	};
 
-	const handleDeviceFlowCancel = () => {
-		setDeviceFlowState(null);
+	const handleTokenAuthCancel = () => {
 		setStep("auth-methods");
 	};
 
 	const renderStep = () => {
-		if (deviceFlowState) {
+		if (_step === "token-auth") {
 			return (
-				<DeviceFlowStep
-					providerName={deviceFlowState.providerName}
+				<TokenAuthStep
 					onAuthenticated={handleAuthenticated}
-					onCancel={handleDeviceFlowCancel}
+					onCancel={handleTokenAuthCancel}
 				/>
 			);
 		}
@@ -54,7 +44,7 @@ export default function SignIn() {
 		return (
 			<AuthMethodsStep
 				onAuthenticated={handleAuthenticated}
-				onDeviceFlowStart={handleDeviceFlowStart}
+				onTokenAuthStart={handleTokenAuthStart}
 			/>
 		);
 	};
