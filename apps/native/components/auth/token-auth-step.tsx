@@ -77,6 +77,7 @@ export function TokenAuthStep({
 					placeholder="Paste your token here"
 					autoCapitalize="none"
 					autoCorrect={false}
+					secureTextEntry
 				/>
 				<TextField.ErrorMessage>{error}</TextField.ErrorMessage>
 			</TextField>
