@@ -438,9 +438,6 @@ export type RequestConfig = {
 /**
  * This is the container for all API methods.
  */
-const isReactNative =
-	typeof navigator !== "undefined" && navigator.product === "ReactNative";
-
 class ApiMethods {
 	experimental: ExperimentalApiMethods;
 
@@ -457,7 +454,6 @@ class ApiMethods {
 			headers?: Record<string, string>;
 			signal?: AbortSignal;
 			responseType?: "json" | "text" | "blob" | "arraybuffer";
-			credentials?: RequestCredentials;
 		} = {},
 	): Promise<T> {
 		const fullUrl = new URL(
@@ -474,16 +470,10 @@ class ApiMethods {
 					: "http://localhost"),
 		);
 
-		const headers: Record<string, string> = {
+		const headers = {
 			...this.config.headers,
 			...options.headers,
 		};
-
-		// Authorization: Bearer is supported by Coder v2.x and avoids custom header preflight issues.
-		// We keep Coder-Session-Token as well for backward compatibility if not cross-origin.
-		if (headers["Coder-Session-Token"]) {
-			headers.Authorization = `Bearer ${headers["Coder-Session-Token"]}`;
-		}
 
 		let body: BodyInit | undefined;
 		if (options.body) {
@@ -495,19 +485,11 @@ class ApiMethods {
 			}
 		}
 
-		const isCrossOrigin =
-			typeof location !== "undefined" && fullUrl.origin !== location.origin;
-
 		const response = await fetch(fullUrl.toString(), {
 			method,
 			headers,
 			body,
 			signal: options.signal,
-			credentials: isReactNative
-				? options.credentials
-				: isCrossOrigin
-					? "omit"
-					: options.credentials,
 		});
 
 		if (!response.ok && response.status !== 304) {
@@ -1730,7 +1712,7 @@ class ApiMethods {
 		const res = await this.request<TypesGen.OAuth2DeviceFlowCallbackResponse>(
 			"GET",
 			"/api/v2/users/oauth2/github/callback",
-			{ params: { code, state }, credentials: "include" },
+			{ params: { code, state } },
 		);
 		if (typeof res !== "object" || typeof res.redirect_url !== "string") {
 			console.error("Invalid response from OAuth2 GitHub callback", res);
@@ -1751,26 +1733,9 @@ class ApiMethods {
 					? location.origin
 					: "http://localhost"),
 		);
-
-		const handshakeHeaders: Record<string, string> = {
-			...(this.config.headers as Record<string, string>),
-		};
-		if (handshakeHeaders["Coder-Session-Token"]) {
-			handshakeHeaders.Authorization = `Bearer ${handshakeHeaders["Coder-Session-Token"]}`;
-		}
-
-		const isCrossOrigin =
-			typeof location !== "undefined" && callbackUrl.origin !== location.origin;
-
 		const stateRes = await fetch(callbackUrl.toString(), {
 			method: "GET",
 			redirect: "follow",
-			credentials: isReactNative
-				? "include"
-				: isCrossOrigin
-					? "omit"
-					: "same-origin",
-			headers: handshakeHeaders,
 		});
 		const finalUrl = new URL(stateRes.url);
 		const state = finalUrl.searchParams.get("state");
@@ -1782,7 +1747,6 @@ class ApiMethods {
 		const device = await this.request<TypesGen.ExternalAuthDevice>(
 			"GET",
 			"/api/v2/users/oauth2/github/device",
-			{ credentials: "include" },
 		);
 
 		return { ...device, state };
