@@ -490,6 +490,7 @@ class ApiMethods {
 			headers,
 			body,
 			signal: options.signal,
+			credentials: "include",
 		});
 
 		if (!response.ok && response.status !== 304) {
@@ -1736,6 +1737,8 @@ class ApiMethods {
 		const stateRes = await fetch(callbackUrl.toString(), {
 			method: "GET",
 			redirect: "follow",
+			credentials: "include",
+			headers: this.config.headers as Record<string, string>,
 		});
 		const finalUrl = new URL(stateRes.url);
 		const state = finalUrl.searchParams.get("state");
