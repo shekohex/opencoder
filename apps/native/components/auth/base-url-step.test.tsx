@@ -11,6 +11,7 @@ jest.mock("@coder/sdk", () => ({
 	API: {
 		getAuthMethods: jest.fn(),
 		setHost: jest.fn(),
+		setProxyTarget: jest.fn(),
 	},
 }));
 

@@ -10,7 +10,12 @@ jest.mock("@/lib/auth", () => ({
 
 jest.mock("expo-router", () => ({
 	Redirect: jest.fn(() => null),
-	Stack: jest.fn(() => null),
+	Stack: Object.assign(
+		jest.fn(() => null),
+		{ Screen: jest.fn(() => null) },
+	),
+	useSegments: jest.fn(() => []),
+	usePathname: jest.fn(() => "/"),
 }));
 
 describe("AppLayout", () => {
@@ -32,6 +37,7 @@ describe("AppLayout", () => {
 		});
 
 		render(<AppLayout />);
+		// Since segments is empty array [], currentPath is undefined, so just /sign-in
 		expect(Redirect).toHaveBeenCalledWith({ href: "/sign-in" }, undefined);
 	});
 

@@ -36,7 +36,6 @@ export function BaseUrlStep({ onNext }: BaseUrlStepProps) {
 			return;
 		}
 
-		// Skip API validation to avoid CORS issues on web
 		setBaseUrl(normalizedUrl);
 		onNext();
 	};

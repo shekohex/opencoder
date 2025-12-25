@@ -2783,6 +2783,7 @@ interface ClientApi extends ApiMethods {
 	getCsrfToken: () => string;
 	setSessionToken: (token: string) => void;
 	setHost: (host: string | undefined) => void;
+	setProxyTarget: (target: string | undefined) => void;
 }
 
 /** @public Exported for use by external consumers (e.g., VS Code extension). */
@@ -2833,6 +2834,18 @@ export class Api extends ApiMethods implements ClientApi {
 
 	setHost = (host: string | undefined): void => {
 		this.config.baseURL = host;
+	};
+
+	setProxyTarget = (target: string | undefined): void => {
+		if (target) {
+			this.config.headers = {
+				...this.config.headers,
+				"X-Proxy-Target": target,
+			};
+		} else {
+			const { "X-Proxy-Target": _, ...rest } = this.config.headers || {};
+			this.config.headers = rest;
+		}
 	};
 }
 

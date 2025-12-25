@@ -1,6 +1,18 @@
 import { API } from "@coder/sdk";
 import React from "react";
+import { Platform } from "react-native";
 import { useStorageState } from "@/lib/useStorageState";
+
+function isWeb(): boolean {
+	return Platform.OS === "web";
+}
+
+function getProxyUrl(): string {
+	if (typeof window !== "undefined" && window.location) {
+		return window.location.origin;
+	}
+	return "http://localhost:8081";
+}
 
 const AuthContext = React.createContext<{
 	signIn: (token: string) => void;
@@ -15,10 +27,9 @@ const AuthContext = React.createContext<{
 	session: null,
 	isLoading: false,
 	baseUrl: null,
-	setBaseUrl: () => null,
+	setBaseUrl: () => {},
 });
 
-// This hook can be used to access the user info.
 export function useSession() {
 	const value = React.useContext(AuthContext);
 	if (process.env.NODE_ENV !== "production") {
@@ -37,7 +48,13 @@ export function SessionProvider(props: React.PropsWithChildren) {
 
 	React.useEffect(() => {
 		if (baseUrl) {
-			API.setHost(baseUrl);
+			if (isWeb()) {
+				API.setHost(getProxyUrl());
+				API.setProxyTarget(baseUrl);
+			} else {
+				API.setHost(baseUrl);
+				API.setProxyTarget(undefined);
+			}
 		}
 		if (session) {
 			API.setSessionToken(session);
@@ -45,7 +62,13 @@ export function SessionProvider(props: React.PropsWithChildren) {
 	}, [baseUrl, session]);
 
 	const setBaseUrl = (url: string) => {
-		API.setHost(url);
+		if (isWeb()) {
+			API.setHost(getProxyUrl());
+			API.setProxyTarget(url);
+		} else {
+			API.setHost(url);
+			API.setProxyTarget(undefined);
+		}
 		setBaseUrlState(url);
 	};
 

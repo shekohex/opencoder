@@ -1,3 +1,5 @@
+import type { Href } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { AuthMethodsStep } from "@/components/auth/auth-methods-step";
 import { BaseUrlStep } from "@/components/auth/base-url-step";
@@ -9,6 +11,7 @@ type Step = "base-url" | "auth-methods" | "token-auth";
 
 export default function SignIn() {
 	const { baseUrl } = useSession();
+	const { redirectTo } = useLocalSearchParams<{ redirectTo?: string }>();
 	const [_step, setStep] = useState<Step>("base-url");
 
 	const handleBaseUrlNext = () => {
@@ -16,7 +19,8 @@ export default function SignIn() {
 	};
 
 	const handleAuthenticated = () => {
-		// Navigation handled by layout when session changes
+		const destination = (redirectTo || "/") as Href;
+		router.replace(destination);
 	};
 
 	const handleTokenAuthStart = () => {
