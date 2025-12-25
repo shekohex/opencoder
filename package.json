@@ -30,7 +30,7 @@
 		"zod": "catalog:"
 	},
 	"devDependencies": {
-		"turbo": "^2.6.3",
+		"turbo": "^2.7.2",
 		"@babel/runtime": "^7.28.4",
 		"@biomejs/biome": "^2.2.0",
 		"husky": "^9.1.7",
