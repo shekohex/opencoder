@@ -80,13 +80,15 @@ describe("api.ts", () => {
 
 			// then
 			expect(mockFetch).toHaveBeenCalledTimes(2);
-			// Check first call (handshake)
+			// In test environment, isReactNative is false.
+			// isCrossOrigin is false because both use http://localhost.
+			// Handshake uses same-origin when NOT cross-origin.
 			expect(mockFetch).toHaveBeenNthCalledWith(
 				1,
 				expect.stringContaining("/callback"),
-				expect.objectContaining({ credentials: "include" }),
+				expect.objectContaining({ credentials: "same-origin" }),
 			);
-			// Check second call (device)
+			// Device call uses options.credentials ("include") because NOT cross-origin.
 			expect(mockFetch).toHaveBeenNthCalledWith(
 				2,
 				expect.stringContaining("/device"),

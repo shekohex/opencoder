@@ -438,6 +438,9 @@ export type RequestConfig = {
 /**
  * This is the container for all API methods.
  */
+const isReactNative =
+	typeof navigator !== "undefined" && navigator.product === "ReactNative";
+
 class ApiMethods {
 	experimental: ExperimentalApiMethods;
 
@@ -471,10 +474,18 @@ class ApiMethods {
 					: "http://localhost"),
 		);
 
-		const headers = {
+		const headers: Record<string, string> = {
 			...this.config.headers,
 			...options.headers,
 		};
+
+		// If we have Coder-Session-Token, move it to Authorization header
+		// to avoid CORS preflight issues with custom headers that are not in the allowed list.
+		// Authorization is almost always in the allowed list.
+		if (headers["Coder-Session-Token"]) {
+			headers.Authorization = `Coder-Session-Token ${headers["Coder-Session-Token"]}`;
+			delete headers["Coder-Session-Token"];
+		}
 
 		let body: BodyInit | undefined;
 		if (options.body) {
@@ -486,12 +497,19 @@ class ApiMethods {
 			}
 		}
 
+		const isCrossOrigin =
+			typeof location !== "undefined" && fullUrl.origin !== location.origin;
+
 		const response = await fetch(fullUrl.toString(), {
 			method,
 			headers,
 			body,
 			signal: options.signal,
-			credentials: options.credentials,
+			credentials: isReactNative
+				? options.credentials
+				: isCrossOrigin && options.credentials === "include"
+					? "omit"
+					: options.credentials,
 		});
 
 		if (!response.ok && response.status !== 304) {
@@ -1735,11 +1753,26 @@ class ApiMethods {
 					? location.origin
 					: "http://localhost"),
 		);
+		const handshakeHeaders: Record<string, string> = {
+			...(this.config.headers as Record<string, string>),
+		};
+		if (handshakeHeaders["Coder-Session-Token"]) {
+			handshakeHeaders.Authorization = `Coder-Session-Token ${handshakeHeaders["Coder-Session-Token"]}`;
+			delete handshakeHeaders["Coder-Session-Token"];
+		}
+
+		const isCrossOrigin =
+			typeof location !== "undefined" && callbackUrl.origin !== location.origin;
+
 		const stateRes = await fetch(callbackUrl.toString(), {
 			method: "GET",
 			redirect: "follow",
-			credentials: "include",
-			headers: this.config.headers as Record<string, string>,
+			credentials: isReactNative
+				? "include"
+				: isCrossOrigin
+					? "omit"
+					: "same-origin",
+			headers: handshakeHeaders,
 		});
 		const finalUrl = new URL(stateRes.url);
 		const state = finalUrl.searchParams.get("state");
