@@ -479,12 +479,10 @@ class ApiMethods {
 			...options.headers,
 		};
 
-		// If we have Coder-Session-Token, move it to Authorization header
-		// to avoid CORS preflight issues with custom headers that are not in the allowed list.
-		// Authorization is almost always in the allowed list.
+		// Authorization: Bearer is supported by Coder v2.x and avoids custom header preflight issues.
+		// We keep Coder-Session-Token as well for backward compatibility if not cross-origin.
 		if (headers["Coder-Session-Token"]) {
-			headers.Authorization = `Coder-Session-Token ${headers["Coder-Session-Token"]}`;
-			delete headers["Coder-Session-Token"];
+			headers.Authorization = `Bearer ${headers["Coder-Session-Token"]}`;
 		}
 
 		let body: BodyInit | undefined;
@@ -507,7 +505,7 @@ class ApiMethods {
 			signal: options.signal,
 			credentials: isReactNative
 				? options.credentials
-				: isCrossOrigin && options.credentials === "include"
+				: isCrossOrigin
 					? "omit"
 					: options.credentials,
 		});
@@ -1753,12 +1751,12 @@ class ApiMethods {
 					? location.origin
 					: "http://localhost"),
 		);
+
 		const handshakeHeaders: Record<string, string> = {
 			...(this.config.headers as Record<string, string>),
 		};
 		if (handshakeHeaders["Coder-Session-Token"]) {
-			handshakeHeaders.Authorization = `Coder-Session-Token ${handshakeHeaders["Coder-Session-Token"]}`;
-			delete handshakeHeaders["Coder-Session-Token"];
+			handshakeHeaders.Authorization = `Bearer ${handshakeHeaders["Coder-Session-Token"]}`;
 		}
 
 		const isCrossOrigin =
