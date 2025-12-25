@@ -4,18 +4,17 @@ import { renderHook, waitFor } from "@testing-library/react-native";
 import type React from "react";
 import {
 	useAuthMethods,
-	useDevicePoll,
-	useDeviceStart,
+	useGitHubDeviceCallback,
+	useGitHubDeviceStart,
 	useLogin,
 } from "./auth-queries";
 
-// Mock dependencies
 jest.mock("@coder/sdk", () => ({
 	API: {
 		getAuthMethods: jest.fn(),
 		login: jest.fn(),
-		getExternalAuthDevice: jest.fn(),
-		exchangeExternalAuthDevice: jest.fn(),
+		getOAuth2GitHubDevice: jest.fn(),
+		getOAuth2GitHubDeviceFlowCallback: jest.fn(),
 	},
 }));
 
@@ -69,33 +68,34 @@ describe("auth-queries", () => {
 		expect(API.login).toHaveBeenCalledWith("user", "pwd");
 	});
 
-	it("useDeviceStart calls API.getExternalAuthDevice", async () => {
-		(API.getExternalAuthDevice as jest.Mock).mockResolvedValue({
+	it("useGitHubDeviceStart calls API.getOAuth2GitHubDevice", async () => {
+		(API.getOAuth2GitHubDevice as jest.Mock).mockResolvedValue({
 			user_code: "123",
 		});
 
-		const { result } = renderHook(() => useDeviceStart("github"), {
+		const { result } = renderHook(() => useGitHubDeviceStart(), {
 			wrapper: createWrapper(),
 		});
 
 		await waitFor(() => expect(result.current.isSuccess).toBe(true));
-		expect(API.getExternalAuthDevice).toHaveBeenCalledWith("github");
+		expect(API.getOAuth2GitHubDevice).toHaveBeenCalled();
 	});
 
-	it("useDevicePoll calls API.exchangeExternalAuthDevice", async () => {
-		(API.exchangeExternalAuthDevice as jest.Mock).mockResolvedValue({
-			session_token: "token",
+	it("useGitHubDeviceCallback calls API.getOAuth2GitHubDeviceFlowCallback", async () => {
+		(API.getOAuth2GitHubDeviceFlowCallback as jest.Mock).mockResolvedValue({
+			redirect_url: "/",
 		});
 
-		const { result } = renderHook(() => useDevicePoll("github"), {
+		const { result } = renderHook(() => useGitHubDeviceCallback(), {
 			wrapper: createWrapper(),
 		});
 
-		result.current.mutate("device-code");
+		result.current.mutate({ deviceCode: "device-code", state: "state-123" });
 
 		await waitFor(() => expect(result.current.isSuccess).toBe(true));
-		expect(API.exchangeExternalAuthDevice).toHaveBeenCalledWith("github", {
-			device_code: "device-code",
-		});
+		expect(API.getOAuth2GitHubDeviceFlowCallback).toHaveBeenCalledWith(
+			"device-code",
+			"state-123",
+		);
 	});
 });

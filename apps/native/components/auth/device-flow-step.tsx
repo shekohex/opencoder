@@ -1,23 +1,23 @@
-import { API } from "@coder/sdk";
-import { useMutation, useQuery } from "@tanstack/react-query";
 import * as Clipboard from "expo-clipboard";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { ActivityIndicator, Linking, View } from "react-native";
 import { useSession } from "@/lib/auth";
+import {
+	useGitHubDeviceCallback,
+	useGitHubDeviceStart,
+} from "@/lib/auth-queries";
 
 import { AppText } from "../app-text";
 import { Button } from "../button";
 import { CodeText } from "../code-text";
 
 interface DeviceFlowStepProps {
-	provider: string;
 	providerName: string;
 	onAuthenticated: () => void;
 	onCancel: () => void;
 }
 
 export function DeviceFlowStep({
-	provider,
 	providerName,
 	onAuthenticated,
 	onCancel,
@@ -25,45 +25,49 @@ export function DeviceFlowStep({
 	const { signIn } = useSession();
 	const pollInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
-	const deviceStart = useQuery({
-		queryKey: ["deviceStart", provider],
-		queryFn: async () => {
-			return API.getExternalAuthDevice(provider);
-		},
-	});
+	const deviceStart = useGitHubDeviceStart();
+	const callbackMutation = useGitHubDeviceCallback();
 
-	const exchangeMutation = useMutation({
-		mutationFn: async (deviceCode: string) => {
-			// We need to bypass the strict typing or update it.
-			// API.exchangeExternalAuthDevice returns Promise<void> but we expect session token in response.
-			return (await API.exchangeExternalAuthDevice(provider, {
-				device_code: deviceCode,
-			})) as unknown as { session_token: string };
-		},
-		onSuccess: (data) => {
-			if (data?.session_token) {
-				signIn(data.session_token);
-				onAuthenticated();
-			}
-		},
-	});
+	const stopPolling = useCallback(() => {
+		if (pollInterval.current) {
+			clearInterval(pollInterval.current);
+			pollInterval.current = null;
+		}
+	}, []);
 
 	useEffect(() => {
-		if (deviceStart.data) {
-			const { device_code, interval } = deviceStart.data;
-			const pollMs = (interval || 5) * 1000;
+		if (!deviceStart.data) return;
 
-			const poll = () => {
-				exchangeMutation.mutate(device_code);
-			};
+		const { device_code, interval, state } = deviceStart.data;
+		const pollMs = (interval || 5) * 1000;
 
-			pollInterval.current = setInterval(poll, pollMs);
-		}
+		const poll = async () => {
+			if (callbackMutation.isPending) return;
 
-		return () => {
-			if (pollInterval.current) clearInterval(pollInterval.current);
+			callbackMutation.mutate(
+				{ deviceCode: device_code, state },
+				{
+					onSuccess: (data) => {
+						stopPolling();
+						if (data?.redirect_url) {
+							signIn(device_code);
+							onAuthenticated();
+						}
+					},
+				},
+			);
 		};
-	}, [deviceStart.data, exchangeMutation.mutate]);
+
+		pollInterval.current = setInterval(poll, pollMs);
+
+		return stopPolling;
+	}, [
+		deviceStart.data,
+		callbackMutation,
+		signIn,
+		onAuthenticated,
+		stopPolling,
+	]);
 
 	const handleCopy = async () => {
 		if (deviceStart.data?.user_code) {

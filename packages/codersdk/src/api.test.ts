@@ -44,6 +44,46 @@ describe("api.ts", () => {
 		});
 	});
 
+	describe("getOAuth2GitHubDevice", () => {
+		it("gets github device auth after setting state cookie", async () => {
+			// given
+			const deviceResponse: TypesGen.ExternalAuthDevice = {
+				device_code: "d",
+				user_code: "u",
+				verification_uri: "https://example.com",
+				expires_in: 600,
+				interval: 5,
+			};
+			const state = "xyz_state_123";
+			const callbackRedirectUrl = `https://coder.example.com/login/device?state=${state}`;
+
+			const mockFetch = jest.fn((url) => {
+				if (url.toString().endsWith("/callback")) {
+					return Promise.resolve({
+						ok: true,
+						status: 200,
+						url: callbackRedirectUrl,
+						json: () => Promise.resolve({}),
+					} as Response);
+				}
+				if (url.toString().endsWith("/device")) {
+					return Promise.resolve(
+						new Response(JSON.stringify(deviceResponse), { status: 200 }),
+					);
+				}
+				return Promise.reject(new Error(`Unexpected fetch call: ${url}`));
+			});
+			global.fetch = mockFetch as unknown as typeof fetch;
+
+			// when
+			const result = await API.getOAuth2GitHubDevice();
+
+			// then
+			expect(mockFetch).toHaveBeenCalledTimes(2);
+			expect(result).toStrictEqual({ ...deviceResponse, state });
+		});
+	});
+
 	describe("login", () => {
 		it("should return LoginResponse", async () => {
 			// given

@@ -22,23 +22,30 @@ export function useLogin() {
 	});
 }
 
-export function useDeviceStart(provider: string) {
+export function useGitHubDeviceStart() {
 	return useQuery({
-		queryKey: ["deviceStart", provider],
+		queryKey: ["githubDeviceStart"],
 		queryFn: async () => {
-			return API.getExternalAuthDevice(provider);
+			return API.getOAuth2GitHubDevice();
 		},
-		enabled: !!provider,
+		refetchOnWindowFocus: false,
+		refetchOnMount: false,
+		refetchOnReconnect: false,
+		staleTime: 899 * 1000,
+		gcTime: 899 * 1000,
 	});
 }
 
-export function useDevicePoll(provider: string) {
+export function useGitHubDeviceCallback() {
 	return useMutation({
-		mutationFn: async (deviceCode: string) => {
-			// Cast the void return to what we actually get from JSON
-			return (await API.exchangeExternalAuthDevice(provider, {
-				device_code: deviceCode,
-			})) as unknown as { session_token: string };
+		mutationFn: async ({
+			deviceCode,
+			state,
+		}: {
+			deviceCode: string;
+			state: string;
+		}) => {
+			return API.getOAuth2GitHubDeviceFlowCallback(deviceCode, state);
 		},
 	});
 }

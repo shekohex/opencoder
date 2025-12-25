@@ -1721,11 +1721,35 @@ class ApiMethods {
 		return res;
 	};
 
-	getOAuth2GitHubDevice = async (): Promise<TypesGen.ExternalAuthDevice> => {
-		return this.request<TypesGen.ExternalAuthDevice>(
+	getOAuth2GitHubDevice = async (): Promise<
+		TypesGen.ExternalAuthDevice & { state: string }
+	> => {
+		// We first hit the callback endpoint without a code to get a valid oauth_state cookie
+		// and the state parameter from the redirect URL.
+		const callbackUrl = new URL(
+			"/api/v2/users/oauth2/github/callback",
+			this.config.baseURL ||
+				(typeof location !== "undefined"
+					? location.origin
+					: "http://localhost"),
+		);
+		const stateRes = await fetch(callbackUrl.toString(), {
+			method: "GET",
+			redirect: "follow",
+		});
+		const finalUrl = new URL(stateRes.url);
+		const state = finalUrl.searchParams.get("state");
+
+		if (!state) {
+			throw new Error("Failed to get OAuth2 state from callback redirect");
+		}
+
+		const device = await this.request<TypesGen.ExternalAuthDevice>(
 			"GET",
 			"/api/v2/users/oauth2/github/device",
 		);
+
+		return { ...device, state };
 	};
 
 	getOAuth2ProviderApps = async (

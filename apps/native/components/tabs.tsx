@@ -231,7 +231,6 @@ export function TabsTrigger({
 			{...props}
 			// @ts-expect-error: Web-only prop
 			onKeyDown={handleKeyDown}
-			// @ts-expect-error: Web-only prop
 			tabIndex={isActive ? 0 : -1}
 		>
 			{typeof children === "string" ? (

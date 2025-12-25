@@ -9,11 +9,10 @@ import { FontProvider } from "@/lib/font-context";
 import { ThemeProvider } from "@/lib/theme-context";
 import { DeviceFlowStep } from "./device-flow-step";
 
-// Mock dependencies
 jest.mock("@coder/sdk", () => ({
 	API: {
-		getExternalAuthDevice: jest.fn(),
-		exchangeExternalAuthDevice: jest.fn(),
+		getOAuth2GitHubDevice: jest.fn(),
+		getOAuth2GitHubDeviceFlowCallback: jest.fn(),
 		setSessionToken: jest.fn(),
 	},
 }));
@@ -51,7 +50,7 @@ describe("DeviceFlowStep", () => {
 	});
 
 	it("starts device flow and shows code", async () => {
-		(API.getExternalAuthDevice as jest.Mock).mockResolvedValue({
+		(API.getOAuth2GitHubDevice as jest.Mock).mockResolvedValue({
 			user_code: "ABCD-1234",
 			verification_uri: "https://github.com/login/device",
 			device_code: "device-code-123",
@@ -61,7 +60,6 @@ describe("DeviceFlowStep", () => {
 
 		const { findByText } = render(
 			<DeviceFlowStep
-				provider="github"
 				providerName="GitHub"
 				onAuthenticated={jest.fn()}
 				onCancel={jest.fn()}
@@ -70,11 +68,11 @@ describe("DeviceFlowStep", () => {
 		);
 
 		expect(await findByText("ABCD-1234")).toBeTruthy();
-		expect(API.getExternalAuthDevice).toHaveBeenCalledWith("github");
+		expect(API.getOAuth2GitHubDevice).toHaveBeenCalled();
 	});
 
 	it("copies code to clipboard", async () => {
-		(API.getExternalAuthDevice as jest.Mock).mockResolvedValue({
+		(API.getOAuth2GitHubDevice as jest.Mock).mockResolvedValue({
 			user_code: "ABCD-1234",
 			verification_uri: "https://github.com/login/device",
 			device_code: "device-code-123",
@@ -84,7 +82,6 @@ describe("DeviceFlowStep", () => {
 
 		const { findByText, getByLabelText } = render(
 			<DeviceFlowStep
-				provider="github"
 				providerName="GitHub"
 				onAuthenticated={jest.fn()}
 				onCancel={jest.fn()}
@@ -94,7 +91,6 @@ describe("DeviceFlowStep", () => {
 
 		await findByText("ABCD-1234");
 
-		// Assuming we have a copy button or pressable
 		const copyButton = getByLabelText("Copy code");
 		fireEvent.press(copyButton);
 
@@ -102,7 +98,7 @@ describe("DeviceFlowStep", () => {
 	});
 
 	it("opens link", async () => {
-		(API.getExternalAuthDevice as jest.Mock).mockResolvedValue({
+		(API.getOAuth2GitHubDevice as jest.Mock).mockResolvedValue({
 			user_code: "ABCD-1234",
 			verification_uri: "https://github.com/login/device",
 			device_code: "device-code-123",
@@ -112,7 +108,6 @@ describe("DeviceFlowStep", () => {
 
 		const { findByText } = render(
 			<DeviceFlowStep
-				provider="github"
 				providerName="GitHub"
 				onAuthenticated={jest.fn()}
 				onCancel={jest.fn()}

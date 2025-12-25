@@ -1,24 +1,62 @@
 import { useState } from "react";
 import { AuthMethodsStep } from "@/components/auth/auth-methods-step";
 import { BaseUrlStep } from "@/components/auth/base-url-step";
+import { DeviceFlowStep } from "@/components/auth/device-flow-step";
 import { Container } from "@/components/container";
 import { useSession } from "@/lib/auth";
 
+type Step = "base-url" | "auth-methods" | "device-flow";
+
+interface DeviceFlowState {
+	providerName: string;
+}
+
 export default function SignIn() {
 	const { baseUrl } = useSession();
-	const [_step, setStep] = useState<"base-url" | "auth-methods">("base-url");
+	const [_step, setStep] = useState<Step>("base-url");
+	const [deviceFlowState, setDeviceFlowState] =
+		useState<DeviceFlowState | null>(null);
 
 	const handleBaseUrlNext = () => {
 		setStep("auth-methods");
 	};
 
 	const handleAuthenticated = () => {
-		// Layout should redirect
+		setDeviceFlowState(null);
 	};
 
 	const handleDeviceFlowStart = (provider: string) => {
-		// Next task
-		console.log("Start device flow for", provider);
+		const providerName = provider === "github" ? "GitHub" : provider;
+		setDeviceFlowState({ providerName });
+		setStep("device-flow");
+	};
+
+	const handleDeviceFlowCancel = () => {
+		setDeviceFlowState(null);
+		setStep("auth-methods");
+	};
+
+	const renderStep = () => {
+		if (deviceFlowState) {
+			return (
+				<DeviceFlowStep
+					providerName={deviceFlowState.providerName}
+					onAuthenticated={handleAuthenticated}
+					onCancel={handleDeviceFlowCancel}
+				/>
+			);
+		}
+
+		if (!baseUrl) {
+			return <BaseUrlStep onNext={handleBaseUrlNext} />;
+		}
+
+		return (
+			<AuthMethodsStep
+				onAuthenticated={handleAuthenticated}
+				onDeviceFlowStart={handleDeviceFlowStart}
+			/>
+		);
 	};
 
 	return (
@@ -30,14 +68,7 @@ export default function SignIn() {
 				padding: 16,
 			}}
 		>
-			{!baseUrl ? (
-				<BaseUrlStep onNext={handleBaseUrlNext} />
-			) : (
-				<AuthMethodsStep
-					onAuthenticated={handleAuthenticated}
-					onDeviceFlowStart={handleDeviceFlowStart}
-				/>
-			)}
+			{renderStep()}
 		</Container>
 	);
 }
