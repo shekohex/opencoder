@@ -6,7 +6,7 @@
 	"scripts": {
 		"check": "biome check --write .",
 		"check-types": "tsc --noEmit",
-		"test": "bun run test"
+		"test": "bun test"
 	},
 	"dependencies": {
 		"@opencoder/config": "workspace:*"

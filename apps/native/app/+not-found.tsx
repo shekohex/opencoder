@@ -19,7 +19,7 @@ export default function NotFoundScreen() {
 						<Text style={[styles.subtitle, { color: theme.text.weak }]}>
 							Sorry, the page you're looking for doesn't exist.
 						</Text>
-						<Link href="/" asChild>
+						<Link href="/sign-in" asChild>
 							<Text
 								style={[
 									styles.link,

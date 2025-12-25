@@ -229,10 +229,9 @@ export function TabsTrigger({
 			accessibilityLabel={typeof children === "string" ? children : undefined}
 			className={`${baseStyles} ${activeContainerStyles} ${className}`}
 			{...props}
-			// @ts-expect-error Web-only props
+			// @ts-expect-error: Web-only prop
 			onKeyDown={handleKeyDown}
-			// Roving tabindex: 0 if active, -1 if not
-			// @ts-expect-error Web-only props
+			// @ts-expect-error: Web-only prop
 			tabIndex={isActive ? 0 : -1}
 		>
 			{typeof children === "string" ? (

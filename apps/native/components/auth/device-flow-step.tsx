@@ -23,7 +23,7 @@ export function DeviceFlowStep({
 	onCancel,
 }: DeviceFlowStepProps) {
 	const { signIn } = useSession();
-	const pollInterval = useRef<NodeJS.Timeout | null>(null);
+	const pollInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
 	const deviceStart = useQuery({
 		queryKey: ["deviceStart", provider],

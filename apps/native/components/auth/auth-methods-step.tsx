@@ -1,7 +1,9 @@
-import { API, type AuthMethods } from "@coder/sdk";
+import { API, type TypesGen } from "@coder/sdk";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { View } from "react-native";
+import Svg, { Path } from "react-native-svg";
+import { siGithub } from "simple-icons";
 import { useSession } from "@/lib/auth";
 
 import { AppText } from "../app-text";
@@ -57,12 +59,13 @@ export function AuthMethodsStep({
 		);
 	}
 
-	const methods = (authMethodsQuery.data || {}) as AuthMethods;
+	const methods = (authMethodsQuery.data || {}) as TypesGen.AuthMethods;
 	const hasPassword = methods.password?.enabled;
 	// Filter for GitHub or OIDC or whatever we support.
 	// For now, we iterate keys and show buttons for non-password/built-in
 	const oauthProviders = Object.entries(methods).filter(
-		([key, value]) => key !== "password" && value.enabled,
+		([key, value]) =>
+			key !== "password" && (value as { enabled: boolean }).enabled,
 	);
 
 	return (
@@ -83,13 +86,18 @@ export function AuthMethodsStep({
 							onPress={() => onDeviceFlowStart(key)}
 							leftIcon={
 								key === "github" ? (
-									// In a real app we'd use simple-icons SVG
-									// For now text or maybe an image if we had one
-									<AppText>🐙</AppText>
+									<Svg
+										viewBox="0 0 24 24"
+										width={16}
+										height={16}
+										fill="currentColor"
+									>
+										<Path d={siGithub.path} />
+									</Svg>
 								) : undefined
 							}
 						>
-							{value.name || key}
+							{(value as { name?: string }).name || key}
 						</Button>
 					))}
 				</View>

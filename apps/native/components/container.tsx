@@ -1,4 +1,5 @@
 import type React from "react";
+import type { StyleProp, ViewStyle } from "react-native";
 import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "@/lib/theme-context";
@@ -8,7 +9,7 @@ export function Container({
 	style,
 }: {
 	children: React.ReactNode;
-	style?: any;
+	style?: StyleProp<ViewStyle>;
 }) {
 	const { theme } = useTheme();
 

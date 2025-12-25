@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react-native";
 import { Redirect } from "expo-router";
 import { useSession } from "@/lib/auth";
-import AppLayout from "./_layout";
+import AppLayout from "../../app/(app)/_layout";
 
 // Mock dependencies
 jest.mock("@/lib/auth", () => ({
