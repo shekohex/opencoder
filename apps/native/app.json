@@ -4,20 +4,21 @@
 		"slug": "opencoder",
 		"version": "1.0.0",
 		"orientation": "portrait",
-		"icon": "./assets/images/icon.png",
+		"icon": "./assets/images/opencoder-icon-light.svg",
 		"scheme": "opencoder",
 		"userInterfaceStyle": "automatic",
 		"newArchEnabled": true,
 		"ios": {
 			"supportsTablet": true,
-			"bundleIdentifier": "com.github.shekohex.opencoder"
+			"bundleIdentifier": "com.github.shekohex.opencoder",
+			"icon": "./assets/images/opencoder-icon-light.svg"
 		},
 		"android": {
 			"adaptiveIcon": {
-				"backgroundColor": "#E6F4FE",
-				"foregroundImage": "./assets/images/android-icon-foreground.png",
-				"backgroundImage": "./assets/images/android-icon-background.png",
-				"monochromeImage": "./assets/images/android-icon-monochrome.png"
+				"backgroundColor": "#FFFFFF",
+				"foregroundImage": "./assets/images/opencoder-icon-light.svg",
+				"backgroundImage": "./assets/images/opencoder-icon-light.svg",
+				"monochromeImage": "./assets/images/opencoder-icon-light.svg"
 			},
 			"edgeToEdgeEnabled": true,
 			"predictiveBackGestureEnabled": false,
@@ -32,11 +33,12 @@
 			[
 				"expo-splash-screen",
 				{
-					"image": "./assets/images/splash-icon.png",
-					"imageWidth": 200,
+					"image": "./assets/images/opencoder-logo-light.svg",
+					"imageWidth": 250,
 					"resizeMode": "contain",
 					"backgroundColor": "#ffffff",
 					"dark": {
+						"image": "./assets/images/opencoder-logo-dark.svg",
 						"backgroundColor": "#000000"
 					}
 				}
@@ -58,6 +60,7 @@
 						"node_modules/@expo-google-fonts/jetbrains-mono/300Light/JetBrainsMono_300Light.ttf",
 						"node_modules/@expo-google-fonts/jetbrains-mono/400Regular/JetBrainsMono_400Regular.ttf",
 						"node_modules/@expo-google-fonts/jetbrains-mono/700Bold/JetBrainsMono_700Bold.ttf",
+						"node_modules/@expo-google-fonts/turret-road/800ExtraBold/TurretRoad_800ExtraBold.ttf",
 						"./assets/fonts/nerd-fonts/BlexMonoNerdFont-Light.ttf",
 						"./assets/fonts/nerd-fonts/BlexMonoNerdFont-Regular.ttf",
 						"./assets/fonts/nerd-fonts/BlexMonoNerdFont-Bold.ttf",
@@ -153,6 +156,15 @@
 								]
 							},
 							{
+								"fontFamily": "TurretRoad",
+								"fontDefinitions": [
+									{
+										"path": "node_modules/@expo-google-fonts/turret-road/800ExtraBold/TurretRoad_800ExtraBold.ttf",
+										"weight": 800
+									}
+								]
+							},
+							{
 								"fontFamily": "JetBrainsMonoNerdFont",
 								"fontDefinitions": [
 									{
@@ -185,6 +197,7 @@
 							"node_modules/@expo-google-fonts/jetbrains-mono/300Light/JetBrainsMono_300Light.ttf",
 							"node_modules/@expo-google-fonts/jetbrains-mono/400Regular/JetBrainsMono_400Regular.ttf",
 							"node_modules/@expo-google-fonts/jetbrains-mono/700Bold/JetBrainsMono_700Bold.ttf",
+							"node_modules/@expo-google-fonts/turret-road/800ExtraBold/TurretRoad_800ExtraBold.ttf",
 							"./assets/fonts/nerd-fonts/BlexMonoNerdFont-Light.ttf",
 							"./assets/fonts/nerd-fonts/BlexMonoNerdFont-Regular.ttf",
 							"./assets/fonts/nerd-fonts/BlexMonoNerdFont-Bold.ttf",

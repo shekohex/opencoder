@@ -1,6 +1,8 @@
+import { brandColors } from "@opencoder/branding";
 import { type SemanticColors, semanticColors } from "./tokens";
 
 export const THEME_NAMES = [
+	"opencoder",
 	"opencode",
 	"dracula",
 	"nord",
@@ -58,6 +60,52 @@ export type ResolvedTheme = SemanticColors & {
 const opencodeTheme: ThemeDefinition = {
 	light: semanticColors.light,
 	dark: semanticColors.dark,
+};
+
+const opencoderTheme: ThemeDefinition = {
+	light: {
+		...semanticColors.light,
+		surface: {
+			...semanticColors.light.surface,
+			brand: brandColors.light.outer,
+			brandHover: brandColors.light.open,
+		},
+		text: {
+			...semanticColors.light.text,
+			interactive: brandColors.light.outer,
+			onInteractive: brandColors.light.inner,
+		},
+		border: {
+			...semanticColors.light.border,
+			selected: brandColors.light.outer,
+			interactive: brandColors.light.outer,
+		},
+		icon: {
+			...semanticColors.light.icon,
+			interactive: brandColors.light.outer,
+		},
+	},
+	dark: {
+		...semanticColors.dark,
+		surface: {
+			...semanticColors.dark.surface,
+			brand: brandColors.dark.outer,
+			brandHover: brandColors.dark.open,
+		},
+		text: {
+			...semanticColors.dark.text,
+			interactive: brandColors.dark.outer,
+		},
+		border: {
+			...semanticColors.dark.border,
+			selected: brandColors.dark.outer,
+			interactive: brandColors.dark.outer,
+		},
+		icon: {
+			...semanticColors.dark.icon,
+			interactive: brandColors.dark.outer,
+		},
+	},
 };
 
 const draculaTheme: ThemeDefinition = {
@@ -4290,6 +4338,7 @@ const synthwave84Theme: ThemeDefinition = {
 	},
 };
 export const themes: Record<ThemeName, ThemeDefinition> = {
+	opencoder: opencoderTheme,
 	opencode: opencodeTheme,
 	dracula: draculaTheme,
 	nord: nordTheme,
@@ -4324,6 +4373,7 @@ export const themes: Record<ThemeName, ThemeDefinition> = {
 };
 
 export const themeDisplayNames: Record<ThemeName, string> = {
+	opencoder: "OpenCoder",
 	opencode: "OpenCode",
 	dracula: "Dracula",
 	nord: "Nord",

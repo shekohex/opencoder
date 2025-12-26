@@ -21,17 +21,18 @@ import {
 	Manrope_400Regular,
 	Manrope_700Bold,
 } from "@expo-google-fonts/manrope";
+import { TurretRoad_800ExtraBold } from "@expo-google-fonts/turret-road";
 import { Platform } from "react-native";
 
 // --- Types ---
 
 export type FontRole = "sans" | "mono";
-export type FontWeight = 300 | 400 | 700;
+export type FontWeight = 300 | 400 | 700 | 800;
 export type MonoFlavor = "normal" | "nerd";
 
 // We allow specific subsets for Sans/Mono to be passed in options,
 // matching what we have in the epic description.
-export type SansFamily = "Inter" | "Manrope";
+export type SansFamily = "Inter" | "Manrope" | "Turret Road";
 export type MonoFamily = "IBMPlexMono" | "JetBrainsMono";
 
 export interface FontRegistryOptions {
@@ -48,6 +49,7 @@ export interface FontRegistryOptions {
 const ANDROID_FAMILIES = {
 	Inter: "Inter",
 	Manrope: "Manrope",
+	"Turret Road": "TurretRoad",
 	IBMPlexMono: "IBMPlexMono",
 	JetBrainsMono: "JetBrainsMono",
 	BlexMonoNerdFont: "BlexMonoNerdFont",
@@ -65,6 +67,9 @@ const IOS_FAMILIES = {
 		300: "Manrope-Light",
 		400: "Manrope-Regular",
 		700: "Manrope-Bold",
+	},
+	"Turret Road": {
+		800: "TurretRoad-ExtraBold",
 	},
 	IBMPlexMono: {
 		300: "IBMPlexMono-Light",
@@ -101,6 +106,9 @@ const WEB_FAMILIES = {
 		300: "Manrope_300Light",
 		400: "Manrope_400Regular",
 		700: "Manrope_700Bold",
+	},
+	"Turret Road": {
+		800: "TurretRoad_800ExtraBold",
 	},
 	IBMPlexMono: {
 		300: "IBMPlexMono_300Light",
@@ -152,17 +160,21 @@ export function getFontFamily(options: FontRegistryOptions): string {
 
 	if (Platform.OS === "ios") {
 		// iOS uses explicit PostScript names for embedded fonts to ensure correct weight loading
-		const mapping = IOS_FAMILIES[familyKey];
+		const mapping = (IOS_FAMILIES as Record<string, Record<number, string>>)[
+			familyKey
+		];
 		if (mapping) {
-			return mapping[weight];
+			return mapping[weight] || mapping[400] || family;
 		}
 		return family;
 	}
 
 	// Web
-	const mapping = WEB_FAMILIES[familyKey];
+	const mapping = (WEB_FAMILIES as Record<string, Record<number, string>>)[
+		familyKey
+	];
 	if (mapping) {
-		return mapping[weight];
+		return mapping[weight] || mapping[400] || family;
 	}
 	return family;
 }
@@ -186,6 +198,8 @@ export function getWebFontMap() {
 		Manrope_300Light,
 		Manrope_400Regular,
 		Manrope_700Bold,
+		// Turret Road
+		TurretRoad_800ExtraBold,
 		// IBM Plex Mono
 		IBMPlexMono_300Light,
 		IBMPlexMono_400Regular,

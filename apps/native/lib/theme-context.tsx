@@ -20,10 +20,6 @@ import {
 
 const storage = createMMKV({ id: "theme-storage" });
 
-type UniwindThemeName =
-	| ThemeMode
-	| `${Exclude<ThemeName, "opencode">}-${ThemeMode}`;
-
 const THEME_KEY = "theme_name";
 const MODE_PREFERENCE_KEY = "theme_mode_preference";
 
@@ -46,7 +42,7 @@ function getStoredThemeName(): ThemeName {
 	if (stored && THEME_NAMES.includes(stored as ThemeName)) {
 		return stored as ThemeName;
 	}
-	return "opencode";
+	return "opencoder";
 }
 
 function getStoredModePreference(): ThemeModePreference {
@@ -81,10 +77,8 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 
 	useEffect(() => {
 		const uniwindTheme =
-			themeName === "opencode"
-				? (mode satisfies ThemeMode)
-				: (`${themeName}-${mode}` satisfies UniwindThemeName);
-		Uniwind.setTheme(uniwindTheme);
+			themeName === "opencoder" ? mode : `${themeName}-${mode}`;
+		Uniwind.setTheme(uniwindTheme as Parameters<typeof Uniwind.setTheme>[0]);
 	}, [themeName, mode]);
 
 	const setThemeName = useCallback((name: ThemeName) => {
