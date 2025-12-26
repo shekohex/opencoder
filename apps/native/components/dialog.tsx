@@ -26,8 +26,6 @@ import Animated, {
 	ZoomOut,
 } from "react-native-reanimated";
 
-// --- Types & Context ---
-
 interface TriggerProps {
 	onPress?: (e: GestureResponderEvent) => void;
 }
@@ -139,15 +137,8 @@ export function DialogContent({
 			isOpen,
 			onClose,
 			isDismissable: true,
-			// Setting this to false is critical for Web/focus-trap compatibility.
-			// Otherwise, clicking non-focusable elements inside the dialog (like text)
-			// might trigger a blur that react-aria interprets as clicking outside.
 			shouldCloseOnBlur: false,
 			shouldCloseOnInteractOutside: (_element) => {
-				// We handle backdrop clicks manually with the absolute Pressable below.
-				// This avoids issues where clicks inside the dialog are interpreted as outside
-				// if the ref isn't perfectly resolved (especially with Animated/Web views).
-				// We keep isDismissable=true for Escape key support.
 				return false;
 			},
 		},
@@ -169,7 +160,6 @@ export function DialogContent({
 				exiting={FadeOut.duration(200)}
 				className={`absolute inset-0 bg-black/50 ${overlayClassName}`}
 			>
-				{/* Backdrop Pressable to close */}
 				<Pressable className="absolute inset-0" onPress={onClose} />
 			</Animated.View>
 
@@ -178,17 +168,11 @@ export function DialogContent({
 				pointerEvents="box-none"
 			>
 				<FocusScope contain restoreFocus autoFocus>
-					{/* Wrapper view to hold the ref for useOverlay compatibility */}
 					<View
 						ref={ref}
-						// Use simple spread for props on Web, but filtering might be needed if conflicts arise.
-						// React Native Web handles many aria attributes correctly.
 						{...(overlayProps as unknown as ViewProps)}
 						style={{ maxWidth: "100%", maxHeight: "100%" }}
-						// Using onStartShouldSetResponder to trap touches is a robust way to prevent
-						// touches from bubbling to the backdrop Pressable in React Native.
 						onStartShouldSetResponder={() => true}
-						// Stop propagation on web to prevent the backdrop or useOverlay from seeing these events.
 						{...(Platform.OS === "web"
 							? {
 									onPointerDown: (e: { stopPropagation: () => void }) =>
@@ -205,10 +189,8 @@ export function DialogContent({
 							exiting={ZoomOut.duration(150)}
 							className={`w-full max-w-sm rounded-xl border border-border bg-background shadow-xl ${className}`}
 							style={style as StyleProp<ViewStyle>}
-							// @ts-expect-error
-							accessibilityRole={Platform.OS === "web" ? "dialog" : "alert"}
-							accessibilityModal
-							aria-modal="true"
+							accessibilityRole="none"
+							aria-modal
 							aria-labelledby={titleId}
 							aria-describedby={descriptionId}
 						>
@@ -299,7 +281,7 @@ export function DialogFooter({
 	);
 }
 
-// Close Button (Standard "X" icon usually top-right)
+// Close Button
 export function DialogClose({
 	className,
 	asChild,

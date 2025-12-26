@@ -1,15 +1,12 @@
-import { Feather } from "@expo/vector-icons";
-import { FocusScope } from "@react-native-aria/focus";
-import { useListBox, useOption } from "@react-native-aria/listbox";
+import { useActionSheet } from "@expo/react-native-action-sheet";
 import React, { useCallback, useMemo, useRef, useState } from "react";
-import { Modal, Pressable, Text, View } from "react-native";
-import Animated, {
-	FadeIn,
-	FadeOut,
-	SlideInDown,
-	SlideOutDown,
-} from "react-native-reanimated";
-import type { ListState, Node } from "react-stately";
+import {
+	type GestureResponderEvent,
+	Pressable,
+	Text,
+	View,
+} from "react-native";
+import type { ListState } from "react-stately";
 import { Item, useListState } from "react-stately";
 
 import {
@@ -66,6 +63,8 @@ export function Select<T = unknown>({
 	disabled = false,
 	label,
 }: SelectRootProps<T>) {
+	const { showActionSheetWithOptions } = useActionSheet();
+
 	const isControlled = value !== undefined;
 	const [internalValues, setInternalValues] = useState<Set<SelectValue>>(() =>
 		normalizeToSet(defaultValue, selectionMode),
@@ -74,21 +73,7 @@ export function Select<T = unknown>({
 		? normalizeToSet(value, selectionMode)
 		: internalValues;
 
-	const [isOpen, setIsOpen] = useState(false);
 	const triggerRef = useRef<View>(null);
-
-	const handleSelectionChange = useCallback(
-		(newValues: Set<SelectValue>) => {
-			if (!isControlled) {
-				setInternalValues(newValues);
-			}
-			onValueChange?.(setToValue(newValues, selectionMode));
-			if (selectionMode === "single") {
-				setIsOpen(false);
-			}
-		},
-		[isControlled, onValueChange, selectionMode],
-	);
 
 	const items = useMemo(() => buildItems(children), [children]);
 	const listState = useListState({
@@ -99,35 +84,92 @@ export function Select<T = unknown>({
 				keys === "all"
 					? new Set(items.map((i) => i.key))
 					: (keys as Set<SelectValue>);
-			handleSelectionChange(newSet);
+			if (!isControlled) {
+				setInternalValues(newSet);
+			}
+			onValueChange?.(setToValue(newSet, selectionMode));
 		},
 		disabledKeys: new Set(items.filter((i) => i.disabled).map((i) => i.key)),
 		items,
 		children: (item) => <Item key={item.key}>{item.label}</Item>,
 	});
 
+	const handleShowActionSheet = useCallback(() => {
+		if (disabled) return;
+
+		const options = items.map((item) => item.label);
+		const cancelButtonIndex = options.length;
+
+		const selectedIndex = items.findIndex((item) =>
+			selectedValues.has(item.key),
+		);
+
+		const optionsWithCancel = [...options, "Cancel"];
+		const buttonOptions: {
+			options: string[];
+			cancelButtonIndex: number;
+			title?: string;
+			destructiveButtonIndex?: number;
+		} = {
+			options: optionsWithCancel,
+			cancelButtonIndex,
+			title: label,
+		};
+
+		if (selectedIndex >= 0) {
+			buttonOptions.destructiveButtonIndex = selectedIndex;
+		}
+
+		showActionSheetWithOptions(buttonOptions, (buttonIndex) => {
+			if (
+				buttonIndex === cancelButtonIndex ||
+				buttonIndex === null ||
+				buttonIndex === undefined
+			) {
+				return;
+			}
+			const item = items[buttonIndex as number];
+			if (item && !item.disabled) {
+				listState.selectionManager.select(item.key);
+			}
+		});
+	}, [
+		disabled,
+		items,
+		selectedValues,
+		listState,
+		label,
+		showActionSheetWithOptions,
+	]);
+
 	const ctx = useMemo(
 		() => ({
-			isOpen,
-			setOpen: (open: boolean) => !disabled && setIsOpen(open),
+			isOpen: false,
+			setOpen: handleShowActionSheet as unknown as (open: boolean) => void,
 			selectedValues,
 			selectionMode,
 			placeholder,
 			disabled,
 			listState: listState as unknown as ListState<T>,
-			onSelectionChange: handleSelectionChange,
+			onSelectionChange: (newValues: Set<SelectValue>) => {
+				if (!isControlled) {
+					setInternalValues(newValues);
+				}
+				onValueChange?.(setToValue(newValues, selectionMode));
+			},
 			label,
 			triggerRef,
 		}),
 		[
-			isOpen,
+			handleShowActionSheet,
 			selectedValues,
 			selectionMode,
 			placeholder,
 			disabled,
 			listState,
-			handleSelectionChange,
 			label,
+			isControlled,
+			onValueChange,
 		],
 	);
 
@@ -142,165 +184,45 @@ export function Select<T = unknown>({
 }
 
 export function SelectTrigger({ children, className }: SelectTriggerProps) {
-	const {
-		isOpen,
-		setOpen,
-		selectedValues,
-		placeholder,
-		disabled,
-		listState,
-		triggerRef,
-	} = useSelectContext();
+	const { selectedValues, placeholder, disabled, listState, setOpen } =
+		useSelectContext();
 
 	const displayText = listState
 		? getDisplayValue(selectedValues, listState.collection, placeholder)
 		: (placeholder ?? "Select...");
 
+	const handlePress = useCallback(() => {
+		(setOpen as unknown as () => void)();
+	}, [setOpen]);
+
+	if (React.isValidElement(children)) {
+		const childProps = children.props as Partial<{
+			onPress?: (e: GestureResponderEvent) => void;
+		}>;
+		return React.cloneElement(children, {
+			onPress: (e: GestureResponderEvent) => {
+				childProps.onPress?.(e);
+				handlePress();
+			},
+		} as Partial<{ onPress?: (e: GestureResponderEvent) => void }>);
+	}
+
 	return (
 		<Pressable
-			ref={triggerRef}
-			onPress={() => setOpen(!isOpen)}
+			onPress={handlePress}
 			disabled={disabled}
 			accessibilityRole="button"
-			accessibilityState={{ expanded: isOpen, disabled }}
+			accessibilityState={{ expanded: false, disabled }}
 			accessibilityLabel={displayText}
 			className={`flex-row items-center justify-between rounded-md border border-border bg-input px-3 py-2.5 ${disabled ? "opacity-50" : ""} ${className ?? ""}`}
 		>
-			{children ?? (
-				<>
-					<Text className="text-foreground">{displayText}</Text>
-					<Feather
-						name={isOpen ? "chevron-up" : "chevron-down"}
-						size={16}
-						color="var(--color-icon)"
-					/>
-				</>
-			)}
+			{children ?? <Text className="text-foreground">{displayText}</Text>}
 		</Pressable>
 	);
 }
 
-export function SelectContent({ className }: SelectContentProps) {
-	const { isOpen, setOpen, listState, label } = useSelectContext();
-
-	if (!listState) return null;
-
-	return (
-		<Modal
-			transparent
-			visible={isOpen}
-			animationType="none"
-			onRequestClose={() => setOpen(false)}
-			statusBarTranslucent
-		>
-			<Animated.View
-				entering={FadeIn.duration(200)}
-				exiting={FadeOut.duration(150)}
-				className="absolute inset-0 bg-black/50"
-			>
-				<Pressable
-					className="absolute inset-0"
-					onPress={() => setOpen(false)}
-					accessibilityRole="none"
-				/>
-			</Animated.View>
-
-			<View
-				className="pointer-events-box-none flex-1 justify-end"
-				pointerEvents="box-none"
-			>
-				<FocusScope contain restoreFocus autoFocus>
-					<Animated.View
-						entering={SlideInDown.duration(250).springify().damping(20)}
-						exiting={SlideOutDown.duration(200)}
-						className={`rounded-t-2xl border-border border-t bg-background pb-8 ${className ?? ""}`}
-					>
-						<View className="items-center py-3">
-							<View className="h-1 w-10 rounded-full bg-border" />
-						</View>
-
-						{label && (
-							<Text className="px-4 pb-2 font-semibold text-foreground text-lg">
-								{label}
-							</Text>
-						)}
-
-						<SelectListBox listState={listState} label={label} />
-					</Animated.View>
-				</FocusScope>
-			</View>
-		</Modal>
-	);
-}
-
-function SelectListBox<T>({
-	listState,
-	label,
-}: {
-	listState: ListState<T>;
-	label?: string;
-}) {
-	const listRef = useRef<View>(null);
-
-	const { listBoxProps } = useListBox(
-		{
-			label: label ?? "Select",
-			autoFocus: "first",
-			disallowEmptySelection: true,
-		},
-		listState,
-		listRef as unknown as React.RefObject<HTMLElement>,
-	);
-
-	return (
-		<View
-			ref={listRef}
-			{...(listBoxProps as object)}
-			accessibilityRole="list"
-			className="max-h-80"
-		>
-			{[...listState.collection].map((item) => (
-				<OptionItem key={item.key} item={item} state={listState} />
-			))}
-		</View>
-	);
-}
-
-function OptionItem<T>({
-	item,
-	state,
-}: {
-	item: Node<T>;
-	state: ListState<T>;
-}) {
-	const ref = useRef<View>(null);
-	const isSelected = state.selectionManager.isSelected(item.key);
-	const isDisabled = state.disabledKeys.has(item.key);
-
-	const { optionProps } = useOption(
-		{ key: item.key, isSelected, isDisabled },
-		state,
-		ref as unknown as React.RefObject<HTMLElement>,
-	);
-
-	return (
-		<Pressable
-			ref={ref}
-			{...(optionProps as object)}
-			accessibilityRole="menuitem"
-			accessibilityState={{ selected: isSelected, disabled: isDisabled }}
-			className={`flex-row items-center justify-between px-4 py-3.5 active:bg-surface-interactive ${isDisabled ? "opacity-50" : ""}`}
-		>
-			<Text
-				className={`text-base text-foreground ${isSelected ? "font-semibold" : ""}`}
-			>
-				{item.rendered}
-			</Text>
-			{isSelected && (
-				<Feather name="check" size={20} color="var(--color-icon-interactive)" />
-			)}
-		</Pressable>
-	);
+export function SelectContent(_props: SelectContentProps) {
+	return null;
 }
 
 export function SelectOption<T = unknown>(_props: SelectOptionProps<T>) {
