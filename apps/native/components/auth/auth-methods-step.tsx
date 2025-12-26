@@ -1,9 +1,11 @@
 import { API, type TypesGen } from "@coder/sdk";
+import { Icon, Logo } from "@opencoder/branding";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useSession } from "@/lib/auth";
+import { useTheme } from "@/lib/theme-context";
 
 import { AppText } from "../app-text";
 import { Button } from "../button";
@@ -19,6 +21,7 @@ export function AuthMethodsStep({
 	onTokenAuthStart,
 }: AuthMethodsStepProps) {
 	const { signIn } = useSession();
+	const { mode } = useTheme();
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState<string | undefined>();
@@ -70,10 +73,8 @@ export function AuthMethodsStep({
 	return (
 		<View className="w-full max-w-sm gap-6">
 			<View className="mb-2 items-center gap-4">
-				<View className="rounded-xl bg-surface-active p-4">
-					<AppText className="font-bold text-4xl">C</AppText>
-				</View>
-				<AppText className="font-bold text-2xl">Coder</AppText>
+				<Icon mode={mode} size={80} />
+				<Logo mode={mode} width={250} height={50} />
 			</View>
 
 			{oauthProviders.length > 0 && (
