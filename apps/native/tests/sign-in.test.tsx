@@ -73,7 +73,7 @@ describe("SignIn Screen", () => {
 			wrapper: createWrapper(),
 		});
 
-		expect(await findByText("Coder")).toBeTruthy();
+		expect(await findByText("Sign In")).toBeTruthy();
 		expect(await findByText("Login via Browser")).toBeTruthy();
 	});
 
@@ -95,6 +95,6 @@ describe("SignIn Screen", () => {
 
 		// Go back
 		fireEvent.press(getByText("Cancel"));
-		expect(await findByText("Coder")).toBeTruthy();
+		expect(await findByText("Sign In")).toBeTruthy();
 	});
 });
