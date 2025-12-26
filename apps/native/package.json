@@ -16,7 +16,7 @@
 	"jest": {
 		"preset": "jest-expo",
 		"transformIgnorePatterns": [
-			"node_modules/(?!((?:\\.bun/.+?/node_modules/)?((jest-)?react-native|@react-native(-community)?|@react-native/.*|expo(nent)?|expo-modules-core|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg|uniwind)))"
+			"node_modules/(?!((?:\\.bun/.+?/node_modules/)?((jest-)?react-native|@react-native(-community)?|@react-native/.*|expo(nent)?|expo-modules-core|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg|uniwind|@opencoder/branding)))"
 		],
 		"moduleNameMapper": {
 			"^@/(.*)$": "<rootDir>/$1"
@@ -37,8 +37,10 @@
 		"@expo-google-fonts/inter": "^0.4.2",
 		"@expo-google-fonts/jetbrains-mono": "^0.4.1",
 		"@expo-google-fonts/manrope": "^0.4.2",
+		"@expo-google-fonts/turret-road": "^0.4.1",
 		"@expo/vector-icons": "^15.0.2",
 		"@opencode-ai/sdk": "^1.0",
+		"@opencoder/branding": "workspace:*",
 		"@react-native-aria/focus": "^0.2.9",
 		"@react-native-aria/interactions": "^0.2.16",
 		"@react-native-aria/listbox": "^0.2.9",
