@@ -92,6 +92,7 @@
 		"@babel/preset-env": "^7.28.5",
 		"@babel/preset-typescript": "^7.28.5",
 		"@babel/runtime": "^7.28.4",
+		"@expo/config-types": "^54.0.10",
 		"@opencoder/config": "workspace:*",
 		"@testing-library/jest-native": "^5.4.3",
 		"@testing-library/react-native": "^13.3.3",
