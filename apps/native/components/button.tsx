@@ -86,7 +86,7 @@ export const Button = forwardRef<View, ButtonProps>(
 
 		const getTextColorClass = () => {
 			if (disabled && !loading) return "text-foreground-weak";
-			if (isWhiteText) return "text-white";
+			if (isWhiteText) return "text-background";
 			return "text-foreground";
 		};
 

@@ -31,12 +31,11 @@
 			--surface-critical: #d1383d20;
 			--surface-info: #31879520;
 
-			--text-color: #8a8a8a;
-			--text-weak: #8a8a8a;
-			--text-weaker: #a0a0a0;
-			--text-strong: #1a1a1a;
+			--text-color: #1a1a1a;
+			--text-weak: #444444;
+			--text-weaker: #666666;
+			--text-strong: #000000;
 			--text-interactive: #000000;
-			--text-on-interactive: #ffffff;
 			--text-success: #3d9a57;
 			--text-critical: #d1383d;
 			--text-warning: #d68c27;
@@ -106,7 +105,6 @@
 			--text-weaker: #606060;
 			--text-strong: #eeeeee;
 			--text-interactive: #ffffff;
-			--text-on-interactive: #000000;
 			--text-success: #7fd88f;
 			--text-critical: #e06c75;
 			--text-warning: #f5a742;

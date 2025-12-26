@@ -265,11 +265,11 @@ export const semanticColors = {
 			weaker: palette.smoke.light[8],
 			strong: palette.smoke.light[12],
 			interactive: palette.smoke.light[9],
-			onInteractive: palette.white,
 			success: palette.opencode.light.green,
 			critical: palette.opencode.light.red,
 			warning: palette.opencode.light.orange,
 		},
+
 		border: {
 			base: palette.smoke.lightAlpha[7],
 			hover: palette.smoke.lightAlpha[8],
@@ -335,11 +335,11 @@ export const semanticColors = {
 			weaker: palette.smoke.dark[8],
 			strong: palette.smoke.dark[12],
 			interactive: palette.opencode.dark.secondary,
-			onInteractive: palette.white,
 			success: palette.opencode.dark.green,
 			critical: palette.opencode.dark.red,
 			warning: palette.opencode.dark.orange,
 		},
+
 		border: {
 			base: palette.smoke.darkAlpha[7],
 			hover: palette.smoke.darkAlpha[8],
@@ -407,11 +407,11 @@ export type SemanticColors = {
 		weaker: string;
 		strong: string;
 		interactive: string;
-		onInteractive: string;
 		success: string;
 		critical: string;
 		warning: string;
 	};
+
 	border: {
 		base: string;
 		hover: string;

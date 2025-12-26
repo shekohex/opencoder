@@ -84,7 +84,6 @@
 	--color-foreground-weaker: var(--text-weaker);
 	--color-foreground-strong: var(--text-strong);
 	--color-foreground-interactive: var(--text-interactive);
-	--color-foreground-on-interactive: var(--text-on-interactive);
 	--color-foreground-success: var(--text-success);
 	--color-foreground-critical: var(--text-critical);
 	--color-foreground-warning: var(--text-warning);
