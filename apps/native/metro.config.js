@@ -6,6 +6,8 @@ const config = getDefaultConfig(__dirname);
 config.resolver.unstable_enablePackageExports = true;
 
 const extraThemes = [
+	"opencode-light",
+	"opencode-dark",
 	"dracula-light",
 	"dracula-dark",
 	"nord-light",
