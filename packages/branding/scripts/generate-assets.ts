@@ -2,6 +2,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { Resvg } from "@resvg/resvg-js";
 import * as opentype from "opentype.js";
 import { brandColors, colors } from "../src/colors";
 
@@ -12,6 +13,17 @@ const FONT_PATH = path.resolve(
 	"../node_modules/@expo-google-fonts/turret-road/800ExtraBold/TurretRoad_800ExtraBold.ttf",
 );
 const OUTPUT_DIR = path.resolve(__dirname, "..");
+
+function renderPng(svg: string, outputFile: string, width: number) {
+	const renderer = new Resvg(svg, {
+		fitTo: {
+			mode: "width",
+			value: width,
+		},
+	});
+	const pngData = renderer.render().asPng();
+	fs.writeFileSync(outputFile, pngData);
+}
 
 async function generateLogo(mode: "light" | "dark") {
 	const font = await opentype.load(FONT_PATH);
@@ -43,11 +55,12 @@ async function generateLogo(mode: "light" | "dark") {
 </svg>
 `;
 
-	fs.writeFileSync(
-		path.join(OUTPUT_DIR, `opencoder-logo-${mode}.svg`),
-		svg.trim(),
-	);
+	const svgFile = path.join(OUTPUT_DIR, `opencoder-logo-${mode}.svg`);
+	const pngFile = path.join(OUTPUT_DIR, `opencoder-logo-${mode}.png`);
+	fs.writeFileSync(svgFile, svg.trim());
+	renderPng(svg.trim(), pngFile, 1024);
 	console.log(`Generated opencoder-logo-${mode}.svg`);
+	console.log(`Generated opencoder-logo-${mode}.png`);
 }
 
 function generateIcon(mode: "light" | "dark") {
@@ -69,11 +82,12 @@ function generateIcon(mode: "light" | "dark") {
   </g>
 </svg>
 `;
-	fs.writeFileSync(
-		path.join(OUTPUT_DIR, `opencoder-icon-${mode}.svg`),
-		svg.trim(),
-	);
+	const svgFile = path.join(OUTPUT_DIR, `opencoder-icon-${mode}.svg`);
+	const pngFile = path.join(OUTPUT_DIR, `opencoder-icon-${mode}.png`);
+	fs.writeFileSync(svgFile, svg.trim());
+	renderPng(svg.trim(), pngFile, 1024);
 	console.log(`Generated opencoder-icon-${mode}.svg`);
+	console.log(`Generated opencoder-icon-${mode}.png`);
 }
 
 async function main() {
