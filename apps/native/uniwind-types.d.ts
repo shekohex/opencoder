@@ -6,8 +6,6 @@ declare module "uniwind" {
 		themes: readonly [
 			"light",
 			"dark",
-			"opencoder-light",
-			"opencoder-dark",
 			"opencode-light",
 			"opencode-dark",
 			"dracula-light",
