@@ -25,11 +25,17 @@ const MODE_PREFERENCE_KEY = "theme_mode_preference";
 
 export type ThemeModePreference = "system" | "light" | "dark";
 
+type UniwindThemeName = Exclude<
+	Parameters<typeof Uniwind.setTheme>[0],
+	"system"
+>;
+
 interface ThemeContextValue {
 	themeName: ThemeName;
 	mode: ThemeMode;
 	modePreference: ThemeModePreference;
 	theme: ResolvedTheme;
+	themeVersion: number;
 	setThemeName: (name: ThemeName) => void;
 	setModePreference: (pref: ThemeModePreference) => void;
 	availableThemes: readonly ThemeName[];
@@ -63,6 +69,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 		useState<ThemeName>(getStoredThemeName);
 	const [modePreference, setModePreferenceState] =
 		useState<ThemeModePreference>(getStoredModePreference);
+	const [themeVersion, setThemeVersion] = useState(0);
 
 	const mode: ThemeMode = useMemo(() => {
 		if (modePreference === "system") {
@@ -78,7 +85,12 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 	useEffect(() => {
 		const uniwindTheme =
 			themeName === "opencoder" ? mode : `${themeName}-${mode}`;
-		Uniwind.setTheme(uniwindTheme as Parameters<typeof Uniwind.setTheme>[0]);
+		const resolvedTheme = uniwindTheme as UniwindThemeName;
+
+		Uniwind.setTheme(resolvedTheme);
+		// Trigger variable invalidation for className-only components.
+		Uniwind.updateCSSVariables(resolvedTheme, {});
+		setThemeVersion((current) => current + 1);
 	}, [themeName, mode]);
 
 	const setThemeName = useCallback((name: ThemeName) => {
@@ -97,11 +109,20 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 			mode,
 			modePreference,
 			theme,
+			themeVersion,
 			setThemeName,
 			setModePreference,
 			availableThemes: THEME_NAMES,
 		}),
-		[themeName, mode, modePreference, theme, setThemeName, setModePreference],
+		[
+			themeName,
+			mode,
+			modePreference,
+			theme,
+			themeVersion,
+			setThemeName,
+			setModePreference,
+		],
 	);
 
 	return (

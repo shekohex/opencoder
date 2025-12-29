@@ -61,6 +61,7 @@ jest.mock("@gorhom/bottom-sheet", () => {
 jest.mock("uniwind", () => ({
 	Uniwind: {
 		setTheme: jest.fn(),
+		updateCSSVariables: jest.fn(),
 	},
 }));
 
