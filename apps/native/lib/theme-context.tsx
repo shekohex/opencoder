@@ -76,7 +76,8 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 	}, [themeName, mode]);
 
 	useEffect(() => {
-		const uniwindTheme = `${themeName}-${mode}`;
+		const uniwindTheme =
+			themeName === "opencoder" ? mode : `${themeName}-${mode}`;
 		Uniwind.setTheme(uniwindTheme as Parameters<typeof Uniwind.setTheme>[0]);
 	}, [themeName, mode]);
 
