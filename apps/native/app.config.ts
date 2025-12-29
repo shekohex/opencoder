@@ -216,6 +216,12 @@ const config: ExpoConfig = {
 				experimentalLauncherActivity: true,
 			},
 		],
+		[
+			"expo-dev-client",
+			{
+				launchMode: "most-recent",
+			},
+		],
 	],
 	experiments: {
 		typedRoutes: true,
