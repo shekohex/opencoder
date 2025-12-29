@@ -81,17 +81,15 @@ const IOS_FAMILIES = {
 		400: "JetBrainsMono-Regular",
 		700: "JetBrainsMono-Bold",
 	},
-	// Nerd Fonts often use the filename as the PS name, or "Family Name Style".
-	// BlexMonoNerdFont-Regular.ttf -> "BlexMonoNerdFont-Regular" (likely)
 	BlexMonoNerdFont: {
-		300: "BlexMonoNerdFont-Light",
-		400: "BlexMonoNerdFont-Regular",
-		700: "BlexMonoNerdFont-Bold",
+		300: "BlexMonoNF-Light",
+		400: "BlexMonoNF",
+		700: "BlexMonoNF-Bold",
 	},
 	JetBrainsMonoNerdFont: {
-		300: "JetBrainsMonoNerdFont-Light",
-		400: "JetBrainsMonoNerdFont-Regular",
-		700: "JetBrainsMonoNerdFont-Bold",
+		300: "JetBrainsMonoNF-Light",
+		400: "JetBrainsMonoNF-Regular",
+		700: "JetBrainsMonoNF-Bold",
 	},
 };
 
