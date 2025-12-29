@@ -1,13 +1,24 @@
+import { BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet";
 import React from "react";
-import { Alert, type GestureResponderEvent, Pressable } from "react-native";
+import {
+	Alert,
+	type GestureResponderEvent,
+	Pressable,
+	Text,
+	View,
+} from "react-native";
+
+import { useTheme } from "@/lib/theme-context";
 
 interface NativeDialogContextValue {
 	isOpen: boolean;
 	onOpen: () => void;
 	onClose: () => void;
+	variant: "sheet" | "alert";
 	title: string;
 	description: string;
 	buttons: Array<{
+		id: number;
 		text: string;
 		onPress: () => void;
 		style?: "default" | "cancel" | "destructive";
@@ -18,7 +29,7 @@ interface NativeDialogContextValue {
 		text: string,
 		onPress: () => void,
 		style?: "default" | "cancel" | "destructive",
-	) => void;
+	) => () => void;
 }
 
 const NativeDialogContext = React.createContext<
@@ -42,6 +53,7 @@ interface DialogProps {
 	isOpen?: boolean;
 	defaultOpen?: boolean;
 	onOpenChange?: (isOpen: boolean) => void;
+	variant?: "sheet" | "alert";
 }
 
 export function Dialog({
@@ -49,6 +61,7 @@ export function Dialog({
 	isOpen: controlledOpen,
 	defaultOpen = false,
 	onOpenChange,
+	variant = "sheet",
 }: DialogProps) {
 	const [uncontrolledOpen, setUncontrolledOpen] = React.useState(defaultOpen);
 	const isOpen = controlledOpen ?? uncontrolledOpen;
@@ -57,11 +70,31 @@ export function Dialog({
 	const [buttons, setButtons] = React.useState<
 		NativeDialogContextValue["buttons"]
 	>([]);
+	const nextButtonId = React.useRef(0);
+	const hasPresented = React.useRef(false);
+	const openSession = React.useRef(0);
+	const pendingFallback = React.useRef<ReturnType<typeof setTimeout> | null>(
+		null,
+	);
 
 	const handleOpenChange = React.useCallback(
 		(open: boolean) => {
 			if (controlledOpen === undefined) {
 				setUncontrolledOpen(open);
+			}
+			if (open) {
+				hasPresented.current = false;
+				openSession.current += 1;
+				if (pendingFallback.current) {
+					clearTimeout(pendingFallback.current);
+					pendingFallback.current = null;
+				}
+			} else {
+				hasPresented.current = false;
+				if (pendingFallback.current) {
+					clearTimeout(pendingFallback.current);
+					pendingFallback.current = null;
+				}
 			}
 			onOpenChange?.(open);
 		},
@@ -74,37 +107,77 @@ export function Dialog({
 			onPress: () => void,
 			style?: "default" | "cancel" | "destructive",
 		) => {
-			setButtons((prev) => [...prev, { text, onPress, style }]);
+			const id = nextButtonId.current++;
+			setButtons((prev) => [...prev, { id, text, onPress, style }]);
+			return () =>
+				setButtons((prev) => prev.filter((button) => button.id !== id));
 		},
 		[],
 	);
 
-	React.useEffect(() => {
-		if (isOpen && title) {
-			const alertButtons =
-				buttons.length > 0
-					? buttons.map((b) => ({
-							text: b.text,
-							onPress: () => {
-								b.onPress();
-								handleOpenChange(false);
-							},
-							style: b.style,
-						}))
-					: [{ text: "OK", onPress: () => handleOpenChange(false) }];
+	const handleOpen = React.useCallback(() => {
+		handleOpenChange(true);
+	}, [handleOpenChange]);
 
+	const handleClose = React.useCallback(() => {
+		handleOpenChange(false);
+	}, [handleOpenChange]);
+
+	React.useEffect(() => {
+		if (variant !== "alert") return;
+		if (!isOpen || !title || hasPresented.current) return;
+
+		const showAlert = (
+			alertButtons: Array<{
+				text: string;
+				onPress: () => void;
+				style?: "default" | "cancel" | "destructive";
+			}>,
+		) => {
+			if (!isOpen || hasPresented.current) return;
+			hasPresented.current = true;
 			Alert.alert(title, description || undefined, alertButtons, {
 				cancelable: true,
+				onDismiss: () => handleOpenChange(false),
 			});
+		};
+
+		if (buttons.length > 0) {
+			const mappedButtons = buttons.map((button) => ({
+				text: button.text,
+				onPress: () => {
+					button.onPress();
+					handleOpenChange(false);
+				},
+				style: button.style,
+			}));
+			const timeout = setTimeout(() => showAlert(mappedButtons), 0);
+			return () => clearTimeout(timeout);
 		}
-	}, [isOpen, title, description, buttons, handleOpenChange]);
+
+		const session = openSession.current;
+		pendingFallback.current = setTimeout(() => {
+			if (!isOpen || hasPresented.current) return;
+			if (openSession.current !== session) return;
+			if (buttons.length > 0) return;
+			showAlert([{ text: "OK", onPress: () => handleOpenChange(false) }]);
+		}, 50);
+
+		return () => {
+			if (pendingFallback.current) {
+				clearTimeout(pendingFallback.current);
+				pendingFallback.current = null;
+			}
+		};
+	}, [variant, isOpen, title, description, buttons, handleOpenChange]);
 
 	return (
 		<NativeDialogContext.Provider
 			value={{
 				isOpen,
-				onOpen: () => handleOpenChange(true),
-				onClose: () => handleOpenChange(false),
+				onOpen: handleOpen,
+				onClose: handleClose,
+				variant,
 				title,
 				description,
 				buttons,
@@ -146,8 +219,59 @@ interface DialogContentProps {
 	overlayClassName?: string;
 }
 
-export function DialogContent({ children }: DialogContentProps) {
-	return <>{children}</>;
+export function DialogContent({ children, className }: DialogContentProps) {
+	const context = useNativeDialogContext();
+	const { isOpen, onClose, variant } = context;
+	const { theme } = useTheme();
+	const sheetRef = React.useRef<BottomSheetModal>(null);
+
+	React.useEffect(() => {
+		if (variant !== "sheet") return;
+		if (isOpen) {
+			sheetRef.current?.present();
+		} else {
+			sheetRef.current?.dismiss();
+		}
+	}, [isOpen, variant]);
+
+	const handleSheetChanges = React.useCallback(
+		(index: number) => {
+			if (index < 0) {
+				onClose();
+			}
+		},
+		[onClose],
+	);
+
+	if (variant === "alert") {
+		return (
+			<NativeDialogContext.Provider value={context}>
+				<View
+					style={{ position: "absolute", width: 0, height: 0, opacity: 0 }}
+					pointerEvents="none"
+				>
+					{children}
+				</View>
+			</NativeDialogContext.Provider>
+		);
+	}
+
+	return (
+		<BottomSheetModal
+			ref={sheetRef}
+			snapPoints={["70%"]}
+			onChange={handleSheetChanges}
+			enablePanDownToClose
+			backgroundStyle={{ backgroundColor: theme.background.base }}
+			handleIndicatorStyle={{ backgroundColor: theme.border.base }}
+		>
+			<NativeDialogContext.Provider value={context}>
+				<BottomSheetView className={`p-6 ${className ?? ""}`}>
+					{children}
+				</BottomSheetView>
+			</NativeDialogContext.Provider>
+		</BottomSheetModal>
+	);
 }
 
 interface DialogHeaderProps {
@@ -155,8 +279,10 @@ interface DialogHeaderProps {
 	className?: string;
 }
 
-export function DialogHeader({ children }: DialogHeaderProps) {
-	return <>{children}</>;
+export function DialogHeader({ children, className }: DialogHeaderProps) {
+	const { variant } = useNativeDialogContext();
+	if (variant === "alert") return <>{children}</>;
+	return <View className={`pb-4 ${className ?? ""}`}>{children}</View>;
 }
 
 interface DialogTitleProps {
@@ -164,12 +290,22 @@ interface DialogTitleProps {
 	className?: string;
 }
 
-export function DialogTitle({ children }: DialogTitleProps) {
-	const { setTitle } = useNativeDialogContext();
+export function DialogTitle({ children, className }: DialogTitleProps) {
+	const { isOpen, setTitle, variant } = useNativeDialogContext();
 	React.useEffect(() => {
+		if (variant !== "alert" || !isOpen) return;
 		setTitle(typeof children === "string" ? children : "");
-	}, [children, setTitle]);
-	return null;
+	}, [children, isOpen, setTitle, variant]);
+
+	if (variant === "alert") return null;
+
+	return (
+		<Text
+			className={`font-semibold text-foreground text-lg leading-none tracking-tight ${className ?? ""}`}
+		>
+			{children}
+		</Text>
+	);
 }
 
 interface DialogDescriptionProps {
@@ -177,12 +313,23 @@ interface DialogDescriptionProps {
 	className?: string;
 }
 
-export function DialogDescription({ children }: DialogDescriptionProps) {
-	const { setDescription } = useNativeDialogContext();
+export function DialogDescription({
+	children,
+	className,
+}: DialogDescriptionProps) {
+	const { isOpen, setDescription, variant } = useNativeDialogContext();
 	React.useEffect(() => {
+		if (variant !== "alert" || !isOpen) return;
 		setDescription(typeof children === "string" ? children : "");
-	}, [children, setDescription]);
-	return null;
+	}, [children, isOpen, setDescription, variant]);
+
+	if (variant === "alert") return null;
+
+	return (
+		<Text className={`mt-1.5 text-foreground-weak text-sm ${className ?? ""}`}>
+			{children}
+		</Text>
+	);
 }
 
 interface DialogFooterProps {
@@ -190,27 +337,52 @@ interface DialogFooterProps {
 	className?: string;
 }
 
-export function DialogFooter({ children }: DialogFooterProps) {
-	return <>{children}</>;
+export function DialogFooter({ children, className }: DialogFooterProps) {
+	const { variant } = useNativeDialogContext();
+	if (variant === "alert") return <>{children}</>;
+	return (
+		<View className={`flex-row justify-end gap-2 pt-2 ${className ?? ""}`}>
+			{children}
+		</View>
+	);
 }
 
 interface DialogCloseProps {
 	className?: string;
 	asChild?: boolean;
 	children?: React.ReactNode;
+	style?: "default" | "cancel" | "destructive";
+}
+
+function getButtonLabel(children: React.ReactNode) {
+	if (typeof children === "string") return children;
+	if (React.isValidElement(children)) {
+		const child = children as React.ReactElement<{
+			children?: React.ReactNode;
+		}>;
+		const childText = child.props.children;
+		if (typeof childText === "string") return childText;
+	}
+	return "Cancel";
 }
 
 export function DialogClose({
 	children,
 	asChild,
 	style: buttonStyle,
-}: DialogCloseProps & { style?: "default" | "cancel" | "destructive" }) {
-	const { addButton, onClose } = useNativeDialogContext();
-	const text = typeof children === "string" ? children : "Cancel";
+	className,
+}: DialogCloseProps) {
+	const { addButton, onClose, variant } = useNativeDialogContext();
 
 	React.useEffect(() => {
-		addButton(text, onClose, buttonStyle || "cancel");
-	}, [text, onClose, buttonStyle, addButton]);
+		if (variant !== "alert") return;
+		const text = getButtonLabel(children);
+		const derivedStyle =
+			buttonStyle ?? (text === "Cancel" ? "cancel" : "default");
+		return addButton(text, onClose, derivedStyle);
+	}, [children, onClose, buttonStyle, addButton, variant]);
+
+	if (variant === "alert") return null;
 
 	if (asChild && React.isValidElement(children)) {
 		const childProps = children.props as Partial<TriggerProps>;
@@ -222,7 +394,16 @@ export function DialogClose({
 		} as Partial<TriggerProps>);
 	}
 
-	return <Pressable onPress={onClose}>{children}</Pressable>;
+	return (
+		<Pressable
+			onPress={onClose}
+			className={className}
+			accessibilityRole="button"
+			accessibilityLabel="Close"
+		>
+			{children}
+		</Pressable>
+	);
 }
 
 Dialog.Trigger = DialogTrigger;

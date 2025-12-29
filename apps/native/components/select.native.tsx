@@ -1,4 +1,5 @@
-import { useActionSheet } from "@expo/react-native-action-sheet";
+import { Feather } from "@expo/vector-icons";
+import { BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import {
 	type GestureResponderEvent,
@@ -6,9 +7,10 @@ import {
 	Text,
 	View,
 } from "react-native";
-import type { ListState } from "react-stately";
+import type { ListState, Node } from "react-stately";
 import { Item, useListState } from "react-stately";
 
+import { useTheme } from "@/lib/theme-context";
 import {
 	getDisplayValue,
 	hasTrigger,
@@ -63,8 +65,6 @@ export function Select<T = unknown>({
 	disabled = false,
 	label,
 }: SelectRootProps<T>) {
-	const { showActionSheetWithOptions } = useActionSheet();
-
 	const isControlled = value !== undefined;
 	const [internalValues, setInternalValues] = useState<Set<SelectValue>>(() =>
 		normalizeToSet(defaultValue, selectionMode),
@@ -72,8 +72,21 @@ export function Select<T = unknown>({
 	const selectedValues = isControlled
 		? normalizeToSet(value, selectionMode)
 		: internalValues;
-
+	const [isOpen, setIsOpen] = useState(false);
 	const triggerRef = useRef<View>(null);
+
+	const handleSelectionChange = useCallback(
+		(newValues: Set<SelectValue>) => {
+			if (!isControlled) {
+				setInternalValues(newValues);
+			}
+			onValueChange?.(setToValue(newValues, selectionMode));
+			if (selectionMode === "single") {
+				setIsOpen(false);
+			}
+		},
+		[isControlled, onValueChange, selectionMode],
+	);
 
 	const items = useMemo(() => buildItems(children), [children]);
 	const listState = useListState({
@@ -84,92 +97,35 @@ export function Select<T = unknown>({
 				keys === "all"
 					? new Set(items.map((i) => i.key))
 					: (keys as Set<SelectValue>);
-			if (!isControlled) {
-				setInternalValues(newSet);
-			}
-			onValueChange?.(setToValue(newSet, selectionMode));
+			handleSelectionChange(newSet);
 		},
 		disabledKeys: new Set(items.filter((i) => i.disabled).map((i) => i.key)),
 		items,
 		children: (item) => <Item key={item.key}>{item.label}</Item>,
 	});
 
-	const handleShowActionSheet = useCallback(() => {
-		if (disabled) return;
-
-		const options = items.map((item) => item.label);
-		const cancelButtonIndex = options.length;
-
-		const selectedIndex = items.findIndex((item) =>
-			selectedValues.has(item.key),
-		);
-
-		const optionsWithCancel = [...options, "Cancel"];
-		const buttonOptions: {
-			options: string[];
-			cancelButtonIndex: number;
-			title?: string;
-			destructiveButtonIndex?: number;
-		} = {
-			options: optionsWithCancel,
-			cancelButtonIndex,
-			title: label,
-		};
-
-		if (selectedIndex >= 0) {
-			buttonOptions.destructiveButtonIndex = selectedIndex;
-		}
-
-		showActionSheetWithOptions(buttonOptions, (buttonIndex) => {
-			if (
-				buttonIndex === cancelButtonIndex ||
-				buttonIndex === null ||
-				buttonIndex === undefined
-			) {
-				return;
-			}
-			const item = items[buttonIndex as number];
-			if (item && !item.disabled) {
-				listState.selectionManager.select(item.key);
-			}
-		});
-	}, [
-		disabled,
-		items,
-		selectedValues,
-		listState,
-		label,
-		showActionSheetWithOptions,
-	]);
-
 	const ctx = useMemo(
 		() => ({
-			isOpen: false,
-			setOpen: handleShowActionSheet as unknown as (open: boolean) => void,
+			isOpen,
+			setOpen: (open: boolean) => !disabled && setIsOpen(open),
 			selectedValues,
 			selectionMode,
 			placeholder,
 			disabled,
 			listState: listState as unknown as ListState<T>,
-			onSelectionChange: (newValues: Set<SelectValue>) => {
-				if (!isControlled) {
-					setInternalValues(newValues);
-				}
-				onValueChange?.(setToValue(newValues, selectionMode));
-			},
+			onSelectionChange: handleSelectionChange,
 			label,
 			triggerRef,
 		}),
 		[
-			handleShowActionSheet,
+			isOpen,
 			selectedValues,
 			selectionMode,
 			placeholder,
 			disabled,
 			listState,
+			handleSelectionChange,
 			label,
-			isControlled,
-			onValueChange,
 		],
 	);
 
@@ -184,7 +140,7 @@ export function Select<T = unknown>({
 }
 
 export function SelectTrigger({ children, className }: SelectTriggerProps) {
-	const { selectedValues, placeholder, disabled, listState, setOpen } =
+	const { isOpen, setOpen, selectedValues, placeholder, disabled, listState } =
 		useSelectContext();
 
 	const displayText = listState
@@ -192,8 +148,8 @@ export function SelectTrigger({ children, className }: SelectTriggerProps) {
 		: (placeholder ?? "Select...");
 
 	const handlePress = useCallback(() => {
-		(setOpen as unknown as () => void)();
-	}, [setOpen]);
+		setOpen(!isOpen);
+	}, [isOpen, setOpen]);
 
 	if (React.isValidElement(children)) {
 		const childProps = children.props as Partial<{
@@ -212,17 +168,116 @@ export function SelectTrigger({ children, className }: SelectTriggerProps) {
 			onPress={handlePress}
 			disabled={disabled}
 			accessibilityRole="button"
-			accessibilityState={{ expanded: false, disabled }}
+			accessibilityState={{ expanded: isOpen, disabled }}
 			accessibilityLabel={displayText}
 			className={`flex-row items-center justify-between rounded-md border border-border bg-input px-3 py-2.5 ${disabled ? "opacity-50" : ""} ${className ?? ""}`}
 		>
-			{children ?? <Text className="text-foreground">{displayText}</Text>}
+			<Text className="text-foreground">{displayText}</Text>
+			<Feather
+				name={isOpen ? "chevron-up" : "chevron-down"}
+				size={16}
+				color="var(--color-icon)"
+			/>
 		</Pressable>
 	);
 }
 
-export function SelectContent(_props: SelectContentProps) {
-	return null;
+export function SelectContent({ className }: SelectContentProps) {
+	const { isOpen, setOpen, listState, label, selectionMode } =
+		useSelectContext();
+	const { theme } = useTheme();
+	const sheetRef = useRef<BottomSheetModal>(null);
+
+	const handleSheetChanges = useCallback(
+		(index: number) => {
+			if (index < 0) {
+				setOpen(false);
+			}
+		},
+		[setOpen],
+	);
+
+	React.useEffect(() => {
+		if (isOpen) {
+			sheetRef.current?.present();
+		} else {
+			sheetRef.current?.dismiss();
+		}
+	}, [isOpen]);
+
+	if (!listState) return null;
+
+	return (
+		<BottomSheetModal
+			ref={sheetRef}
+			snapPoints={["50%"]}
+			onChange={handleSheetChanges}
+			enablePanDownToClose
+			backgroundStyle={{ backgroundColor: theme.background.base }}
+			handleIndicatorStyle={{ backgroundColor: theme.border.base }}
+		>
+			<BottomSheetView className={`p-4 ${className ?? ""}`}>
+				{label ? (
+					<Text className="mb-2 font-semibold text-foreground text-sm">
+						{label}
+					</Text>
+				) : null}
+				<View className="gap-1">
+					{[...listState.collection].map((item) => (
+						<SelectOptionItem
+							key={item.key}
+							item={item}
+							selectionMode={selectionMode}
+							listState={listState}
+							onRequestClose={() => setOpen(false)}
+						/>
+					))}
+				</View>
+			</BottomSheetView>
+		</BottomSheetModal>
+	);
+}
+
+function SelectOptionItem<T>({
+	item,
+	selectionMode,
+	listState,
+	onRequestClose,
+}: {
+	item: Node<T>;
+	selectionMode: "single" | "multiple";
+	listState: ListState<T>;
+	onRequestClose: () => void;
+}) {
+	const isSelected = listState.selectionManager.isSelected(item.key);
+	const isDisabled = listState.disabledKeys.has(item.key);
+
+	const handlePress = () => {
+		if (isDisabled) return;
+		if (selectionMode === "multiple") {
+			listState.selectionManager.toggleSelection(item.key);
+			return;
+		}
+		listState.selectionManager.select(item.key);
+		onRequestClose();
+	};
+
+	return (
+		<Pressable
+			onPress={handlePress}
+			disabled={isDisabled}
+			accessibilityRole="menuitem"
+			accessibilityState={{ selected: isSelected, disabled: isDisabled }}
+			className={`flex-row items-center justify-between rounded-md px-3 py-2 ${isDisabled ? "opacity-50" : ""}`}
+		>
+			<Text className={`text-foreground ${isSelected ? "font-semibold" : ""}`}>
+				{item.rendered}
+			</Text>
+			{isSelected ? (
+				<Feather name="check" size={16} color="var(--color-icon-interactive)" />
+			) : null}
+		</Pressable>
+	);
 }
 
 export function SelectOption<T = unknown>(_props: SelectOptionProps<T>) {

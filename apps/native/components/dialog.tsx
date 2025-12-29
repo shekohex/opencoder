@@ -50,13 +50,12 @@ function useDialogContext() {
 	return context;
 }
 
-// --- Components ---
-
 interface DialogProps {
 	children: React.ReactNode;
 	isOpen?: boolean;
 	defaultOpen?: boolean;
 	onOpenChange?: (isOpen: boolean) => void;
+	variant?: "sheet" | "alert";
 }
 
 export function Dialog({
@@ -64,6 +63,7 @@ export function Dialog({
 	isOpen: controlledOpen,
 	defaultOpen = false,
 	onOpenChange,
+	variant: _variant,
 }: DialogProps) {
 	const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
 	const isOpen = controlledOpen ?? uncontrolledOpen;
@@ -94,7 +94,6 @@ export function Dialog({
 	);
 }
 
-// Trigger
 interface DialogTriggerProps {
 	children: React.ReactElement;
 	asChild?: boolean;
@@ -115,7 +114,6 @@ export function DialogTrigger({ children, asChild }: DialogTriggerProps) {
 	return <Pressable onPress={onOpen}>{children}</Pressable>;
 }
 
-// Content (The Modal)
 interface DialogContentProps {
 	children: React.ReactNode;
 	className?: string;
@@ -203,7 +201,6 @@ export function DialogContent({
 	);
 }
 
-// Header
 export function DialogHeader({
 	children,
 	className,
@@ -214,7 +211,6 @@ export function DialogHeader({
 	return <View className={`p-6 pb-4 ${className}`}>{children}</View>;
 }
 
-// Title
 export function DialogTitle({
 	children,
 	className,
@@ -240,7 +236,6 @@ export function DialogTitle({
 	);
 }
 
-// Description
 export function DialogDescription({
 	children,
 	className,
@@ -266,7 +261,6 @@ export function DialogDescription({
 	);
 }
 
-// Footer
 export function DialogFooter({
 	children,
 	className,
@@ -281,15 +275,16 @@ export function DialogFooter({
 	);
 }
 
-// Close Button
 export function DialogClose({
 	className,
 	asChild,
 	children,
+	style: _style,
 }: {
 	className?: string;
 	asChild?: boolean;
 	children?: React.ReactNode;
+	style?: "default" | "cancel" | "destructive";
 }) {
 	const { onClose } = useDialogContext();
 

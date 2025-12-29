@@ -1,10 +1,16 @@
-import { ActionSheetProvider } from "@expo/react-native-action-sheet";
-import { render } from "@testing-library/react-native";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { fireEvent, render } from "@testing-library/react-native";
 import type { ReactNode } from "react";
+
+import { ThemeProvider } from "@/lib/theme-context";
 import { Select } from "./select.native";
 
 function Wrapper({ children }: { children: ReactNode }) {
-	return <ActionSheetProvider>{children}</ActionSheetProvider>;
+	return (
+		<ThemeProvider>
+			<BottomSheetModalProvider>{children}</BottomSheetModalProvider>
+		</ThemeProvider>
+	);
 }
 
 describe("Select (Native)", () => {
@@ -21,7 +27,7 @@ describe("Select (Native)", () => {
 	});
 
 	it("renders trigger with selected value", () => {
-		const { getByText } = render(
+		const { getByRole } = render(
 			<Select value="b" placeholder="Select an option">
 				<Select.Option value="a">Option A</Select.Option>
 				<Select.Option value="b">Option B</Select.Option>
@@ -30,7 +36,8 @@ describe("Select (Native)", () => {
 			{ wrapper: Wrapper },
 		);
 
-		expect(getByText("Option B")).toBeTruthy();
+		const trigger = getByRole("button");
+		expect(trigger.props.accessibilityLabel).toBe("Option B");
 	});
 
 	it("is disabled when disabled prop is true", () => {
@@ -89,7 +96,7 @@ describe("Select (Native)", () => {
 	});
 
 	it("renders with defaultValue", () => {
-		const { getByText } = render(
+		const { getByRole } = render(
 			<Select defaultValue="b" placeholder="Select an option">
 				<Select.Option value="a">Option A</Select.Option>
 				<Select.Option value="b">Option B</Select.Option>
@@ -98,11 +105,12 @@ describe("Select (Native)", () => {
 			{ wrapper: Wrapper },
 		);
 
-		expect(getByText("Option B")).toBeTruthy();
+		const trigger = getByRole("button");
+		expect(trigger.props.accessibilityLabel).toBe("Option B");
 	});
 
 	it("renders multiple selection display", () => {
-		const { getByText } = render(
+		const { getByRole } = render(
 			<Select
 				selectionMode="multiple"
 				defaultValue={["a", "b"]}
@@ -116,6 +124,41 @@ describe("Select (Native)", () => {
 			{ wrapper: Wrapper },
 		);
 
-		expect(getByText("Option A, Option B")).toBeTruthy();
+		const trigger = getByRole("button");
+		expect(trigger.props.accessibilityLabel).toBe("Option A, Option B");
+	});
+
+	it("updates trigger text for multiple selections", () => {
+		const { getByRole, getByText } = render(
+			<Select selectionMode="multiple" placeholder="Select options">
+				<Select.Option value="a">Option A</Select.Option>
+				<Select.Option value="b">Option B</Select.Option>
+				<Select.Content />
+			</Select>,
+			{ wrapper: Wrapper },
+		);
+
+		fireEvent.press(getByText("Option A"));
+		let trigger = getByRole("button");
+		expect(trigger.props.accessibilityLabel).toBe("Option A");
+
+		fireEvent.press(getByText("Option B"));
+		trigger = getByRole("button");
+		expect(trigger.props.accessibilityLabel).toBe("Option A, Option B");
+	});
+
+	it("ignores disabled option selection", () => {
+		const { getByText } = render(
+			<Select placeholder="Select an option">
+				<Select.Option value="a" disabled>
+					Option A
+				</Select.Option>
+				<Select.Content />
+			</Select>,
+			{ wrapper: Wrapper },
+		);
+
+		fireEvent.press(getByText("Option A"));
+		expect(getByText("Select an option")).toBeTruthy();
 	});
 });

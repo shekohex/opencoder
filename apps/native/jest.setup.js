@@ -32,6 +32,32 @@ jest.mock("react-native-nitro-modules", () => ({
 	createHybridObject: jest.fn(() => ({})),
 }));
 
+jest.mock("@expo/vector-icons", () => {
+	const React = require("react");
+	const Icon = (props) => React.createElement("Icon", props);
+	return new Proxy({}, { get: () => Icon });
+});
+
+jest.mock("@gorhom/bottom-sheet", () => {
+	const React = require("react");
+	const { View } = require("react-native");
+	const BottomSheetModalProvider = ({ children }) => children;
+	const BottomSheetView = ({ children, ...props }) =>
+		React.createElement(View, props, children);
+	const BottomSheetModal = React.forwardRef(({ children, ...props }, ref) => {
+		React.useImperativeHandle(ref, () => ({
+			present: () => {},
+			dismiss: () => {},
+		}));
+		return React.createElement(View, props, children);
+	});
+	return {
+		BottomSheetModalProvider,
+		BottomSheetModal,
+		BottomSheetView,
+	};
+});
+
 jest.mock("uniwind", () => ({
 	Uniwind: {
 		setTheme: jest.fn(),
