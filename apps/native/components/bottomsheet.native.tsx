@@ -1,4 +1,4 @@
-import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet";
 import React, {
 	useCallback,
 	useContext,
@@ -7,14 +7,9 @@ import React, {
 	useRef,
 	useState,
 } from "react";
-import {
-	type GestureResponderEvent,
-	Pressable,
-	Text,
-	View,
-} from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { type GestureResponderEvent, Pressable, Text } from "react-native";
 
+import { useTheme } from "@/lib/theme-context";
 import type {
 	BottomSheetCloseProps,
 	BottomSheetContentProps,
@@ -37,6 +32,25 @@ function useNativeBottomSheetContext() {
 	return context;
 }
 
+interface InternalContextValue extends BottomSheetContextValue {
+	bottomSheetRef: React.RefObject<BottomSheetModal | null>;
+	snapPoints: string[];
+}
+
+const InternalContext = React.createContext<InternalContextValue | undefined>(
+	undefined,
+);
+
+function useInternalContext() {
+	const context = useContext(InternalContext);
+	if (!context) {
+		throw new Error(
+			"BottomSheet compound components must be used within a BottomSheet",
+		);
+	}
+	return context;
+}
+
 export function BottomSheet({
 	children,
 	isOpen: controlledOpen,
@@ -47,7 +61,7 @@ export function BottomSheet({
 	const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
 	const isOpen = controlledOpen ?? uncontrolledOpen;
 	const [internalSnapPoints, setInternalSnapPoints] = useState<string[]>(
-		snapPoints || ["90%"],
+		snapPoints || ["50%"],
 	);
 
 	const bottomSheetRef = useRef<BottomSheetModal>(null);
@@ -78,7 +92,7 @@ export function BottomSheet({
 		}
 	}, [isOpen]);
 
-	const value = useMemo(
+	const publicValue = useMemo(
 		() => ({
 			isOpen,
 			onOpen: () => handleOpenChange(true),
@@ -89,21 +103,21 @@ export function BottomSheet({
 		[isOpen, internalSnapPoints, handleOpenChange],
 	);
 
+	const internalValue = useMemo(
+		() => ({
+			...publicValue,
+			bottomSheetRef,
+			handleSheetChanges,
+		}),
+		[publicValue, handleSheetChanges],
+	);
+
 	return (
-		<GestureHandlerRootView>
-			<NativeBottomSheetContext.Provider value={value}>
-				<BottomSheetModal
-					ref={bottomSheetRef}
-					index={isOpen ? 0 : -1}
-					snapPoints={internalSnapPoints}
-					onChange={handleSheetChanges}
-					backgroundStyle={{ backgroundColor: "var(--color-background)" }}
-					handleIndicatorStyle={{ backgroundColor: "var(--color-border)" }}
-				>
-					{children}
-				</BottomSheetModal>
-			</NativeBottomSheetContext.Provider>
-		</GestureHandlerRootView>
+		<NativeBottomSheetContext.Provider value={publicValue}>
+			<InternalContext.Provider value={internalValue}>
+				{children}
+			</InternalContext.Provider>
+		</NativeBottomSheetContext.Provider>
 	);
 }
 
@@ -132,12 +146,34 @@ export function BottomSheetContent({
 	children,
 	className,
 }: BottomSheetContentProps) {
-	const { onClose } = useNativeBottomSheetContext();
+	const { bottomSheetRef, snapPoints, onClose } = useInternalContext();
+	const { theme } = useTheme();
+
+	const handleSheetChanges = useCallback(
+		(index: number) => {
+			if (index < 0) {
+				onClose();
+			}
+		},
+		[onClose],
+	);
 
 	return (
-		<View className={`p-6 ${className ?? ""}`} onAccessibilityEscape={onClose}>
-			{children}
-		</View>
+		<BottomSheetModal
+			ref={bottomSheetRef}
+			snapPoints={snapPoints}
+			onChange={handleSheetChanges}
+			enablePanDownToClose
+			backgroundStyle={{ backgroundColor: theme.background.base }}
+			handleIndicatorStyle={{ backgroundColor: theme.border.base }}
+		>
+			<BottomSheetView
+				className={`p-6 ${className ?? ""}`}
+				accessibilityViewIsModal
+			>
+				{children}
+			</BottomSheetView>
+		</BottomSheetModal>
 	);
 }
 

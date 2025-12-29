@@ -1,4 +1,6 @@
 import "../global.css";
+import { ActionSheetProvider } from "@expo/react-native-action-sheet";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { OverlayProvider } from "@react-native-aria/overlays";
 import {
 	DarkTheme,
@@ -77,17 +79,21 @@ function RootLayoutContent() {
 		<NavigationThemeProvider value={navTheme}>
 			<StatusBar style={mode === "dark" ? "light" : "dark"} />
 			<GestureHandlerRootView style={styles.container}>
-				<OverlayProvider>
-					<Stack>
-						<Stack.Screen name="(app)" options={{ headerShown: false }} />
-						<Stack.Screen name="sign-in" options={{ headerShown: false }} />
-						<Stack.Screen
-							name="modal"
-							options={{ title: "Modal", presentation: "modal" }}
-						/>
-						<Stack.Screen name="+not-found" />
-					</Stack>
-				</OverlayProvider>
+				<ActionSheetProvider>
+					<BottomSheetModalProvider>
+						<OverlayProvider>
+							<Stack>
+								<Stack.Screen name="(app)" options={{ headerShown: false }} />
+								<Stack.Screen name="sign-in" options={{ headerShown: false }} />
+								<Stack.Screen
+									name="modal"
+									options={{ title: "Modal", presentation: "modal" }}
+								/>
+								<Stack.Screen name="+not-found" />
+							</Stack>
+						</OverlayProvider>
+					</BottomSheetModalProvider>
+				</ActionSheetProvider>
 			</GestureHandlerRootView>
 		</NavigationThemeProvider>
 	);
