@@ -32,6 +32,12 @@ jest.mock("react-native-nitro-modules", () => ({
 	createHybridObject: jest.fn(() => ({})),
 }));
 
+jest.mock("uniwind", () => ({
+	Uniwind: {
+		setTheme: jest.fn(),
+	},
+}));
+
 jest.mock("expo-router", () => ({
 	useRouter: () => ({
 		push: jest.fn(),
