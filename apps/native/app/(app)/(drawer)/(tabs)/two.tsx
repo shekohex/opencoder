@@ -1,5 +1,7 @@
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
+import { AppText } from "@/components/app-text";
 import { Container } from "@/components/container";
+import { TabBarIcon } from "@/components/tabbar-icon";
 import { useTheme } from "@/lib/theme-context";
 
 export default function TabTwo() {
@@ -9,12 +11,15 @@ export default function TabTwo() {
 		<Container>
 			<ScrollView style={styles.scrollView}>
 				<View style={styles.content}>
-					<Text style={[styles.title, { color: theme.text.strong }]}>
-						Tab Two
-					</Text>
-					<Text style={[styles.subtitle, { color: theme.text.weak }]}>
+					<View style={styles.titleRow}>
+						<TabBarIcon name="compass" color={theme.icon.base} />
+						<AppText style={[styles.title, { color: theme.text.strong }]}>
+							Explore
+						</AppText>
+					</View>
+					<AppText style={[styles.subtitle, { color: theme.text.weak }]}>
 						Discover more features and content
-					</Text>
+					</AppText>
 				</View>
 			</ScrollView>
 		</Container>
@@ -28,6 +33,12 @@ const styles = StyleSheet.create({
 	},
 	content: {
 		paddingVertical: 16,
+	},
+	titleRow: {
+		flexDirection: "row",
+		alignItems: "center",
+		gap: 8,
+		marginBottom: 8,
 	},
 	title: {
 		fontSize: 24,

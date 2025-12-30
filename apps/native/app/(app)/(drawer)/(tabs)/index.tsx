@@ -1,7 +1,9 @@
 import { Link } from "expo-router";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
+import { AppText } from "@/components/app-text";
 import { Button } from "@/components/button";
 import { Container } from "@/components/container";
+import { TabBarIcon } from "@/components/tabbar-icon";
 import { useTheme } from "@/lib/theme-context";
 
 export default function TabOne() {
@@ -11,12 +13,15 @@ export default function TabOne() {
 		<Container>
 			<ScrollView style={styles.scrollView}>
 				<View style={styles.content}>
-					<Text style={[styles.title, { color: theme.text.strong }]}>
-						Tab One
-					</Text>
-					<Text style={[styles.subtitle, { color: theme.text.weak }]}>
+					<View style={styles.titleRow}>
+						<TabBarIcon name="home" color={theme.icon.base} />
+						<AppText style={[styles.title, { color: theme.text.strong }]}>
+							Home
+						</AppText>
+					</View>
+					<AppText style={[styles.subtitle, { color: theme.text.weak }]}>
 						Explore the first section of your app
-					</Text>
+					</AppText>
 
 					<View className="mt-8">
 						{/* @ts-ignore */}
@@ -37,6 +42,12 @@ const styles = StyleSheet.create({
 	},
 	content: {
 		paddingVertical: 16,
+	},
+	titleRow: {
+		flexDirection: "row",
+		alignItems: "center",
+		gap: 8,
+		marginBottom: 8,
 	},
 	title: {
 		fontSize: 24,

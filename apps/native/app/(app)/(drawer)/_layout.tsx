@@ -54,6 +54,26 @@ const DrawerLayout = () => {
 				}}
 			/>
 			<Drawer.Screen
+				name="workspace-mockups"
+				options={{
+					headerTitle: "Workspace Mockups",
+					drawerLabel: "Workspace Mockups",
+					drawerIcon: ({ size, color }) => (
+						<Ionicons name="grid-outline" size={size} color={color} />
+					),
+				}}
+			/>
+			<Drawer.Screen
+				name="workspaces"
+				options={{
+					headerTitle: "Workspaces",
+					drawerLabel: "Workspaces",
+					drawerIcon: ({ size, color }) => (
+						<Ionicons name="briefcase-outline" size={size} color={color} />
+					),
+				}}
+			/>
+			<Drawer.Screen
 				name="settings"
 				options={{
 					headerTitle: "Settings",

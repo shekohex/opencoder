@@ -1,7 +1,9 @@
 import { ScrollView, Text, View } from "react-native";
+import { AppText } from "@/components/app-text";
 import { Button } from "@/components/button";
 import { Container } from "@/components/container";
 import { Switch } from "@/components/switch";
+import { TabBarIcon } from "@/components/tabbar-icon";
 import { useTheme } from "@/lib/theme-context";
 import { themeDisplayNames } from "@/lib/themes";
 
@@ -57,14 +59,17 @@ function RadiusSwatch({
 }
 
 export default function TokensScreen() {
-	const { themeName, mode, setThemeName, availableThemes } = useTheme();
+	const { themeName, mode, setThemeName, availableThemes, theme } = useTheme();
 
 	return (
 		<Container>
 			<ScrollView className="flex-1 p-4">
-				<Text className="mb-6 font-bold text-2xl text-foreground-strong">
-					Design Tokens
-				</Text>
+				<View className="mb-6 flex-row items-center gap-2">
+					<TabBarIcon name="paint-brush" color={theme.icon.base} />
+					<AppText className="font-bold text-2xl text-foreground-strong">
+						Design Tokens
+					</AppText>
+				</View>
 
 				<Section title="Quick Theme Switch">
 					<View className="mb-4 flex-row flex-wrap gap-2">
