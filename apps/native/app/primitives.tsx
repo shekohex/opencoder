@@ -2,6 +2,7 @@ import { Feather } from "@expo/vector-icons";
 import { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 
+import { Accordion } from "@/components/accordion";
 import { Button } from "@/components/button";
 import {
 	Dialog,
@@ -213,6 +214,41 @@ export default function PrimitivesScreen() {
 						<Select.Option value="svelte">Svelte</Select.Option>
 						<Select.Content />
 					</Select>
+				</View>
+
+				<View className="gap-4">
+					<Text className="font-bold text-foreground text-xl">Accordion</Text>
+					<Accordion
+						type="single"
+						collapsible
+						showDividers
+						className="rounded-lg border border-border"
+					>
+						<Accordion.Item value="item-1">
+							<Accordion.Trigger>
+								<Text className="text-foreground text-sm">
+									Workspace details
+								</Text>
+								<Accordion.Indicator />
+							</Accordion.Trigger>
+							<Accordion.Content>
+								<Text className="text-foreground-weak text-sm">
+									Active workspace shows projects and sessions.
+								</Text>
+							</Accordion.Content>
+						</Accordion.Item>
+						<Accordion.Item value="item-2">
+							<Accordion.Trigger>
+								<Text className="text-foreground text-sm">Session rules</Text>
+								<Accordion.Indicator />
+							</Accordion.Trigger>
+							<Accordion.Content>
+								<Text className="text-foreground-weak text-sm">
+									Sessions sync across devices and reopen quickly.
+								</Text>
+							</Accordion.Content>
+						</Accordion.Item>
+					</Accordion>
 				</View>
 
 				<View className="gap-4">
