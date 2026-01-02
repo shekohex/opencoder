@@ -9,6 +9,7 @@ import Animated, {
 	useSharedValue,
 } from "react-native-reanimated";
 import { Accordion } from "@/components/accordion";
+import { useAccordionItemContext } from "@/components/accordion.shared";
 import { AppText } from "@/components/app-text";
 import { Button } from "@/components/button";
 import { WorkspaceCard } from "@/components/workspace-mockups/workspace-card";
@@ -336,20 +337,15 @@ function WorkspaceSidebarContent({
 
 						return (
 							<Accordion.Item key={workspaceValue} value={workspaceValue}>
-								<Accordion.Trigger
+								<WorkspaceAccordionTrigger
+									row={row}
+									ownerInitials={group.ownerInitials}
+									rowHeight={rowHeight}
+									isSelected={isSelected}
 									onPress={() => handleWorkspacePress(row.name)}
-									className="py-2"
-								>
-									<WorkspaceCard
-										row={row}
-										ownerInitials={group.ownerInitials}
-										rowHeight={rowHeight}
-										isSelected={isSelected}
-									/>
-									<Accordion.Indicator size={14} />
-								</Accordion.Trigger>
+								/>
 								<Accordion.Content>
-									<View className="ml-10 gap-3 pb-2">
+									<View className="ml-4 gap-3 border-border border-l pb-2 pl-4">
 										{projectGroups.map((projectGroup) => (
 											<View key={projectGroup.title} className="gap-1">
 												<AppText className="text-foreground-weak text-xs uppercase">
@@ -381,6 +377,56 @@ function WorkspaceSidebarContent({
 					}),
 				)}
 			</Accordion>
+		</View>
+	);
+}
+
+function WorkspaceAccordionTrigger({
+	row,
+	ownerInitials,
+	rowHeight,
+	isSelected,
+	onPress,
+}: {
+	row: (typeof workspaceGroups)[number]["rows"][number];
+	ownerInitials: string;
+	rowHeight: number;
+	isSelected: boolean;
+	onPress: () => void;
+}) {
+	const { isExpanded, toggle } = useAccordionItemContext();
+
+	return (
+		<View className="flex-row items-center py-2">
+			<Pressable
+				onPress={onPress}
+				className="flex-1"
+				accessibilityRole="button"
+				accessibilityState={{ expanded: isExpanded }}
+			>
+				<WorkspaceCard
+					row={row}
+					ownerInitials={ownerInitials}
+					rowHeight={rowHeight}
+					isSelected={isSelected}
+				/>
+			</Pressable>
+			<Pressable
+				onPress={toggle}
+				className="ml-2 h-8 w-8 items-center justify-center"
+				accessibilityRole="button"
+				accessibilityState={{ expanded: isExpanded }}
+				accessibilityLabel={isExpanded ? "Collapse" : "Expand"}
+			>
+				<Animated.View
+					className="items-center justify-center"
+					style={{
+						transform: [{ rotate: isExpanded ? "-180deg" : "0deg" }],
+					}}
+				>
+					<Feather name="chevron-down" size={18} color="var(--color-icon)" />
+				</Animated.View>
+			</Pressable>
 		</View>
 	);
 }
