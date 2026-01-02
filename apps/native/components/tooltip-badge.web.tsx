@@ -2,7 +2,7 @@ import { useTooltip, useTooltipTrigger } from "@react-native-aria/tooltip";
 import { useTooltipTriggerState } from "@react-stately/tooltip";
 import type { ReactNode } from "react";
 import { useRef } from "react";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 
 import { AppText } from "@/components/app-text";
 
@@ -32,14 +32,13 @@ export function TooltipBadge({
 
 	return (
 		<View className="relative items-center">
-			<Pressable
+			<View
 				ref={triggerRef}
 				{...(triggerProps as object)}
-				accessibilityRole="button"
 				accessibilityLabel={label}
 			>
 				{children}
-			</Pressable>
+			</View>
 			{state.isOpen && (
 				<View
 					{...(tooltipProps as object)}

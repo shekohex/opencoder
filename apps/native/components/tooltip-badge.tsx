@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Alert, Pressable } from "react-native";
+import { View } from "react-native";
 
 export function TooltipBadge({
 	label,
@@ -9,12 +9,8 @@ export function TooltipBadge({
 	children: ReactNode;
 }) {
 	return (
-		<Pressable
-			onPress={() => Alert.alert(label)}
-			accessibilityRole="button"
-			accessibilityLabel={label}
-		>
+		<View accessibilityLabel={label} accessibilityHint={label}>
 			{children}
-		</Pressable>
+		</View>
 	);
 }
