@@ -141,7 +141,7 @@ export function BottomSheetContent({
 					}}
 				>
 					<View className="items-center py-3">
-						<View className="h-1 w-10 rounded-full border-4 border-black bg-surface-weak" />
+						<View className="neo-shadow-sm h-1 w-10 rounded-full border-4 border-black bg-surface-weak" />
 					</View>
 					{children}
 				</Animated.View>

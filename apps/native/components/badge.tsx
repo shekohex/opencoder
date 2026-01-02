@@ -26,11 +26,11 @@ export function Badge({
 
 	return (
 		<View
-			className={`rounded-full border-4 border-black px-4 py-2 neo-shadow-sm ${variantStyles[variant]} ${className}`}
+			className={`neo-shadow-sm rounded-full border-4 border-black px-4 py-2 ${variantStyles[variant]} ${className}`}
 			style={rotateStyle}
 			{...props}
 		>
-			<AppText className="font-black uppercase tracking-widest text-sm text-center">
+			<AppText className="text-center font-black text-sm uppercase tracking-widest">
 				{children}
 			</AppText>
 		</View>

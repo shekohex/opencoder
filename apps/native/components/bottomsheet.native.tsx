@@ -179,17 +179,22 @@ export function BottomSheetContent({
 			enablePanDownToClose
 			backdropComponent={backdropComponent}
 			backgroundStyle={{
-				backgroundColor: "#ffffff",
-				borderColor: "#000000",
+				backgroundColor: theme.background.base,
+				borderColor: theme.border.base,
 				borderWidth: 4,
 			}}
 			handleIndicatorStyle={{
 				backgroundColor: theme.surface.weak,
-				borderColor: "#000000",
+				borderColor: theme.border.base,
 				borderWidth: 4,
 				width: 40,
 				height: 4,
-				borderRadius: 4,
+				borderRadius: 2,
+				shadowColor: "#000",
+				shadowOffset: { width: 4, height: 0 },
+				shadowOpacity: 1,
+				shadowRadius: 0,
+				elevation: 4,
 			}}
 		>
 			<BottomSheetView

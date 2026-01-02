@@ -170,7 +170,7 @@ export function SelectTrigger({ children, className }: SelectTriggerProps) {
 			accessibilityRole="button"
 			accessibilityState={{ expanded: isOpen, disabled }}
 			accessibilityLabel={displayText}
-			className={`flex-row items-center justify-between rounded-none border-4 border-black bg-white px-3 py-2.5 neo-shadow-sm ${disabled ? "opacity-50" : ""} ${className ?? ""}`}
+			className={`neo-shadow-sm flex-row items-center justify-between rounded-none border-4 border-black bg-white px-3 py-2.5 ${disabled ? "opacity-50" : ""} ${className ?? ""}`}
 		>
 			<Text className="font-medium text-foreground">{displayText}</Text>
 			<Feather
@@ -213,11 +213,11 @@ export function SelectContent({ className }: SelectContentProps) {
 			snapPoints={["50%"]}
 			onChange={handleSheetChanges}
 			enablePanDownToClose
-			backgroundStyle={{ backgroundColor: "#ffffff" }}
-			handleIndicatorStyle={{ backgroundColor: "#000000" }}
+			backgroundStyle={{ backgroundColor: theme.background.base }}
+			handleIndicatorStyle={{ backgroundColor: theme.text.base }}
 		>
 			<BottomSheetView
-				className={`border-4 border-black p-4 neo-shadow-lg ${className ?? ""}`}
+				className={`neo-shadow-lg border-4 border-black p-4 ${className ?? ""}`}
 			>
 				{label ? (
 					<Text className="mb-2 font-semibold text-foreground text-sm">
@@ -270,7 +270,7 @@ function SelectOptionItem<T>({
 			disabled={isDisabled}
 			accessibilityRole="menuitem"
 			accessibilityState={{ selected: isSelected, disabled: isDisabled }}
-			className={`flex-row items-center justify-between hover:border-l-8 hover:border-l-black border-l-4 border-transparent px-3 py-2 ${isDisabled ? "opacity-50" : ""}`}
+			className={`flex-row items-center justify-between border-transparent border-l-4 px-3 py-2 hover:border-l-8 hover:border-l-black ${isDisabled ? "opacity-50" : ""}`}
 		>
 			<Text className={`text-foreground ${isSelected ? "font-semibold" : ""}`}>
 				{item.rendered}
