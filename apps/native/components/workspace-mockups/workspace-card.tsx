@@ -1,7 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
-import { View } from "react-native";
+import { Pressable, View } from "react-native";
 import Animated, {
 	Easing,
 	useAnimatedStyle,
@@ -11,7 +11,6 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { AppText } from "@/components/app-text";
-import { Card } from "@/components/card";
 import { TooltipBadge } from "@/components/tooltip-badge";
 
 import type { StatusTone, WorkspaceBadge, WorkspaceRowData } from "./mock-data";
@@ -133,20 +132,22 @@ export function WorkspaceCard({
 	rowHeight,
 	isSelected,
 	avatar,
+	onPress,
 }: {
 	row: WorkspaceRowData;
 	ownerInitials: string;
 	rowHeight: number;
 	isSelected?: boolean;
 	avatar?: ReactNode;
+	onPress?: () => void;
 }) {
 	const visibleBadges = row.badges.slice(0, 3);
 	const hiddenBadgeCount = row.badges.length - visibleBadges.length;
 	const isPulsing =
 		row.statusTone === "success" && row.status.toLowerCase() === "running";
 
-	return (
-		<Card
+	const CardContent = (
+		<View
 			className={`flex-row items-center gap-3 px-4 ${
 				isSelected ? "border-border-selected bg-surface" : "bg-transparent"
 			}`}
@@ -202,6 +203,20 @@ export function WorkspaceCard({
 					</View>
 				</View>
 			</View>
-		</Card>
+		</View>
 	);
+
+	if (onPress) {
+		return (
+			<Pressable
+				onPress={onPress}
+				accessibilityRole="button"
+				className="flex-1"
+			>
+				{CardContent}
+			</Pressable>
+		);
+	}
+
+	return <View className="flex-1">{CardContent}</View>;
 }

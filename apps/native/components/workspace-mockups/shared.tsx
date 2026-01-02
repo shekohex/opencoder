@@ -398,19 +398,13 @@ function WorkspaceAccordionTrigger({
 
 	return (
 		<View className="flex-row items-center py-2">
-			<Pressable
+			<WorkspaceCard
+				row={row}
+				ownerInitials={ownerInitials}
+				rowHeight={rowHeight}
+				isSelected={isSelected}
 				onPress={onPress}
-				className="flex-1"
-				accessibilityRole="button"
-				accessibilityState={{ expanded: isExpanded }}
-			>
-				<WorkspaceCard
-					row={row}
-					ownerInitials={ownerInitials}
-					rowHeight={rowHeight}
-					isSelected={isSelected}
-				/>
-			</Pressable>
+			/>
 			<Pressable
 				onPress={toggle}
 				className="ml-2 h-8 w-8 items-center justify-center"
