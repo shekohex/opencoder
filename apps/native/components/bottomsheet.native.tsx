@@ -7,7 +7,12 @@ import React, {
 	useRef,
 	useState,
 } from "react";
-import { type GestureResponderEvent, Pressable, Text } from "react-native";
+import {
+	type GestureResponderEvent,
+	Pressable,
+	Text,
+	View,
+} from "react-native";
 
 import { useTheme } from "@/lib/theme-context";
 import type {
@@ -158,14 +163,34 @@ export function BottomSheetContent({
 		[onClose],
 	);
 
+	const backdropComponent = useMemo(
+		() =>
+			function Backdrop() {
+				return <View className="flex-1 bg-black/50" />;
+			},
+		[],
+	);
+
 	return (
 		<BottomSheetModal
 			ref={bottomSheetRef}
 			snapPoints={snapPoints}
 			onChange={handleSheetChanges}
 			enablePanDownToClose
-			backgroundStyle={{ backgroundColor: theme.background.base }}
-			handleIndicatorStyle={{ backgroundColor: theme.border.base }}
+			backdropComponent={backdropComponent}
+			backgroundStyle={{
+				backgroundColor: "#ffffff",
+				borderColor: "#000000",
+				borderWidth: 4,
+			}}
+			handleIndicatorStyle={{
+				backgroundColor: theme.surface.weak,
+				borderColor: "#000000",
+				borderWidth: 4,
+				width: 40,
+				height: 4,
+				borderRadius: 4,
+			}}
 		>
 			<BottomSheetView
 				className={`p-6 ${className ?? ""}`}

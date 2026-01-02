@@ -132,10 +132,16 @@ export function BottomSheetContent({
 				<Animated.View
 					entering={SlideInDown.duration(250).springify().damping(20)}
 					exiting={SlideOutDown.duration(200)}
-					className={`rounded-t-2xl border-border border-t bg-background pb-8 ${className ?? ""}`}
+					className={`border-4 border-black bg-white pb-8 ${className ?? ""}`}
+					style={{
+						borderBottomLeftRadius: 0,
+						borderBottomRightRadius: 0,
+						borderTopLeftRadius: 16,
+						borderTopRightRadius: 16,
+					}}
 				>
 					<View className="items-center py-3">
-						<View className="h-1 w-10 rounded-full bg-border" />
+						<View className="h-1 w-10 rounded-full border-4 border-black bg-surface-weak" />
 					</View>
 					{children}
 				</Animated.View>
