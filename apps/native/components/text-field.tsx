@@ -84,8 +84,9 @@ function Label({ children, className, ...props }: LabelProps) {
 	return (
 		<AppText
 			nativeID={labelId}
-			className={`font-medium text-foreground text-sm ${
-				isDisabled ? "text-foreground-weak" : ""
+			// biome-ignore lint/nursery/useSortedClasses: Manual order for spec compliance
+			className={`font-black uppercase tracking-widest text-black text-base ${
+				isDisabled ? "opacity-50" : ""
 			} ${className}`}
 			{...props}
 		>
@@ -111,12 +112,10 @@ function Input({ className, ...props }: InputProps) {
 	const [isFocused, setIsFocused] = useState(false);
 
 	const baseStyles =
-		"h-10 w-full rounded-md border border-border bg-input px-3 py-2 text-base text-foreground placeholder:text-foreground-weak focus:outline-none";
-	const focusStyles = isFocused
-		? "border-border-interactive ring-2 ring-border-interactive/20"
-		: "";
+		"h-12 w-full rounded-none border-4 border-black bg-white px-4 py-3 text-lg font-bold text-foreground placeholder:text-black/40";
+	const focusStyles = isFocused ? "bg-surface-warningStrong neo-shadow-sm" : "";
 	const invalidStyles = isInvalid
-		? "border-border-critical text-foreground-critical bg-surface-critical"
+		? "border-black bg-surface-criticalStrong"
 		: "";
 	const disabledStyles = isDisabled ? "opacity-50 bg-input-disabled" : "";
 
@@ -164,7 +163,7 @@ function Description({ children, className, ...props }: DescriptionProps) {
 	return (
 		<AppText
 			nativeID={descriptionId}
-			className={`text-foreground-weak text-sm ${className}`}
+			className={`text-base text-black/70 ${className}`}
 			{...props}
 		>
 			{children}
@@ -184,7 +183,8 @@ function ErrorMessage({ children, className, ...props }: ErrorMessageProps) {
 	return (
 		<AppText
 			nativeID={errorMessageId}
-			className={`font-medium text-foreground-critical text-sm ${className}`}
+			// biome-ignore lint/nursery/useSortedClasses: Manual order for spec compliance
+			className={`font-black uppercase text-surface-criticalStrong text-base ${className}`}
 			{...props}
 		>
 			{children}
