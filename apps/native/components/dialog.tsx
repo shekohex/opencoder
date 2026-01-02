@@ -185,7 +185,7 @@ export function DialogContent({
 						<Animated.View
 							entering={ZoomIn.duration(200).springify().damping(20)}
 							exiting={ZoomOut.duration(150)}
-							className={`w-full max-w-sm rounded-xl border border-border bg-background shadow-xl ${className}`}
+							className={`neo-shadow-xl w-full max-w-sm rounded-none border-4 border-black bg-white ${className}`}
 							style={style as StyleProp<ViewStyle>}
 							accessibilityRole="none"
 							aria-modal
@@ -300,7 +300,7 @@ export function DialogClose({
 	return (
 		<Pressable
 			onPress={onClose}
-			className={`focus-ring absolute top-4 right-4 rounded-sm p-1 opacity-70 active:opacity-100 ${className}`}
+			className={`focus-ring neo-shadow-sm absolute top-4 right-4 rounded-none border-4 border-black bg-surface-muted p-1 opacity-70 active:translate-x-[2px] active:translate-y-[2px] active:opacity-100 ${className}`}
 			accessibilityRole="button"
 			accessibilityLabel="Close"
 		>
