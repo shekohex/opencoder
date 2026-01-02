@@ -5,14 +5,19 @@ import { View } from "react-native";
 export function Card({ className = "", ...props }: ViewProps) {
 	return (
 		<View
-			className={`rounded-xl border border-border bg-surface ${className}`}
+			className={`neo-shadow-md hover:neo-shadow-lg rounded-none border-4 border-black bg-white transition-all duration-200 hover:-translate-y-2 ${className}`}
 			{...props}
 		/>
 	);
 }
 
 export function CardHeader({ className = "", ...props }: ViewProps) {
-	return <View className={`gap-1 ${className}`} {...props} />;
+	return (
+		<View
+			className={`border-black border-b-4 bg-surface-muted/20 ${className}`}
+			{...props}
+		/>
+	);
 }
 
 export function CardTitle({ children }: { children: ReactNode }) {
