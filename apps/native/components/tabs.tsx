@@ -98,7 +98,7 @@ export function TabsList({ className, children, ...props }: TabsListProps) {
 	return (
 		<View
 			accessibilityRole="tablist"
-			className={`flex-row items-center justify-start rounded-lg bg-surface-weak p-1 ${className}`}
+			className={`flex-row items-center justify-start border-black border-b-4 bg-surface-weak p-1 ${className}`}
 			{...props}
 		>
 			{children}
@@ -209,14 +209,14 @@ export function TabsTrigger({
 	};
 
 	const baseStyles =
-		"items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group";
+		"items-center justify-center whitespace-nowrap rounded-none border-4 border-black border-b-0 px-3 py-1.5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group active:translate-x-[2px] active:translate-y-[2px]";
 	const activeContainerStyles = isActive
-		? "bg-background shadow-sm"
+		? "bg-surface-brand text-white"
 		: "hover:bg-surface-hover";
 
 	const textBaseStyles = "text-sm font-medium text-center";
 	const activeTextStyles = isActive
-		? "text-foreground-strong"
+		? "text-white"
 		: "text-foreground-weak group-hover:text-foreground-strong";
 
 	return (
