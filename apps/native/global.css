@@ -129,3 +129,55 @@
 		--tw-ring-offset-color: var(--color-background);
 	}
 }
+
+/* Neo-brutalism utilities */
+.neo-border-thin {
+	border-width: 2px;
+}
+.neo-border {
+	border-width: 4px;
+}
+.neo-border-thick {
+	border-width: 8px;
+}
+
+.neo-shadow-sm {
+	shadow-offset: 4px 0px;
+	shadow-radius: 0px;
+	shadow-color: #000;
+	shadow-opacity: 1;
+	elevation: 4;
+}
+
+.neo-shadow-md {
+	shadow-offset: 8px 0px;
+	shadow-radius: 0px;
+	shadow-color: #000;
+	shadow-opacity: 1;
+	elevation: 8;
+}
+
+.neo-shadow-lg {
+	shadow-offset: 12px 0px;
+	shadow-radius: 0px;
+	shadow-color: #000;
+	shadow-opacity: 1;
+	elevation: 12;
+}
+
+.neo-shadow-xl {
+	shadow-offset: 16px 0px;
+	shadow-radius: 0px;
+	shadow-color: #000;
+	shadow-opacity: 1;
+	elevation: 16;
+}
+
+/* For white shadows on dark backgrounds */
+.neo-shadow-white-sm {
+	shadow-offset: 4px 0px;
+	shadow-radius: 0px;
+	shadow-color: #fff;
+	shadow-opacity: 1;
+	elevation: 4;
+}
