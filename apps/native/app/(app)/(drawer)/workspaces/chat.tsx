@@ -11,16 +11,22 @@ import {
 	buildStatus,
 	messageRows,
 } from "@/components/workspace-mockups/mock-data";
+import { useWorkspaceNav } from "@/lib/workspace-nav";
 
 const BACK_ROUTE = "/workspaces/sessions" as Href;
 
 export default function WorkspacesChatScreen() {
+	const { setSelectedSessionId } = useWorkspaceNav();
+
 	return (
 		<Container>
 			<View className="flex-1 bg-background">
 				<View className="border-border border-b px-4 py-3">
 					<Link href={BACK_ROUTE} asChild>
-						<Pressable className="flex-row items-center gap-2">
+						<Pressable
+							onPress={() => setSelectedSessionId("Workspace nav")}
+							className="flex-row items-center gap-2"
+						>
 							<Feather
 								name="chevron-left"
 								size={14}

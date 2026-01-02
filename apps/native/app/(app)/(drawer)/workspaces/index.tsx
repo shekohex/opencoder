@@ -7,9 +7,9 @@ import { Button } from "@/components/button";
 import { Container } from "@/components/container";
 import { workspaceGroups } from "@/components/workspace-mockups/mock-data";
 import {
+	AppShell,
 	LogoEmptyState,
 	ROW_HEIGHTS,
-	WorkspaceThreePane,
 } from "@/components/workspace-mockups/shared";
 import { useWorkspaceLayout } from "@/lib/hooks/use-workspace-layout";
 import { breakpoints } from "@/lib/tokens";
@@ -29,7 +29,7 @@ export default function WorkspacesScreen() {
 		<Container>
 			{isDesktop || isTablet ? (
 				<View className="flex-1 bg-background">
-					<WorkspaceThreePane
+					<AppShell
 						breakpoint={isDesktop ? "desktop" : "tablet"}
 						showRightPanel={showRightPanel}
 						availableWidth={availableWidth}

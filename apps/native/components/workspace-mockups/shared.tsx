@@ -2,7 +2,7 @@ import { Feather } from "@expo/vector-icons";
 import { Logo } from "@opencoder/branding";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo } from "react";
-import { View } from "react-native";
+import { Pressable, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
 	useAnimatedStyle,
@@ -13,6 +13,7 @@ import { AppText } from "@/components/app-text";
 import { Button } from "@/components/button";
 import { WorkspaceCard } from "@/components/workspace-mockups/workspace-card";
 import { useTheme } from "@/lib/theme-context";
+import { useWorkspaceNav } from "@/lib/workspace-nav";
 
 import {
 	buildStatus,
@@ -65,12 +66,20 @@ export function WorkspaceThreePane({
 	height,
 	availableWidth,
 	isFramed = true,
+	selectedWorkspaceId,
+	selectedProjectId,
+	onSelectProject,
+	selectedSessionId,
 }: {
 	breakpoint: BreakpointName;
 	showRightPanel?: boolean;
 	height?: number;
 	availableWidth?: number;
 	isFramed?: boolean;
+	selectedWorkspaceId?: string | null;
+	selectedProjectId?: string | null;
+	onSelectProject?: (id: string) => void;
+	selectedSessionId?: string | null;
 }) {
 	const rowHeight = ROW_HEIGHTS[breakpoint];
 	const baseSidebarWidth = SIDEBAR_WIDTHS[breakpoint];
@@ -212,14 +221,22 @@ export function WorkspaceThreePane({
 					className="border-border border-r bg-background"
 					style={sidebarStyle}
 				>
-					<WorkspaceSidebarContent rowHeight={rowHeight} />
+					<WorkspaceSidebarContent
+						rowHeight={rowHeight}
+						selectedWorkspaceId={selectedWorkspaceId ?? null}
+						selectedProjectId={selectedProjectId ?? null}
+						onSelectProject={onSelectProject ?? (() => {})}
+					/>
 				</Animated.View>
 				<ResizeHandle gesture={leftHandle} />
 				<Animated.View
 					className="border-border border-r bg-background"
 					style={middleStyle}
 				>
-					<SessionSidebarContent rowHeight={rowHeight} />
+					<SessionSidebarContent
+						rowHeight={rowHeight}
+						selectedSessionId={selectedSessionId ?? null}
+					/>
 				</Animated.View>
 				<ResizeHandle gesture={middleHandle} />
 				<ChatPanel />
@@ -288,7 +305,17 @@ function TopBar() {
 	);
 }
 
-function WorkspaceSidebarContent({ rowHeight }: { rowHeight: number }) {
+function WorkspaceSidebarContent({
+	rowHeight,
+	selectedWorkspaceId,
+	selectedProjectId,
+	onSelectProject,
+}: {
+	rowHeight: number;
+	selectedWorkspaceId: string | null;
+	selectedProjectId: string | null;
+	onSelectProject: (id: string) => void;
+}) {
 	return (
 		<View>
 			<ListHeader title="Workspaces" actionLabel="New" />
@@ -303,8 +330,8 @@ function WorkspaceSidebarContent({ rowHeight }: { rowHeight: number }) {
 								{group.rows.length} workspaces
 							</AppText>
 						</View>
-						{group.rows.map((row, index) => {
-							const isSelected = index === 0 && group.owner === "Alex Chen";
+						{group.rows.map((row, _index) => {
+							const isSelected = row.name === selectedWorkspaceId;
 
 							return (
 								<View key={row.name} className="gap-2">
@@ -317,16 +344,23 @@ function WorkspaceSidebarContent({ rowHeight }: { rowHeight: number }) {
 
 									{isSelected && (
 										<View className="ml-10 gap-1 pb-2">
-											{projectGroups[0].rows.map((project, projectIndex) => (
-												<ProjectRow
-													key={`${row.name}-${project.name}`}
-													name={project.name}
-													status={project.status}
-													lastUsed={project.lastUsed}
-													height={Math.max(rowHeight - 8, 40)}
-													isSelected={projectIndex === 0}
-												/>
-											))}
+											{projectGroups[0].rows.map((project, _projectIndex) => {
+												const projectKey = `${row.name}-${project.name}`;
+												const isProjectSelected =
+													project.name === selectedProjectId;
+
+												return (
+													<ProjectRow
+														key={projectKey}
+														name={project.name}
+														status={project.status}
+														lastUsed={project.lastUsed}
+														height={Math.max(rowHeight - 8, 40)}
+														isSelected={isProjectSelected}
+														onPress={() => onSelectProject(project.name)}
+													/>
+												);
+											})}
 										</View>
 									)}
 								</View>
@@ -339,19 +373,25 @@ function WorkspaceSidebarContent({ rowHeight }: { rowHeight: number }) {
 	);
 }
 
-function SessionSidebarContent({ rowHeight }: { rowHeight: number }) {
+function SessionSidebarContent({
+	rowHeight,
+	selectedSessionId,
+}: {
+	rowHeight: number;
+	selectedSessionId: string | null;
+}) {
 	return (
 		<View>
 			<ListHeader title="Sessions" actionLabel="New" />
 			<View className="gap-3 px-3 pb-3">
-				{sessionRows.map((session, index) => (
+				{sessionRows.map((session) => (
 					<SessionRow
 						key={session.name}
 						title={session.name}
 						status={session.status}
 						lastUsed={session.lastUsed}
 						height={rowHeight}
-						isActive={index === 0}
+						isActive={session.name === selectedSessionId}
 					/>
 				))}
 				<ErrorCard
@@ -482,15 +522,18 @@ function ProjectRow({
 	lastUsed,
 	height,
 	isSelected,
+	onPress,
 }: {
 	name: string;
 	status: string;
 	lastUsed: string;
 	height: number;
 	isSelected?: boolean;
+	onPress?: () => void;
 }) {
 	return (
-		<View
+		<Pressable
+			onPress={onPress}
 			className={`justify-center rounded-lg px-3 ${
 				isSelected ? "bg-surface" : "bg-transparent"
 			}`}
@@ -503,7 +546,7 @@ function ProjectRow({
 			<AppText className="text-foreground-weak text-xs">
 				Updated {lastUsed}
 			</AppText>
-		</View>
+		</Pressable>
 	);
 }
 
@@ -600,6 +643,191 @@ function ErrorCard({
 			<Button size="sm" variant="outline">
 				{ctaLabel}
 			</Button>
+		</View>
+	);
+}
+
+export function AppShell({
+	breakpoint,
+	showRightPanel = true,
+	height,
+	availableWidth,
+	isFramed = true,
+}: {
+	breakpoint: BreakpointName;
+	showRightPanel?: boolean;
+	height?: number;
+	availableWidth?: number;
+	isFramed?: boolean;
+}) {
+	const {
+		selectedWorkspaceId,
+		selectedProjectId,
+		selectedSessionId,
+		setSelectedProjectId,
+	} = useWorkspaceNav();
+
+	const rowHeight = ROW_HEIGHTS[breakpoint];
+	const baseSidebarWidth = SIDEBAR_WIDTHS[breakpoint];
+	const baseMiddleWidth = breakpoint === "desktop" ? 260 : 220;
+	const minChatWidth = breakpoint === "desktop" ? 320 : 260;
+	const rightPanelWidth = showRightPanel ? RIGHT_PANEL_WIDTH : 0;
+
+	const sidebarMin = SIDEBAR_MIN_WIDTH[breakpoint];
+	const sidebarMax = SIDEBAR_MAX_WIDTH[breakpoint];
+	const middleMin = MIDDLE_MIN_WIDTH[breakpoint];
+	const middleMax = MIDDLE_MAX_WIDTH[breakpoint];
+
+	const maxSidebarArea = useMemo(() => {
+		if (!availableWidth) {
+			return null;
+		}
+		return Math.max(availableWidth - rightPanelWidth - minChatWidth, 0);
+	}, [availableWidth, minChatWidth, rightPanelWidth]);
+
+	const clampWidth = useCallback((value: number, min: number, max: number) => {
+		return Math.min(max, Math.max(min, value));
+	}, []);
+
+	const maxSidebarTotal = maxSidebarArea ?? baseSidebarWidth + baseMiddleWidth;
+	const effectiveSidebarMax = Math.min(sidebarMax, maxSidebarTotal - middleMin);
+	const effectiveMiddleMax = Math.min(middleMax, maxSidebarTotal - sidebarMin);
+
+	const sidebarWidth = useSharedValue(
+		clampWidth(baseSidebarWidth, sidebarMin, effectiveSidebarMax),
+	);
+	const middleWidth = useSharedValue(
+		clampWidth(baseMiddleWidth, middleMin, effectiveMiddleMax),
+	);
+	const startSidebarWidth = useSharedValue(sidebarWidth.value);
+	const startMiddleWidth = useSharedValue(middleWidth.value);
+
+	useEffect(() => {
+		const maxLeft = Math.max(sidebarMin, maxSidebarTotal - middleMin);
+		const maxMiddle = Math.max(middleMin, maxSidebarTotal - sidebarMin);
+		const nextSidebar = clampWidth(sidebarWidth.value, sidebarMin, maxLeft);
+		const nextMiddle = clampWidth(middleWidth.value, middleMin, maxMiddle);
+		const total = nextSidebar + nextMiddle;
+
+		if (total > maxSidebarTotal) {
+			const overflow = total - maxSidebarTotal;
+			const adjustedMiddle = Math.max(middleMin, nextMiddle - overflow);
+			const remainingOverflow = overflow - (nextMiddle - adjustedMiddle);
+			const adjustedSidebar = Math.max(
+				sidebarMin,
+				nextSidebar - remainingOverflow,
+			);
+			sidebarWidth.value = adjustedSidebar;
+			middleWidth.value = adjustedMiddle;
+			return;
+		}
+
+		sidebarWidth.value = nextSidebar;
+		middleWidth.value = nextMiddle;
+	}, [
+		maxSidebarTotal,
+		middleMin,
+		sidebarMin,
+		sidebarWidth,
+		middleWidth,
+		clampWidth,
+	]);
+
+	const leftHandle = useMemo(() => {
+		const maxLeft = Math.max(sidebarMin, maxSidebarTotal - middleMin);
+
+		return Gesture.Pan()
+			.hitSlop(12)
+			.activeOffsetX([-8, 8])
+			.shouldCancelWhenOutside(false)
+			.onBegin(() => {
+				startSidebarWidth.value = sidebarWidth.value;
+			})
+			.onChange((event) => {
+				const nextWidth = clampWidth(
+					startSidebarWidth.value + event.translationX,
+					sidebarMin,
+					maxLeft,
+				);
+				sidebarWidth.value = nextWidth;
+			});
+	}, [
+		maxSidebarTotal,
+		middleMin,
+		sidebarMin,
+		sidebarWidth,
+		startSidebarWidth,
+		clampWidth,
+	]);
+
+	const middleHandle = useMemo(() => {
+		const maxMiddle = Math.max(middleMin, maxSidebarTotal - sidebarMin);
+
+		return Gesture.Pan()
+			.hitSlop(12)
+			.activeOffsetX([-8, 8])
+			.shouldCancelWhenOutside(false)
+			.onBegin(() => {
+				startMiddleWidth.value = middleWidth.value;
+			})
+			.onChange((event) => {
+				const nextWidth = clampWidth(
+					startMiddleWidth.value + event.translationX,
+					middleMin,
+					maxMiddle,
+				);
+				middleWidth.value = nextWidth;
+			});
+	}, [
+		maxSidebarTotal,
+		middleMin,
+		sidebarMin,
+		middleWidth,
+		startMiddleWidth,
+		clampWidth,
+	]);
+
+	const sidebarStyle = useAnimatedStyle(() => ({
+		width: sidebarWidth.value,
+	}));
+
+	const middleStyle = useAnimatedStyle(() => ({
+		width: middleWidth.value,
+	}));
+
+	const frameClassName = isFramed
+		? "overflow-hidden rounded-xl border border-border bg-background"
+		: "flex-1 bg-background";
+
+	return (
+		<View className={frameClassName} style={height ? { height } : undefined}>
+			<TopBar />
+			<View className="flex-1 flex-row">
+				<Animated.View
+					className="border-border border-r bg-background"
+					style={sidebarStyle}
+				>
+					<WorkspaceSidebarContent
+						rowHeight={rowHeight}
+						selectedWorkspaceId={selectedWorkspaceId}
+						selectedProjectId={selectedProjectId}
+						onSelectProject={setSelectedProjectId}
+					/>
+				</Animated.View>
+				<ResizeHandle gesture={leftHandle} />
+				<Animated.View
+					className="border-border border-r bg-background"
+					style={middleStyle}
+				>
+					<SessionSidebarContent
+						rowHeight={rowHeight}
+						selectedSessionId={selectedSessionId}
+					/>
+				</Animated.View>
+				<ResizeHandle gesture={middleHandle} />
+				<ChatPanel />
+				{showRightPanel && <InfoSidebar width={RIGHT_PANEL_WIDTH} />}
+			</View>
 		</View>
 	);
 }

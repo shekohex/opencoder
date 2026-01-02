@@ -9,12 +9,14 @@ import { Container } from "@/components/container";
 
 import { sessionRows } from "@/components/workspace-mockups/mock-data";
 import { ROW_HEIGHTS } from "@/components/workspace-mockups/shared";
+import { useWorkspaceNav } from "@/lib/workspace-nav";
 
 const BACK_ROUTE = "/workspaces/projects" as Href;
 const NEXT_ROUTE = "/workspaces/chat" as Href;
 
 export default function WorkspacesSessionsScreen() {
 	const rowHeight = ROW_HEIGHTS.mobile;
+	const { setSelectedProjectId } = useWorkspaceNav();
 
 	return (
 		<Container>
@@ -29,14 +31,11 @@ export default function WorkspacesSessionsScreen() {
 						backHref={BACK_ROUTE}
 					/>
 					<View className="gap-2">
-						{sessionRows.map((session, index) => (
+						{sessionRows.map((session) => (
 							<Link key={session.name} href={NEXT_ROUTE} asChild>
 								<Pressable
-									className={`rounded-lg border px-3 ${
-										index === 0
-											? "border-border-selected bg-surface"
-											: "border-border bg-surface"
-									}`}
+									onPress={() => setSelectedProjectId("opencode")}
+									className={`rounded-lg border px-3 ${"border-border bg-surface"}`}
 									style={{ height: rowHeight }}
 								>
 									<View className="flex-row items-center justify-between">

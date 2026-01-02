@@ -9,12 +9,14 @@ import { Container } from "@/components/container";
 
 import { projectGroups } from "@/components/workspace-mockups/mock-data";
 import { ROW_HEIGHTS } from "@/components/workspace-mockups/shared";
+import { useWorkspaceNav } from "@/lib/workspace-nav";
 
 const BACK_ROUTE = "/workspaces" as Href;
 const NEXT_ROUTE = "/workspaces/sessions" as Href;
 
 export default function WorkspacesProjectsScreen() {
 	const rowHeight = ROW_HEIGHTS.mobile;
+	const { setSelectedWorkspaceId } = useWorkspaceNav();
 
 	return (
 		<Container>
@@ -36,6 +38,7 @@ export default function WorkspacesProjectsScreen() {
 							{group.rows.map((project) => (
 								<Link key={project.name} href={NEXT_ROUTE} asChild>
 									<Pressable
+										onPress={() => setSelectedWorkspaceId("core-platform")}
 										className="rounded-lg border border-border bg-surface px-3"
 										style={{ height: rowHeight }}
 									>
