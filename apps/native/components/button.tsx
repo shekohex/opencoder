@@ -31,21 +31,21 @@ export interface ButtonProps extends Omit<PressableProps, "style"> {
 
 const VARIANTS: Record<ButtonVariant, string> = {
 	primary:
-		"bg-icon-interactive hover:bg-icon-interactive/90 active:bg-icon-interactive/80 border-transparent",
+		"bg-surface-brand border-black hover:bg-surface-brandHover active:bg-surface-brand",
 	secondary:
-		"bg-surface-weak hover:bg-surface-hover active:bg-surface-active border-transparent",
+		"bg-white border-black hover:bg-surface-hover active:bg-surface-active",
 	ghost:
-		"bg-transparent hover:bg-surface-hover active:bg-surface-active border-transparent",
+		"bg-transparent border-transparent hover:border-black hover:bg-surface-hover active:bg-surface-active",
 	danger:
-		"bg-icon-critical hover:bg-icon-critical/90 active:bg-icon-critical/80 border-transparent",
+		"bg-surface-criticalStrong border-black hover:bg-surface-critical/90 active:bg-surface-critical/80",
 	outline:
-		"bg-transparent border-border hover:bg-surface-hover active:bg-surface-active",
+		"bg-white border-black hover:bg-surface-hover active:bg-surface-active",
 };
 
 const SIZES: Record<ButtonSize, string> = {
-	sm: "h-8 px-3 rounded-md gap-2",
-	md: "h-10 px-4 rounded-md gap-2",
-	lg: "h-12 px-6 rounded-lg gap-3",
+	sm: "h-10 px-4 rounded-none gap-2",
+	md: "h-12 px-6 rounded-none gap-2",
+	lg: "h-14 px-8 rounded-none gap-3",
 };
 
 const TEXT_SIZES: Record<ButtonSize, string> = {
@@ -72,12 +72,15 @@ export const Button = forwardRef<View, ButtonProps>(
 		const { theme } = useTheme();
 
 		const baseStyles =
-			"flex-row items-center justify-center border font-medium transition-colors focus-ring";
+			"flex-row items-center justify-center border-4 border-black font-bold uppercase tracking-wide transition-all duration-100";
 		const variantStyles = disabled ? "" : VARIANTS[variant];
 		const sizeStyles = SIZES[size];
 		const disabledStyles = disabled
 			? `${loading ? "opacity-80" : "opacity-50"} pointer-events-none ${loading ? "bg-icon-interactive" : "bg-input-disabled"}`
 			: "";
+		const shadowStyles = disabled
+			? ""
+			: "neo-shadow-md active:neo-shadow-sm active:translate-x-[2px] active:translate-y-[2px]";
 
 		const textBaseStyle = "font-medium text-center";
 		const textSizeStyle = TEXT_SIZES[size];
@@ -95,7 +98,7 @@ export const Button = forwardRef<View, ButtonProps>(
 		return (
 			<Pressable
 				ref={ref}
-				className={`${baseStyles} ${variantStyles} ${sizeStyles} ${disabledStyles} ${className}`}
+				className={`${baseStyles} ${variantStyles} ${sizeStyles} ${disabledStyles} ${shadowStyles} ${className}`}
 				disabled={disabled || loading}
 				accessibilityRole="button"
 				accessibilityState={{ disabled: disabled || loading, busy: loading }}
