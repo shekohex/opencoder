@@ -8,7 +8,7 @@ import Animated, {
 	useAnimatedStyle,
 	useSharedValue,
 } from "react-native-reanimated";
-
+import { Accordion } from "@/components/accordion";
 import { AppText } from "@/components/app-text";
 import { Button } from "@/components/button";
 import { WorkspaceCard } from "@/components/workspace-mockups/workspace-card";
@@ -316,59 +316,71 @@ function WorkspaceSidebarContent({
 	selectedProjectId: string | null;
 	onSelectProject: (id: string) => void;
 }) {
+	const { setSelectedWorkspaceId } = useWorkspaceNav();
+
+	const handleWorkspacePress = useCallback(
+		(workspaceName: string) => {
+			setSelectedWorkspaceId(workspaceName);
+		},
+		[setSelectedWorkspaceId],
+	);
+
 	return (
 		<View>
 			<ListHeader title="Workspaces" actionLabel="New" />
-			<View className="gap-4 px-3 pb-3">
-				{workspaceGroups.map((group) => (
-					<View key={group.owner} className="gap-2">
-						<View className="flex-row items-center justify-between">
-							<AppText className="text-foreground-weak text-xs uppercase">
-								{group.owner}
-							</AppText>
-							<AppText className="text-foreground-weaker text-xs">
-								{group.rows.length} workspaces
-							</AppText>
-						</View>
-						{group.rows.map((row, _index) => {
-							const isSelected = row.name === selectedWorkspaceId;
+			<Accordion type="single" collapsible>
+				{workspaceGroups.map((group) =>
+					group.rows.map((row) => {
+						const isSelected = row.name === selectedWorkspaceId;
+						const workspaceValue = `workspace-${row.name}`;
 
-							return (
-								<View key={row.name} className="gap-2">
+						return (
+							<Accordion.Item key={workspaceValue} value={workspaceValue}>
+								<Accordion.Trigger
+									onPress={() => handleWorkspacePress(row.name)}
+									className="py-2"
+								>
 									<WorkspaceCard
 										row={row}
 										ownerInitials={group.ownerInitials}
 										rowHeight={rowHeight}
 										isSelected={isSelected}
 									/>
+									<Accordion.Indicator size={14} />
+								</Accordion.Trigger>
+								<Accordion.Content>
+									<View className="ml-10 gap-3 pb-2">
+										{projectGroups.map((projectGroup) => (
+											<View key={projectGroup.title} className="gap-1">
+												<AppText className="text-foreground-weak text-xs uppercase">
+													{projectGroup.title}
+												</AppText>
+												{projectGroup.rows.map((project) => {
+													const projectKey = `${row.name}-${project.name}`;
+													const isProjectSelected =
+														project.name === selectedProjectId;
 
-									{isSelected && (
-										<View className="ml-10 gap-1 pb-2">
-											{projectGroups[0].rows.map((project, _projectIndex) => {
-												const projectKey = `${row.name}-${project.name}`;
-												const isProjectSelected =
-													project.name === selectedProjectId;
-
-												return (
-													<ProjectRow
-														key={projectKey}
-														name={project.name}
-														status={project.status}
-														lastUsed={project.lastUsed}
-														height={Math.max(rowHeight - 8, 40)}
-														isSelected={isProjectSelected}
-														onPress={() => onSelectProject(project.name)}
-													/>
-												);
-											})}
-										</View>
-									)}
-								</View>
-							);
-						})}
-					</View>
-				))}
-			</View>
+													return (
+														<ProjectRow
+															key={projectKey}
+															name={project.name}
+															status={project.status}
+															lastUsed={project.lastUsed}
+															height={Math.max(rowHeight - 8, 40)}
+															isSelected={isProjectSelected}
+															onPress={() => onSelectProject(project.name)}
+														/>
+													);
+												})}
+											</View>
+										))}
+									</View>
+								</Accordion.Content>
+							</Accordion.Item>
+						);
+					}),
+				)}
+			</Accordion>
 		</View>
 	);
 }

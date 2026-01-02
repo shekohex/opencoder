@@ -11,6 +11,7 @@ import {
 	LogoEmptyState,
 	ROW_HEIGHTS,
 } from "@/components/workspace-mockups/shared";
+import { WorkspaceItem } from "@/components/workspace-mockups/workspace-item";
 import { useWorkspaceLayout } from "@/lib/hooks/use-workspace-layout";
 import { breakpoints } from "@/lib/tokens";
 
@@ -75,49 +76,12 @@ function MobileWorkspaces() {
 						</View>
 						{group.rows.map((row) => (
 							<Link key={row.name} href={NEXT_ROUTE} asChild>
-								<Pressable
-									className="flex-row items-center gap-3 rounded-lg border border-border bg-surface px-3"
-									style={{ height: rowHeight }}
-								>
-									<View className="h-8 w-8 items-center justify-center rounded-full bg-surface-weak">
-										<AppText className="font-semibold text-foreground-strong text-xs">
-											{group.ownerInitials}
-										</AppText>
-									</View>
-									<View className="flex-1 gap-1">
-										<View className="flex-row items-center gap-2">
-											<AppText className="font-medium text-foreground-strong text-sm">
-												{row.name}
-											</AppText>
-											{row.badges.map((badge) => (
-												<View
-													key={`${row.name}-${badge}`}
-													className="rounded-full bg-surface-weak px-2 py-0.5"
-												>
-													<AppText className="text-foreground-weak text-xs uppercase">
-														{badge}
-													</AppText>
-												</View>
-											))}
-										</View>
-										<AppText className="text-foreground-weak text-xs">
-											Last used {row.lastUsed}
-										</AppText>
-									</View>
-									<View className="flex-row items-center gap-1">
-										<View
-											className={`h-2 w-2 rounded-full ${
-												row.statusTone === "success"
-													? "bg-surface-success"
-													: row.statusTone === "warning"
-														? "bg-surface-warning"
-														: "bg-surface-weak"
-											}`}
-										/>
-										<AppText className="text-foreground-weak text-xs">
-											{row.status}
-										</AppText>
-									</View>
+								<Pressable>
+									<WorkspaceItem
+										row={row}
+										ownerInitials={group.ownerInitials}
+										rowHeight={rowHeight}
+									/>
 								</Pressable>
 							</Link>
 						))}
