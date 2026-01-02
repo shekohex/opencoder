@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "uniwind";
 
+@import "./themes/neobrutalism.css";
 @import "./themes/opencoder.css";
 @import "./themes/opencode.css";
 @import "./themes/dracula.css";
