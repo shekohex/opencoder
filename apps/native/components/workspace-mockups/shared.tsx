@@ -1,7 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import { Logo } from "@opencoder/branding";
 import type { ReactNode } from "react";
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -26,8 +26,8 @@ import {
 export type BreakpointName = "desktop" | "tablet";
 
 export const ROW_HEIGHTS = {
-	desktop: 56,
-	tablet: 52,
+	desktop: 64,
+	tablet: 60,
 	mobile: 56,
 } as const;
 
@@ -90,9 +90,9 @@ export function WorkspaceThreePane({
 		return Math.max(availableWidth - rightPanelWidth - minChatWidth, 0);
 	}, [availableWidth, minChatWidth, rightPanelWidth]);
 
-	const clampWidth = (value: number, min: number, max: number) => {
+	const clampWidth = useCallback((value: number, min: number, max: number) => {
 		return Math.min(max, Math.max(min, value));
-	};
+	}, []);
 
 	const maxSidebarTotal = maxSidebarArea ?? baseSidebarWidth + baseMiddleWidth;
 	const effectiveSidebarMax = Math.min(sidebarMax, maxSidebarTotal - middleMin);

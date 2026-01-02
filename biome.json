@@ -27,7 +27,8 @@
 			"!**/.source",
 			"!**/convex/_generated",
 			"!.agent/skills",
-			"!.opencode/skill"
+			"!.opencode/skill",
+			"!.opencode/plugin"
 		]
 	},
 	"formatter": {

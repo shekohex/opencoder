@@ -1,5 +1,5 @@
 import type { Plugin } from "@opencode-ai/plugin";
-import { parse } from "jsonc-parser";
+import { parse, type ParseError } from "jsonc-parser";
 
 const HOOKS_FILE = ".opencode/hooks.jsonc";
 
@@ -78,12 +78,20 @@ export const QualityCheck: Plugin = async ({ client, $, directory }) => {
 };
 
 async function fetchLastMessage(
-	client: { session: { messages: Function } },
+	client: {
+		session: {
+			messages: (args: { path: { id: string } }) => Promise<unknown>;
+		};
+	},
 	sessionID: string,
 ) {
 	const response = await client.session.messages({ path: { id: sessionID } });
-	if (!response || !("data" in response) || !response.data) return undefined;
-	const messages = response.data as Array<{ info?: { agent?: string } }>;
+	if (!response || typeof response !== "object" || !("data" in response)) {
+		return undefined;
+	}
+	const data = (response as { data?: unknown }).data;
+	if (!Array.isArray(data)) return undefined;
+	const messages = data as Array<{ info?: { agent?: string } }>;
 	return messages[messages.length - 1];
 }
 
@@ -101,7 +109,7 @@ async function readHooksConfig(directory: string): Promise<HookConfig> {
 		};
 		if (!bun.Bun) return {};
 		const content = await bun.Bun.file(hooksPath).text();
-		const errors: any[] = [];
+		const errors: ParseError[] = [];
 		const parsed = parse(content, errors);
 		if (errors.length > 0 || !parsed || typeof parsed !== "object") return {};
 		return parsed as HookConfig;
