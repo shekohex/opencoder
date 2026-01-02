@@ -159,7 +159,11 @@ function AccordionRoot({
 
 	return (
 		<AccordionContext.Provider value={ctx}>
-			<View className={`flex-col ${className ?? ""}`}>{content}</View>
+			<View
+				className={`neo-shadow-md flex-col rounded-none border-4 border-black ${className ?? ""}`}
+			>
+				{content}
+			</View>
 		</AccordionContext.Provider>
 	);
 }
@@ -190,7 +194,11 @@ function AccordionItem({
 
 	return (
 		<AccordionItemContext.Provider value={ctx}>
-			<View className={`flex-col ${className ?? ""}`}>{children}</View>
+			<View
+				className={`flex-col border-black border-b-4 bg-surface-muted/20 ${className ?? ""}`}
+			>
+				{children}
+			</View>
 		</AccordionItemContext.Provider>
 	);
 }
@@ -212,7 +220,7 @@ function AccordionTrigger({
 			disabled={isDisabled}
 			accessibilityRole="button"
 			accessibilityState={{ expanded: isExpanded, disabled: isDisabled }}
-			className={`flex-row items-center justify-between gap-2 px-3 py-3 ${isDisabled ? "opacity-50" : ""} ${className ?? ""}`}
+			className={`active:neo-shadow-sm flex-row items-center justify-between gap-2 px-3 py-3 active:translate-x-[2px] active:translate-y-[2px] ${isDisabled ? "opacity-50" : ""} ${className ?? ""}`}
 			{...props}
 		>
 			{children}
