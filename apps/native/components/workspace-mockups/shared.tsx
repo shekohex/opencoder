@@ -1,8 +1,8 @@
 import { Feather } from "@expo/vector-icons";
 import { Logo } from "@opencoder/branding";
 import type { ReactNode } from "react";
-import { useCallback, useEffect, useMemo } from "react";
-import { Pressable, View } from "react-native";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { FlatList, Pressable, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
 	useAnimatedStyle,
@@ -61,6 +61,25 @@ const MIDDLE_MAX_WIDTH = {
 const RIGHT_PANEL_WIDTH = 240;
 const RESIZE_HANDLE_WIDTH = 10;
 
+type SessionRowData = (typeof sessionRows)[number];
+
+function buildNewSession(sessions: SessionRowData[]) {
+	const existingNames = new Set(sessions.map((session) => session.name));
+	let index = 1;
+	let name = "New session";
+
+	while (existingNames.has(name)) {
+		index += 1;
+		name = `New session ${index}`;
+	}
+
+	return {
+		name,
+		status: "New",
+		lastUsed: "just now",
+	};
+}
+
 export function WorkspaceThreePane({
 	breakpoint,
 	showRightPanel = true,
@@ -71,6 +90,7 @@ export function WorkspaceThreePane({
 	selectedProjectId,
 	onSelectProject,
 	selectedSessionId,
+	onSelectSession,
 }: {
 	breakpoint: BreakpointName;
 	showRightPanel?: boolean;
@@ -79,9 +99,30 @@ export function WorkspaceThreePane({
 	isFramed?: boolean;
 	selectedWorkspaceId?: string | null;
 	selectedProjectId?: string | null;
-	onSelectProject?: (id: string) => void;
+	onSelectProject?: (projectId: string) => void;
 	selectedSessionId?: string | null;
+	onSelectSession?: (sessionId: string) => void;
 }) {
+	const [sessions, setSessions] = useState(sessionRows);
+	const [localSelectedSessionId, setLocalSelectedSessionId] = useState<
+		string | null
+	>(null);
+	const resolvedSelectedSessionId = selectedSessionId ?? localSelectedSessionId;
+
+	const handleSelectSession = (sessionId: string) => {
+		if (onSelectSession) {
+			onSelectSession(sessionId);
+			return;
+		}
+		setLocalSelectedSessionId(sessionId);
+	};
+
+	const handleCreateSession = () => {
+		const nextSession = buildNewSession(sessions);
+		setSessions((prev) => [...prev, nextSession]);
+		handleSelectSession(nextSession.name);
+	};
+
 	const rowHeight = ROW_HEIGHTS[breakpoint];
 	const baseSidebarWidth = SIDEBAR_WIDTHS[breakpoint];
 	const baseMiddleWidth = breakpoint === "desktop" ? 260 : 220;
@@ -236,12 +277,17 @@ export function WorkspaceThreePane({
 				>
 					<SessionSidebarContent
 						rowHeight={rowHeight}
-						selectedSessionId={selectedSessionId ?? null}
+						sessions={sessions}
+						selectedSessionId={resolvedSelectedSessionId}
+						onSelectSession={handleSelectSession}
+						onCreateSession={handleCreateSession}
 					/>
 				</Animated.View>
 				<ResizeHandle gesture={middleHandle} />
-				<ChatPanel />
-				{showRightPanel && <InfoSidebar width={RIGHT_PANEL_WIDTH} />}
+				<ChatPanel sessionTitle={resolvedSelectedSessionId ?? undefined} />
+				{showRightPanel && (
+					<InfoSidebar width={RIGHT_PANEL_WIDTH} sessions={sessions} />
+				)}
 			</View>
 		</View>
 	);
@@ -326,12 +372,27 @@ function WorkspaceSidebarContent({
 		[setSelectedWorkspaceId],
 	);
 
+	const workspaceRows = useMemo(
+		() =>
+			workspaceGroups.flatMap((group) =>
+				group.rows.map((row) => ({
+					...row,
+					ownerInitials: group.ownerInitials,
+				})),
+			),
+		[],
+	);
+
 	return (
-		<View>
+		<View className="flex-1">
 			<ListHeader title="Workspaces" actionLabel="New" />
 			<Accordion type="single" collapsible>
-				{workspaceGroups.map((group) =>
-					group.rows.map((row) => {
+				<FlatList
+					data={workspaceRows}
+					keyExtractor={(item) => item.name}
+					style={{ flex: 1 }}
+					contentContainerStyle={{ paddingBottom: 12 }}
+					renderItem={({ item: row }) => {
 						const isSelected = row.name === selectedWorkspaceId;
 						const workspaceValue = `workspace-${row.name}`;
 
@@ -339,7 +400,7 @@ function WorkspaceSidebarContent({
 							<Accordion.Item key={workspaceValue} value={workspaceValue}>
 								<WorkspaceAccordionTrigger
 									row={row}
-									ownerInitials={group.ownerInitials}
+									ownerInitials={row.ownerInitials}
 									rowHeight={rowHeight}
 									isSelected={isSelected}
 									onPress={() => handleWorkspacePress(row.name)}
@@ -374,8 +435,8 @@ function WorkspaceSidebarContent({
 								</Accordion.Content>
 							</Accordion.Item>
 						);
-					}),
-				)}
+					}}
+				/>
 			</Accordion>
 		</View>
 	);
@@ -427,44 +488,64 @@ function WorkspaceAccordionTrigger({
 
 function SessionSidebarContent({
 	rowHeight,
+	sessions,
 	selectedSessionId,
+	onSelectSession,
+	onCreateSession,
 }: {
 	rowHeight: number;
+	sessions: SessionRowData[];
 	selectedSessionId: string | null;
+	onSelectSession: (sessionId: string) => void;
+	onCreateSession: () => void;
 }) {
 	return (
-		<View>
-			<ListHeader title="Sessions" actionLabel="New" />
-			<View className="gap-3 px-3 pb-3">
-				{sessionRows.map((session) => (
+		<View className="flex-1">
+			<ListHeader
+				title="Sessions"
+				actionLabel="New"
+				onPress={onCreateSession}
+			/>
+			<FlatList
+				data={sessions}
+				keyExtractor={(item) => item.name}
+				style={{ flex: 1 }}
+				contentContainerStyle={{
+					paddingHorizontal: 12,
+					paddingTop: 12,
+					paddingBottom: 12,
+				}}
+				ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+				renderItem={({ item: session }) => (
 					<SessionRow
-						key={session.name}
 						title={session.name}
 						status={session.status}
 						lastUsed={session.lastUsed}
 						height={rowHeight}
 						isActive={session.name === selectedSessionId}
+						onPress={() => onSelectSession(session.name)}
 					/>
-				))}
-				<ErrorCard
-					title="Server offline"
-					subtitle="Open Code server is unreachable."
-					ctaLabel="Retry"
-				/>
-			</View>
+				)}
+				ListFooterComponent={
+					<View className="mt-3">
+						<ErrorCard
+							title="Server offline"
+							subtitle="Open Code server is unreachable."
+							ctaLabel="Retry"
+						/>
+					</View>
+				}
+			/>
 		</View>
 	);
 }
 
-function ChatPanel() {
+function ChatPanel({ sessionTitle }: { sessionTitle?: string }) {
 	return (
 		<View className="flex-1 bg-background">
 			<View className="border-border border-b bg-surface px-4 py-3">
 				<AppText className="font-semibold text-base text-foreground-strong">
-					opencode / Workspace nav
-				</AppText>
-				<AppText className="text-foreground-weak text-xs">
-					Design system audit · Session 12
+					{sessionTitle ?? "Session"}
 				</AppText>
 			</View>
 			<View className="flex-1 gap-3 p-4">
@@ -497,7 +578,13 @@ function ChatPanel() {
 	);
 }
 
-function InfoSidebar({ width }: { width: number }) {
+function InfoSidebar({
+	width,
+	sessions,
+}: {
+	width: number;
+	sessions: SessionRowData[];
+}) {
 	return (
 		<View className="border-border border-l bg-background" style={{ width }}>
 			<View className="gap-3 p-3">
@@ -510,7 +597,7 @@ function InfoSidebar({ width }: { width: number }) {
 				</InfoCard>
 				<InfoCard title="Session focus">
 					<View className="gap-2">
-						{sessionRows.slice(0, 2).map((session) => (
+						{sessions.slice(0, 2).map((session) => (
 							<View key={session.name} className="gap-1">
 								<AppText className="text-foreground-strong text-sm">
 									{session.name}
@@ -534,16 +621,18 @@ function InfoSidebar({ width }: { width: number }) {
 function ListHeader({
 	title,
 	actionLabel,
+	onPress,
 }: {
 	title: string;
 	actionLabel: string;
+	onPress?: () => void;
 }) {
 	return (
 		<View className="flex-row items-center justify-between border-border border-b px-3 py-3">
 			<AppText className="font-semibold text-foreground-strong text-sm">
 				{title}
 			</AppText>
-			<Button size="sm" variant="outline">
+			<Button size="sm" variant="outline" onPress={onPress}>
 				{actionLabel}
 			</Button>
 		</View>
@@ -608,15 +697,18 @@ function SessionRow({
 	lastUsed,
 	height,
 	isActive,
+	onPress,
 }: {
 	title: string;
 	status: string;
 	lastUsed: string;
 	height: number;
 	isActive?: boolean;
+	onPress?: () => void;
 }) {
 	return (
-		<View
+		<Pressable
+			onPress={onPress}
 			className={`justify-center rounded-lg px-3 ${
 				isActive ? "bg-surface" : "bg-transparent"
 			}`}
@@ -629,7 +721,7 @@ function SessionRow({
 			<AppText className="text-foreground-weak text-xs">
 				Updated {lastUsed}
 			</AppText>
-		</View>
+		</Pressable>
 	);
 }
 
@@ -717,7 +809,20 @@ export function AppShell({
 		selectedProjectId,
 		selectedSessionId,
 		setSelectedProjectId,
+		setSelectedSessionId,
 	} = useWorkspaceNav();
+
+	const [sessions, setSessions] = useState(sessionRows);
+
+	const handleSelectSession = (sessionId: string) => {
+		setSelectedSessionId(sessionId);
+	};
+
+	const handleCreateSession = () => {
+		const nextSession = buildNewSession(sessions);
+		setSessions((prev) => [...prev, nextSession]);
+		setSelectedSessionId(nextSession.name);
+	};
 
 	const rowHeight = ROW_HEIGHTS[breakpoint];
 	const baseSidebarWidth = SIDEBAR_WIDTHS[breakpoint];
@@ -873,12 +978,17 @@ export function AppShell({
 				>
 					<SessionSidebarContent
 						rowHeight={rowHeight}
+						sessions={sessions}
 						selectedSessionId={selectedSessionId}
+						onSelectSession={handleSelectSession}
+						onCreateSession={handleCreateSession}
 					/>
 				</Animated.View>
 				<ResizeHandle gesture={middleHandle} />
-				<ChatPanel />
-				{showRightPanel && <InfoSidebar width={RIGHT_PANEL_WIDTH} />}
+				<ChatPanel sessionTitle={selectedSessionId ?? undefined} />
+				{showRightPanel && (
+					<InfoSidebar width={RIGHT_PANEL_WIDTH} sessions={sessions} />
+				)}
 			</View>
 		</View>
 	);

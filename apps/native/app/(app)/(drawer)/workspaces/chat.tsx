@@ -16,17 +16,14 @@ import { useWorkspaceNav } from "@/lib/workspace-nav";
 const BACK_ROUTE = "/workspaces/sessions" as Href;
 
 export default function WorkspacesChatScreen() {
-	const { setSelectedSessionId } = useWorkspaceNav();
+	const { selectedSessionId } = useWorkspaceNav();
 
 	return (
 		<Container>
 			<View className="flex-1 bg-background">
 				<View className="border-border border-b px-4 py-3">
 					<Link href={BACK_ROUTE} asChild>
-						<Pressable
-							onPress={() => setSelectedSessionId("Workspace nav")}
-							className="flex-row items-center gap-2"
-						>
+						<Pressable className="flex-row items-center gap-2">
 							<Feather
 								name="chevron-left"
 								size={14}
@@ -38,14 +35,9 @@ export default function WorkspacesChatScreen() {
 						</Pressable>
 					</Link>
 					<View className="mt-2 flex-row items-center justify-between">
-						<View>
-							<AppText className="font-semibold text-foreground-strong text-lg">
-								Chat
-							</AppText>
-							<AppText className="text-foreground-weak text-xs">
-								Workspace nav session
-							</AppText>
-						</View>
+						<AppText className="font-semibold text-foreground-strong text-lg">
+							{selectedSessionId ?? "Session"}
+						</AppText>
 						<Button size="sm" variant="outline">
 							Share
 						</Button>

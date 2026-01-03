@@ -80,6 +80,7 @@ jest.mock("expo-router", () => ({
 		back: jest.fn(),
 	},
 	Redirect: () => null,
+	Link: ({ children }) => children,
 	Stack: {
 		Screen: () => null,
 	},

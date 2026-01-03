@@ -2,19 +2,20 @@ import { Feather } from "@expo/vector-icons";
 import type { Href } from "expo-router";
 import { Link } from "expo-router";
 import { Pressable, ScrollView, View } from "react-native";
-
 import { AppText } from "@/components/app-text";
 import { Button } from "@/components/button";
 import { Container } from "@/components/container";
-
 import {
 	buildStatus,
 	messageRows,
 } from "@/components/workspace-mockups/mock-data";
+import { useWorkspaceNav } from "@/lib/workspace-nav";
 
 const BACK_ROUTE = "/workspace-mockups/mobile/sessions" as Href;
 
 export default function WorkspaceMockupsMobileChat() {
+	const { selectedSessionId } = useWorkspaceNav();
+
 	return (
 		<Container>
 			<View className="flex-1 bg-background">
@@ -32,14 +33,9 @@ export default function WorkspaceMockupsMobileChat() {
 						</Pressable>
 					</Link>
 					<View className="mt-2 flex-row items-center justify-between">
-						<View>
-							<AppText className="font-semibold text-foreground-strong text-lg">
-								Chat
-							</AppText>
-							<AppText className="text-foreground-weak text-xs">
-								Workspace nav session
-							</AppText>
-						</View>
+						<AppText className="font-semibold text-foreground-strong text-lg">
+							{selectedSessionId ?? "Session"}
+						</AppText>
 						<Button size="sm" variant="outline">
 							Share
 						</Button>

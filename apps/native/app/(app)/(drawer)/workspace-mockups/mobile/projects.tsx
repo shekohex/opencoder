@@ -1,7 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import type { Href } from "expo-router";
 import { Link } from "expo-router";
-import { Pressable, ScrollView, View } from "react-native";
+import { Pressable, SectionList, View } from "react-native";
 
 import { AppText } from "@/components/app-text";
 import { Button } from "@/components/button";
@@ -16,48 +16,61 @@ const NEXT_ROUTE = "/workspace-mockups/mobile/sessions" as Href;
 export default function WorkspaceMockupsMobileProjects() {
 	const rowHeight = ROW_HEIGHTS.mobile;
 
+	const sections = projectGroups.map((group) => ({
+		title: group.title,
+		data: group.rows,
+	}));
+
 	return (
 		<Container>
-			<ScrollView
+			<SectionList
+				sections={sections}
+				keyExtractor={(item, index) => `${item.name}-${index}`}
 				className="flex-1 bg-background"
-				contentContainerClassName="p-4"
-			>
-				<View className="gap-4">
-					<MobileHeader
-						title="Projects"
-						backLabel="Workspaces"
-						backHref={BACK_ROUTE}
-					/>
-					{projectGroups.map((group) => (
-						<View key={group.title} className="gap-2">
-							<AppText className="text-foreground-weak text-xs uppercase">
-								{group.title}
+				contentContainerStyle={{ padding: 16 }}
+				ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+				renderItem={({ item: project }) => (
+					<Link key={project.name} href={NEXT_ROUTE} asChild>
+						<Pressable
+							className="rounded-lg border border-border bg-surface px-3"
+							style={{ height: rowHeight }}
+						>
+							<View className="flex-row items-center justify-between">
+								<AppText className="font-medium text-foreground-strong text-sm">
+									{project.name}
+								</AppText>
+								<AppText className="text-foreground-weak text-xs">
+									{project.status}
+								</AppText>
+							</View>
+							<AppText className="text-foreground-weak text-xs">
+								Updated {project.lastUsed}
 							</AppText>
-							{group.rows.map((project) => (
-								<Link key={project.name} href={NEXT_ROUTE} asChild>
-									<Pressable
-										className="rounded-lg border border-border bg-surface px-3"
-										style={{ height: rowHeight }}
-									>
-										<View className="flex-row items-center justify-between">
-											<AppText className="font-medium text-foreground-strong text-sm">
-												{project.name}
-											</AppText>
-											<AppText className="text-foreground-weak text-xs">
-												{project.status}
-											</AppText>
-										</View>
-										<AppText className="text-foreground-weak text-xs">
-											Updated {project.lastUsed}
-										</AppText>
-									</Pressable>
-								</Link>
-							))}
-						</View>
-					))}
-					<ErrorCard />
-				</View>
-			</ScrollView>
+						</Pressable>
+					</Link>
+				)}
+				renderSectionHeader={({ section }) => (
+					<View className="gap-2 pt-4">
+						<AppText className="text-foreground-weak text-xs uppercase">
+							{section.title}
+						</AppText>
+					</View>
+				)}
+				ListHeaderComponent={
+					<View className="mb-4">
+						<MobileHeader
+							title="Projects"
+							backLabel="Workspaces"
+							backHref={BACK_ROUTE}
+						/>
+					</View>
+				}
+				ListFooterComponent={
+					<View className="mt-4">
+						<ErrorCard />
+					</View>
+				}
+			/>
 		</Container>
 	);
 }

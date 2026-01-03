@@ -1,6 +1,6 @@
 import type { Href } from "expo-router";
 import { Link } from "expo-router";
-import { Pressable, ScrollView, View } from "react-native";
+import { Pressable, SectionList, View } from "react-native";
 
 import { AppText } from "@/components/app-text";
 import { Button } from "@/components/button";
@@ -39,12 +39,7 @@ export default function WorkspacesScreen() {
 					/>
 				</View>
 			) : (
-				<ScrollView
-					className="flex-1 bg-background"
-					contentContainerClassName="p-4"
-				>
-					<MobileWorkspaces />
-				</ScrollView>
+				<MobileWorkspaces />
 			)}
 		</Container>
 	);
@@ -52,46 +47,63 @@ export default function WorkspacesScreen() {
 
 function MobileWorkspaces() {
 	const rowHeight = ROW_HEIGHTS.mobile;
+	const sections = workspaceGroups.map((group) => ({
+		title: group.owner,
+		ownerInitials: group.ownerInitials,
+		workspaceCount: group.rows.length,
+		data: group.rows,
+	}));
 
 	return (
-		<View className="gap-4">
-			<View className="flex-row items-center justify-between">
-				<AppText className="font-semibold text-foreground-strong text-lg">
-					Workspaces
-				</AppText>
-				<Button size="sm" variant="outline">
-					New
-				</Button>
-			</View>
-			<View className="gap-3">
-				{workspaceGroups.map((group) => (
-					<View key={group.owner} className="gap-2">
-						<View className="flex-row items-center justify-between">
-							<AppText className="text-foreground-weak text-xs uppercase">
-								{group.owner}
-							</AppText>
-							<AppText className="text-foreground-weaker text-xs">
-								{group.rows.length} workspaces
-							</AppText>
-						</View>
-						{group.rows.map((row) => (
-							<Link key={row.name} href={NEXT_ROUTE} asChild>
-								<Pressable>
-									<WorkspaceItem
-										row={row}
-										ownerInitials={group.ownerInitials}
-										rowHeight={rowHeight}
-									/>
-								</Pressable>
-							</Link>
-						))}
+		<SectionList
+			sections={sections}
+			keyExtractor={(item, index) => `${item.name}-${index}`}
+			className="flex-1 bg-background"
+			contentContainerStyle={{ padding: 16 }}
+			ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+			renderItem={({ item, section }) => (
+				<Link key={item.name} href={NEXT_ROUTE} asChild>
+					<Pressable>
+						<WorkspaceItem
+							row={item}
+							ownerInitials={section.ownerInitials}
+							rowHeight={rowHeight}
+						/>
+					</Pressable>
+				</Link>
+			)}
+			renderSectionHeader={({ section }) => (
+				<View className="gap-2 pt-4">
+					<View className="flex-row items-center justify-between">
+						<AppText className="text-foreground-weak text-xs uppercase">
+							{section.title}
+						</AppText>
+						<AppText className="text-foreground-weaker text-xs">
+							{section.workspaceCount} workspaces
+						</AppText>
 					</View>
-				))}
-			</View>
-			<LogoEmptyState
-				title="Invite your team"
-				subtitle="Share workspaces and keep sessions in sync across projects."
-			/>
-		</View>
+				</View>
+			)}
+			ListHeaderComponent={
+				<View className="gap-4">
+					<View className="flex-row items-center justify-between">
+						<AppText className="font-semibold text-foreground-strong text-lg">
+							Workspaces
+						</AppText>
+						<Button size="sm" variant="outline">
+							New
+						</Button>
+					</View>
+				</View>
+			}
+			ListFooterComponent={
+				<View className="mt-4">
+					<LogoEmptyState
+						title="Invite your team"
+						subtitle="Share workspaces and keep sessions in sync across projects."
+					/>
+				</View>
+			}
+		/>
 	);
 }
