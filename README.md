@@ -23,6 +23,13 @@ opencoder/
 └── .beads/          # Issue tracking (powered by bd)
 ```
 
+## Table of Contents
+
+- [Getting Started](#getting-started)
+- [Android Build and Release](#android-build-and-release)
+- [Quality Gates](#quality-gates)
+- [Issue Tracking](#issue-tracking)
+
 ## Getting Started
 
 ### Prerequisites
@@ -54,6 +61,58 @@ bun run dev:native
 # Web only
 bun run dev:web
 ```
+
+## Android Build and Release
+
+### Update Version
+
+When using CNG (prebuild), update the app version in `apps/native/app.config.ts` and re-run prebuild so native files stay in sync.
+
+- `version` (user-facing version)
+- `android.versionCode` (increment every release)
+
+```bash
+bunx expo prebuild --clean
+```
+
+### Build (Local AAB with EAS)
+
+`apps/native/eas.json` already sets `JAVA_HOME` and `ANDROID_HOME` for local builds.
+
+```bash
+bunx -p eas-cli eas build -p android --profile production --local
+```
+
+The AAB will be written to `apps/native/build-<timestamp>.aab`.
+
+### Publish (Fastlane)
+
+Fastlane expects a service account JSON with Play Console access and an existing app in Play Console.
+
+Args or env are both supported:
+
+```bash
+# Args
+bundle exec --gemfile "apps/native/Gemfile" fastlane upload_play_store \
+  aab:/Users/shady/github/shekohex/opencoder/apps/native/build-1767522043689.aab \
+  json_key:/Users/shady/github/shekohex/opencoder/apps/native/opencoder-001-ee6878fa8e16.json \
+  package_name:com.github.shekohex.opencoder
+```
+
+```bash
+# Env
+AAB_PATH="/Users/shady/github/shekohex/opencoder/apps/native/build-1767522043689.aab" \
+PLAY_SERVICE_ACCOUNT_JSON="/Users/shady/github/shekohex/opencoder/apps/native/opencoder-001-ee6878fa8e16.json" \
+PACKAGE_NAME="com.github.shekohex.opencoder" \
+bundle exec --gemfile "apps/native/Gemfile" fastlane upload_play_store
+```
+
+### Troubleshooting
+
+- `Package not found`: The app must exist in Play Console and the service account must have access.
+- `SDK location not found`: Ensure `ANDROID_HOME=/Users/shady/Library/Android/sdk` or set `sdk.dir` in `android/local.properties`.
+- `Unsupported class file major version 69`: Use JDK 17 (already set in `apps/native/eas.json`).
+- `PluginError: Failed to resolve plugin`: Run `bun run build -C packages/expo-plugins` and use the `../../packages/expo-plugins/dist` path in `apps/native/app.config.ts`.
 
 ## Quality Gates
 
