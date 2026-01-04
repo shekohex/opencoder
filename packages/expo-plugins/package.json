@@ -1,0 +1,21 @@
+{
+	"name": "@opencoder/expo-plugins",
+	"version": "0.0.0",
+	"type": "commonjs",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"build": "tsc -p tsconfig.json",
+		"check-types": "tsc -p tsconfig.json --noEmit"
+	},
+	"dependencies": {
+		"@expo/config-plugins": "^8.0.0"
+	},
+	"devDependencies": {
+		"@types/node": "catalog:",
+		"typescript": "catalog:"
+	}
+}
