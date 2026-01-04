@@ -15,6 +15,7 @@ web-build/
 android
 ios
 opencoder-001-ee6878fa8e16.json
+fastlane/report.xml
 
 # macOS
 .DS_Store
