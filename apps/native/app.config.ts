@@ -16,6 +16,7 @@ const config: ExpoConfig = {
 		icon: "./assets/images/opencoder-icon-light.png",
 	},
 	android: {
+		versionCode: 1,
 		adaptiveIcon: {
 			backgroundColor: "#FFFFFF",
 			foregroundImage: "./assets/images/android-icon-foreground.png",
@@ -29,6 +30,11 @@ const config: ExpoConfig = {
 	web: {
 		output: "server",
 		favicon: "./assets/images/favicon.png",
+	},
+	extra: {
+		eas: {
+			projectId: "969a84ad-4c59-4737-b3cd-e2bc796ff519",
+		},
 	},
 	plugins: [
 		"expo-router",
@@ -46,6 +52,15 @@ const config: ExpoConfig = {
 			},
 		],
 		"expo-secure-store",
+		[
+			"expo-build-properties",
+			{
+				android: {
+					buildArchs: ["arm64-v8a"],
+				},
+			},
+		],
+		"../../packages/expo-plugins/dist",
 		[
 			"expo-font",
 			{

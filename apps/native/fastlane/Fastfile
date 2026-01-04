@@ -1,0 +1,22 @@
+default_platform(:android)
+
+platform :android do
+  desc "Upload AAB to Play Console"
+  lane :upload_play_store do |options|
+    aab_path = options[:aab] || ENV["AAB_PATH"]
+    json_key = options[:json_key] || ENV["PLAY_SERVICE_ACCOUNT_JSON"]
+    package_name = options[:package_name] || ENV["PACKAGE_NAME"]
+    track = options[:track] || ENV.fetch("PLAY_TRACK", "internal")
+
+    UI.user_error!("Missing AAB path. Use aab:<path> or AAB_PATH.") if aab_path.to_s.empty?
+    UI.user_error!("Missing service account JSON. Use json_key:<path> or PLAY_SERVICE_ACCOUNT_JSON.") if json_key.to_s.empty?
+    UI.user_error!("Missing package name. Use package_name:<id> or PACKAGE_NAME.") if package_name.to_s.empty?
+
+    supply(
+      aab: aab_path,
+      json_key: json_key,
+      package_name: package_name,
+      track: track
+    )
+  end
+end

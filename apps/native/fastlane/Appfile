@@ -1,0 +1,2 @@
+package_name "com.github.shekohex.opencoder"
+json_key_file ENV["PLAY_JSON_KEY"]

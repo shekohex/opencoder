@@ -7,10 +7,14 @@ npm-debug.*
 *.p12
 *.key
 *.mobileprovision
+credentials.android.json
+credentials.json
 *.orig.*
 web-build/
+*.aab
 android
 ios
+opencoder-001-ee6878fa8e16.json
 
 # macOS
 .DS_Store
