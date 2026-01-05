@@ -7,10 +7,7 @@ import { AppText } from "@/components/app-text";
 import { Button } from "@/components/button";
 import { Container } from "@/components/container";
 
-import {
-	buildStatus,
-	messageRows,
-} from "@/components/workspace-mockups/mock-data";
+import { messageRows } from "@/components/workspace-mockups/mock-data";
 import { useWorkspaceNav } from "@/lib/workspace-nav";
 
 const BACK_ROUTE = "/workspaces/sessions" as Href;
@@ -44,7 +41,6 @@ export default function WorkspacesChatScreen() {
 					</View>
 				</View>
 				<ScrollView className="flex-1" contentContainerClassName="gap-3 p-4">
-					<BuildBanner />
 					{messageRows.map((message, index) => (
 						<View
 							key={`${message.role}-mobile-${index}`}
@@ -73,26 +69,5 @@ export default function WorkspacesChatScreen() {
 				</View>
 			</View>
 		</Container>
-	);
-}
-
-function BuildBanner() {
-	return (
-		<View className="gap-1 rounded-lg border border-border-info bg-surface-info px-3 py-2">
-			<View className="flex-row items-center justify-between">
-				<View className="flex-row items-center gap-2">
-					<View className="h-2 w-2 rounded-full bg-surface-info" />
-					<AppText className="font-semibold text-foreground-strong text-xs">
-						{buildStatus.title}
-					</AppText>
-				</View>
-				<AppText className="text-foreground-weak text-xs">
-					{buildStatus.detail}
-				</AppText>
-			</View>
-			<AppText className="text-foreground-weak text-xs">
-				{buildStatus.stage}
-			</AppText>
-		</View>
 	);
 }

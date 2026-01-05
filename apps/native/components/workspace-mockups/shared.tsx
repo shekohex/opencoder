@@ -89,6 +89,8 @@ export function WorkspaceThreePane({
 	selectedWorkspaceId,
 	selectedProjectId,
 	onSelectProject,
+	onSelectWorkspace,
+	onCreateWorkspace,
 	selectedSessionId,
 	onSelectSession,
 }: {
@@ -100,6 +102,8 @@ export function WorkspaceThreePane({
 	selectedWorkspaceId?: string | null;
 	selectedProjectId?: string | null;
 	onSelectProject?: (projectId: string) => void;
+	onSelectWorkspace?: (workspaceId: string) => void;
+	onCreateWorkspace?: () => void;
 	selectedSessionId?: string | null;
 	onSelectSession?: (sessionId: string) => void;
 }) {
@@ -268,6 +272,8 @@ export function WorkspaceThreePane({
 						selectedWorkspaceId={selectedWorkspaceId ?? null}
 						selectedProjectId={selectedProjectId ?? null}
 						onSelectProject={onSelectProject ?? (() => {})}
+						onSelectWorkspace={onSelectWorkspace ?? (() => {})}
+						onCreateWorkspace={onCreateWorkspace}
 					/>
 				</Animated.View>
 				<ResizeHandle gesture={leftHandle} />
@@ -357,19 +363,21 @@ function WorkspaceSidebarContent({
 	selectedWorkspaceId,
 	selectedProjectId,
 	onSelectProject,
+	onSelectWorkspace,
+	onCreateWorkspace,
 }: {
 	rowHeight: number;
 	selectedWorkspaceId: string | null;
 	selectedProjectId: string | null;
 	onSelectProject: (id: string) => void;
+	onSelectWorkspace: (id: string) => void;
+	onCreateWorkspace?: () => void;
 }) {
-	const { setSelectedWorkspaceId } = useWorkspaceNav();
-
 	const handleWorkspacePress = useCallback(
 		(workspaceName: string) => {
-			setSelectedWorkspaceId(workspaceName);
+			onSelectWorkspace(workspaceName);
 		},
-		[setSelectedWorkspaceId],
+		[onSelectWorkspace],
 	);
 
 	const workspaceRows = useMemo(
@@ -385,7 +393,11 @@ function WorkspaceSidebarContent({
 
 	return (
 		<View className="flex-1">
-			<ListHeader title="Workspaces" actionLabel="New" />
+			<ListHeader
+				title="Workspaces"
+				actionLabel="New"
+				onPress={onCreateWorkspace}
+			/>
 			<Accordion type="single" collapsible>
 				<FlatList
 					data={workspaceRows}
@@ -797,17 +809,20 @@ export function AppShell({
 	height,
 	availableWidth,
 	isFramed = true,
+	onCreateWorkspace,
 }: {
 	breakpoint: BreakpointName;
 	showRightPanel?: boolean;
 	height?: number;
 	availableWidth?: number;
 	isFramed?: boolean;
+	onCreateWorkspace?: () => void;
 }) {
 	const {
 		selectedWorkspaceId,
 		selectedProjectId,
 		selectedSessionId,
+		setSelectedWorkspaceId,
 		setSelectedProjectId,
 		setSelectedSessionId,
 	} = useWorkspaceNav();
@@ -969,6 +984,8 @@ export function AppShell({
 						selectedWorkspaceId={selectedWorkspaceId}
 						selectedProjectId={selectedProjectId}
 						onSelectProject={setSelectedProjectId}
+						onSelectWorkspace={setSelectedWorkspaceId}
+						onCreateWorkspace={onCreateWorkspace}
 					/>
 				</Animated.View>
 				<ResizeHandle gesture={leftHandle} />
