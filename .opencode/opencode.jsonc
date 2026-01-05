@@ -3,7 +3,7 @@
 	"permission": {
 		"external_directory": "allow",
 		"bash": {
-			"bd close": "ask"
+			"bd close *": "ask"
 		}
 	}
 }
