@@ -2,7 +2,7 @@ import { Feather } from "@expo/vector-icons";
 import { Logo } from "@opencoder/branding";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FlatList, Pressable, View } from "react-native";
+import { ActivityIndicator, FlatList, Pressable, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
 	useAnimatedStyle,
@@ -26,6 +26,7 @@ import {
 } from "./mock-data";
 
 export type BreakpointName = "desktop" | "tablet";
+export type ListState = "ready" | "loading" | "empty" | "error";
 
 type WorkspaceGroup = (typeof workspaceGroupsSeed)[number];
 
@@ -407,6 +408,7 @@ function WorkspaceSidebarContent({
 	onSelectProject,
 	onSelectWorkspace,
 	onCreateWorkspace,
+	listState = "ready",
 }: {
 	rowHeight: number;
 	workspaceGroups?: WorkspaceGroup[];
@@ -415,6 +417,7 @@ function WorkspaceSidebarContent({
 	onSelectProject: (id: string) => void;
 	onSelectWorkspace: (id: string) => void;
 	onCreateWorkspace?: () => void;
+	listState?: ListState;
 }) {
 	const resolvedWorkspaceGroups = workspaceGroups ?? workspaceGroupsSeed;
 	const handleWorkspacePress = useCallback(
@@ -442,58 +445,82 @@ function WorkspaceSidebarContent({
 				actionLabel="New"
 				onPress={onCreateWorkspace}
 			/>
-			<Accordion type="single" collapsible>
-				<FlatList
-					data={workspaceRows}
-					keyExtractor={(item) => item.name}
-					style={{ flex: 1 }}
-					contentContainerStyle={{ paddingBottom: 12 }}
-					renderItem={({ item: row }) => {
-						const isSelected = row.name === selectedWorkspaceId;
-						const workspaceValue = `workspace-${row.name}`;
+			{listState === "error" && (
+				<View className="px-3 pt-3">
+					<ErrorBanner
+						title="Sync issue"
+						subtitle="Unable to load workspaces."
+						ctaLabel="Retry"
+					/>
+				</View>
+			)}
+			{listState === "loading" && (
+				<LoadingList count={6} rowHeight={rowHeight} />
+			)}
+			{listState === "empty" && (
+				<View className="px-3 pt-3">
+					<EmptyStateCard
+						title="No workspaces yet"
+						subtitle="Create your first workspace to get started."
+						ctaLabel="Create workspace"
+						onPress={onCreateWorkspace}
+					/>
+				</View>
+			)}
+			{listState === "ready" && (
+				<Accordion type="single" collapsible>
+					<FlatList
+						data={workspaceRows}
+						keyExtractor={(item) => item.name}
+						style={{ flex: 1 }}
+						contentContainerStyle={{ paddingBottom: 12 }}
+						renderItem={({ item: row }) => {
+							const isSelected = row.name === selectedWorkspaceId;
+							const workspaceValue = `workspace-${row.name}`;
 
-						return (
-							<Accordion.Item key={workspaceValue} value={workspaceValue}>
-								<WorkspaceAccordionTrigger
-									row={row}
-									ownerInitials={row.ownerInitials}
-									rowHeight={rowHeight}
-									isSelected={isSelected}
-									onPress={() => handleWorkspacePress(row.name)}
-								/>
-								<Accordion.Content>
-									<View className="ml-4 gap-3 border-border border-l pb-2 pl-4">
-										{projectGroups.map((projectGroup) => (
-											<View key={projectGroup.title} className="gap-1">
-												<AppText className="text-foreground-weak text-xs uppercase">
-													{projectGroup.title}
-												</AppText>
-												{projectGroup.rows.map((project) => {
-													const projectKey = `${row.name}-${project.name}`;
-													const isProjectSelected =
-														project.name === selectedProjectId;
+							return (
+								<Accordion.Item key={workspaceValue} value={workspaceValue}>
+									<WorkspaceAccordionTrigger
+										row={row}
+										ownerInitials={row.ownerInitials}
+										rowHeight={rowHeight}
+										isSelected={isSelected}
+										onPress={() => handleWorkspacePress(row.name)}
+									/>
+									<Accordion.Content>
+										<View className="ml-4 gap-3 border-border border-l pb-2 pl-4">
+											{projectGroups.map((projectGroup) => (
+												<View key={projectGroup.title} className="gap-1">
+													<AppText className="text-foreground-weak text-xs uppercase">
+														{projectGroup.title}
+													</AppText>
+													{projectGroup.rows.map((project) => {
+														const projectKey = `${row.name}-${project.name}`;
+														const isProjectSelected =
+															project.name === selectedProjectId;
 
-													return (
-														<ProjectRow
-															key={projectKey}
-															name={project.name}
-															status={project.status}
-															lastUsed={project.lastUsed}
-															height={Math.max(rowHeight - 8, 40)}
-															isSelected={isProjectSelected}
-															onPress={() => onSelectProject(project.name)}
-														/>
-													);
-												})}
-											</View>
-										))}
-									</View>
-								</Accordion.Content>
-							</Accordion.Item>
-						);
-					}}
-				/>
-			</Accordion>
+														return (
+															<ProjectRow
+																key={projectKey}
+																name={project.name}
+																status={project.status}
+																lastUsed={project.lastUsed}
+																height={Math.max(rowHeight - 8, 40)}
+																isSelected={isProjectSelected}
+																onPress={() => onSelectProject(project.name)}
+															/>
+														);
+													})}
+												</View>
+											))}
+										</View>
+									</Accordion.Content>
+								</Accordion.Item>
+							);
+						}}
+					/>
+				</Accordion>
+			)}
 		</View>
 	);
 }
@@ -524,7 +551,7 @@ function WorkspaceAccordionTrigger({
 			/>
 			<Pressable
 				onPress={toggle}
-				className="ml-2 h-8 w-8 items-center justify-center"
+				className="focus-ring ml-2 h-8 w-8 items-center justify-center rounded-full"
 				accessibilityRole="button"
 				accessibilityState={{ expanded: isExpanded }}
 				accessibilityLabel={isExpanded ? "Collapse" : "Expand"}
@@ -548,12 +575,14 @@ function SessionSidebarContent({
 	selectedSessionId,
 	onSelectSession,
 	onCreateSession,
+	listState = "ready",
 }: {
 	rowHeight: number;
 	sessions: SessionRowData[];
 	selectedSessionId: string | null;
 	onSelectSession: (sessionId: string) => void;
 	onCreateSession: () => void;
+	listState?: ListState;
 }) {
 	return (
 		<View className="flex-1">
@@ -562,41 +591,63 @@ function SessionSidebarContent({
 				actionLabel="New"
 				onPress={onCreateSession}
 			/>
-			<FlatList
-				data={sessions}
-				keyExtractor={(item) => item.name}
-				style={{ flex: 1 }}
-				contentContainerStyle={{
-					paddingHorizontal: 12,
-					paddingTop: 12,
-					paddingBottom: 12,
-				}}
-				ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
-				renderItem={({ item: session }) => (
-					<SessionRow
-						title={session.name}
-						status={session.status}
-						lastUsed={session.lastUsed}
-						height={rowHeight}
-						isActive={session.name === selectedSessionId}
-						onPress={() => onSelectSession(session.name)}
+			{listState === "error" && (
+				<View className="px-3 pt-3">
+					<ErrorCard
+						title="Server offline"
+						subtitle="Open Code server is unreachable."
+						ctaLabel="Retry"
+						secondaryLabel="Open server"
 					/>
-				)}
-				ListFooterComponent={
-					<View className="mt-3">
-						<ErrorCard
-							title="Server offline"
-							subtitle="Open Code server is unreachable."
-							ctaLabel="Retry"
+				</View>
+			)}
+			{listState === "loading" && (
+				<LoadingList count={5} rowHeight={rowHeight} />
+			)}
+			{listState === "empty" && (
+				<View className="px-3 pt-3">
+					<EmptyStateCard
+						title="No sessions yet"
+						subtitle="Create a session to start chatting."
+						ctaLabel="New session"
+						onPress={onCreateSession}
+					/>
+				</View>
+			)}
+			{listState === "ready" && (
+				<FlatList
+					data={sessions}
+					keyExtractor={(item) => item.name}
+					style={{ flex: 1 }}
+					contentContainerStyle={{
+						paddingHorizontal: 12,
+						paddingTop: 12,
+						paddingBottom: 12,
+					}}
+					ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+					renderItem={({ item: session }) => (
+						<SessionRow
+							title={session.name}
+							status={session.status}
+							lastUsed={session.lastUsed}
+							height={rowHeight}
+							isActive={session.name === selectedSessionId}
+							onPress={() => onSelectSession(session.name)}
 						/>
-					</View>
-				}
-			/>
+					)}
+				/>
+			)}
 		</View>
 	);
 }
 
-function ChatPanel({ sessionTitle }: { sessionTitle?: string }) {
+function ChatPanel({
+	sessionTitle,
+	messageState = "ready",
+}: {
+	sessionTitle?: string;
+	messageState?: ListState;
+}) {
 	return (
 		<View className="flex-1 bg-background">
 			<View className="border-border border-b bg-surface px-4 py-3">
@@ -606,21 +657,34 @@ function ChatPanel({ sessionTitle }: { sessionTitle?: string }) {
 			</View>
 			<View className="flex-1 gap-3 p-4">
 				<BuildBanner />
-				{messageRows.map((message, index) => (
-					<View
-						key={`${message.role}-${index}`}
-						className={`rounded-lg px-3 py-2 ${
-							message.role === "user"
-								? "self-end bg-surface-interactive"
-								: "self-start bg-surface"
-						}`}
-						style={{ maxWidth: "70%" }}
-					>
-						<AppText className="text-foreground text-sm">
-							{message.text}
-						</AppText>
+				{messageState === "loading" && (
+					<View className="flex-1 items-center justify-center">
+						<ActivityIndicator color="var(--color-icon)" />
 					</View>
-				))}
+				)}
+				{messageState === "empty" && (
+					<EmptyStateCard
+						title="No messages yet"
+						subtitle="Start a session to see messages here."
+						ctaLabel="New session"
+					/>
+				)}
+				{messageState === "ready" &&
+					messageRows.map((message, index) => (
+						<View
+							key={`${message.role}-${index}`}
+							className={`rounded-lg px-3 py-2 ${
+								message.role === "user"
+									? "self-end bg-surface-interactive"
+									: "self-start bg-surface"
+							}`}
+							style={{ maxWidth: "70%" }}
+						>
+							<AppText className="text-foreground text-sm">
+								{message.text}
+							</AppText>
+						</View>
+					))}
 			</View>
 			<View className="border-border border-t bg-surface px-4 py-3">
 				<View className="flex-row items-center gap-2 rounded-lg border border-border bg-input px-3 py-2">
@@ -731,10 +795,12 @@ function ProjectRow({
 	return (
 		<Pressable
 			onPress={onPress}
-			className={`justify-center rounded-lg px-3 ${
+			className={`focus-ring justify-center rounded-lg px-3 ${
 				isSelected ? "bg-surface" : "bg-transparent"
 			}`}
 			style={{ height }}
+			accessibilityRole="button"
+			accessibilityLabel={`${name} project`}
 		>
 			<View className="flex-row items-center justify-between">
 				<AppText className="text-foreground-strong text-sm">{name}</AppText>
@@ -765,10 +831,12 @@ function SessionRow({
 	return (
 		<Pressable
 			onPress={onPress}
-			className={`justify-center rounded-lg px-3 ${
+			className={`focus-ring justify-center rounded-lg px-3 ${
 				isActive ? "bg-surface" : "bg-transparent"
 			}`}
 			style={{ height }}
+			accessibilityRole="button"
+			accessibilityLabel={`${title} session`}
 		>
 			<View className="flex-row items-center justify-between">
 				<AppText className="text-foreground-strong text-sm">{title}</AppText>
@@ -826,6 +894,44 @@ function ErrorCard({
 	title,
 	subtitle,
 	ctaLabel,
+	secondaryLabel,
+}: {
+	title: string;
+	subtitle: string;
+	ctaLabel: string;
+	secondaryLabel?: string;
+}) {
+	return (
+		<View className="gap-2 rounded-lg border border-border-critical bg-surface-critical px-3 py-3">
+			<View className="flex-row items-center gap-2">
+				<Feather name="alert-triangle" size={14} color="var(--color-icon)" />
+				<AppText className="font-semibold text-foreground-strong text-sm">
+					{title}
+				</AppText>
+			</View>
+			<AppText className="text-foreground-weak text-xs">{subtitle}</AppText>
+			<View className="flex-row gap-2">
+				<Button size="sm" variant="outline" accessibilityLabel={ctaLabel}>
+					{ctaLabel}
+				</Button>
+				{secondaryLabel && (
+					<Button
+						size="sm"
+						variant="secondary"
+						accessibilityLabel={secondaryLabel}
+					>
+						{secondaryLabel}
+					</Button>
+				)}
+			</View>
+		</View>
+	);
+}
+
+export function ErrorBanner({
+	title,
+	subtitle,
+	ctaLabel,
 }: {
 	title: string;
 	subtitle: string;
@@ -840,9 +946,72 @@ function ErrorCard({
 				</AppText>
 			</View>
 			<AppText className="text-foreground-weak text-xs">{subtitle}</AppText>
-			<Button size="sm" variant="outline">
+			<Button size="sm" variant="outline" accessibilityLabel={ctaLabel}>
 				{ctaLabel}
 			</Button>
+		</View>
+	);
+}
+
+export function EmptyStateCard({
+	title,
+	subtitle,
+	ctaLabel,
+	onPress,
+}: {
+	title: string;
+	subtitle: string;
+	ctaLabel: string;
+	onPress?: () => void;
+}) {
+	return (
+		<View className="gap-2 rounded-lg border border-border bg-surface px-3 py-3">
+			<AppText className="font-semibold text-foreground-strong text-sm">
+				{title}
+			</AppText>
+			<AppText className="text-foreground-weak text-xs">{subtitle}</AppText>
+			<Button
+				size="sm"
+				variant="outline"
+				onPress={onPress}
+				accessibilityLabel={ctaLabel}
+			>
+				{ctaLabel}
+			</Button>
+		</View>
+	);
+}
+
+export function LoadingList({
+	count,
+	rowHeight,
+}: {
+	count: number;
+	rowHeight: number;
+}) {
+	const keys = useMemo(
+		() =>
+			Array.from(
+				{ length: count },
+				() => `Skeleton-${Math.random().toString(36).slice(2)}`,
+			),
+		[count],
+	);
+
+	return (
+		<View className="gap-3 px-3 py-3">
+			{keys.map((key) => (
+				<View
+					key={key}
+					className="justify-center rounded-lg border border-border bg-surface px-3"
+					style={{ height: rowHeight }}
+				>
+					<View className="gap-2">
+						<View className="h-3 w-2/3 rounded-full bg-surface-weak" />
+						<View className="h-3 w-1/3 rounded-full bg-surface-weak" />
+					</View>
+				</View>
+			))}
 		</View>
 	);
 }
@@ -855,6 +1024,7 @@ export function AppShell({
 	isFramed = true,
 	workspaceGroups,
 	onCreateWorkspace,
+	listState = "ready",
 }: {
 	breakpoint: BreakpointName;
 	showRightPanel?: boolean;
@@ -863,6 +1033,7 @@ export function AppShell({
 	isFramed?: boolean;
 	workspaceGroups: WorkspaceGroup[];
 	onCreateWorkspace?: () => void;
+	listState?: ListState;
 }) {
 	const {
 		selectedWorkspaceId,
@@ -1033,6 +1204,7 @@ export function AppShell({
 						onSelectProject={setSelectedProjectId}
 						onSelectWorkspace={setSelectedWorkspaceId}
 						onCreateWorkspace={onCreateWorkspace}
+						listState={listState}
 					/>
 				</Animated.View>
 				<ResizeHandle gesture={leftHandle} />
@@ -1046,10 +1218,14 @@ export function AppShell({
 						selectedSessionId={selectedSessionId}
 						onSelectSession={handleSelectSession}
 						onCreateSession={handleCreateSession}
+						listState={listState}
 					/>
 				</Animated.View>
 				<ResizeHandle gesture={middleHandle} />
-				<ChatPanel sessionTitle={selectedSessionId ?? undefined} />
+				<ChatPanel
+					sessionTitle={selectedSessionId ?? undefined}
+					messageState={listState}
+				/>
 				{showRightPanel && (
 					<InfoSidebar width={RIGHT_PANEL_WIDTH} sessions={sessions} />
 				)}

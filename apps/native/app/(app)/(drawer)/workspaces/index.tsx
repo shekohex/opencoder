@@ -1,6 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import type { Href } from "expo-router";
-import { Link } from "expo-router";
+import { Link, useLocalSearchParams } from "expo-router";
 import { Pressable, SectionList, View } from "react-native";
 
 import { AppText } from "@/components/app-text";
@@ -9,6 +9,10 @@ import { Container } from "@/components/container";
 import { buildStatus } from "@/components/workspace-mockups/mock-data";
 import {
 	AppShell,
+	EmptyStateCard,
+	ErrorBanner,
+	type ListState,
+	LoadingList,
 	LogoEmptyState,
 	ROW_HEIGHTS,
 	useWorkspacePolling,
@@ -24,6 +28,13 @@ export default function WorkspacesScreen() {
 	const { width, height } = useWorkspaceLayout();
 	const { openTemplates } = useCoderBrowser();
 	const { workspaceGroups, hasActiveBuilds } = useWorkspacePolling();
+	const { state } = useLocalSearchParams<{ state?: string }>();
+	const listState: ListState =
+		state === "loading" || state === "error" || state === "empty"
+			? state
+			: "ready";
+	const resolvedListState: ListState =
+		listState === "ready" && workspaceGroups.length === 0 ? "empty" : listState;
 	const frameHeight = Math.max(640, height);
 	const availableWidth = width;
 
@@ -43,12 +54,14 @@ export default function WorkspacesScreen() {
 						isFramed={false}
 						workspaceGroups={workspaceGroups}
 						onCreateWorkspace={openTemplates}
+						listState={resolvedListState}
 					/>
 				</View>
 			) : (
 				<MobileWorkspaces
 					workspaceGroups={workspaceGroups}
 					hasActiveBuilds={hasActiveBuilds}
+					listState={resolvedListState}
 				/>
 			)}
 		</Container>
@@ -60,9 +73,11 @@ const COMPACT_WIDTH_THRESHOLD = 360;
 function MobileWorkspaces({
 	workspaceGroups,
 	hasActiveBuilds,
+	listState,
 }: {
 	workspaceGroups: typeof import("@/components/workspace-mockups/mock-data").workspaceGroups;
 	hasActiveBuilds: boolean;
+	listState: ListState;
 }) {
 	const { width } = useWorkspaceLayout();
 	const { openTemplates, openBuildPage } = useCoderBrowser();
@@ -74,6 +89,7 @@ function MobileWorkspaces({
 		workspaceCount: group.rows.length,
 		data: group.rows,
 	}));
+	const listSections = listState === "ready" ? sections : [];
 
 	const handleOpenBuildPage = () => {
 		openBuildPage("me", "my-workspace", 1);
@@ -81,14 +97,18 @@ function MobileWorkspaces({
 
 	return (
 		<SectionList
-			sections={sections}
+			sections={listSections}
 			keyExtractor={(item, index) => `${item.name}-${index}`}
 			className="flex-1 bg-background"
 			contentContainerStyle={{ padding: 16 }}
 			ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
 			renderItem={({ item, section }) => (
 				<Link key={item.name} href={NEXT_ROUTE} asChild>
-					<Pressable>
+					<Pressable
+						className="focus-ring rounded-lg"
+						accessibilityRole="button"
+						accessibilityLabel={`Open workspace ${item.name}`}
+					>
 						<WorkspaceItem
 							row={item}
 							ownerInitials={section.ownerInitials}
@@ -127,8 +147,27 @@ function MobileWorkspaces({
 							{isCompact ? null : "New"}
 						</Button>
 					</View>
+					{listState === "error" && (
+						<ErrorBanner
+							title="Sync issue"
+							subtitle="Unable to load workspaces."
+							ctaLabel="Retry"
+						/>
+					)}
 					{hasActiveBuilds && <BuildBanner onPress={handleOpenBuildPage} />}
 				</View>
+			}
+			ListEmptyComponent={
+				listState === "loading" ? (
+					<LoadingList count={5} rowHeight={rowHeight} />
+				) : listState === "empty" ? (
+					<EmptyStateCard
+						title="No workspaces yet"
+						subtitle="Create your first workspace to get started."
+						ctaLabel="Create workspace"
+						onPress={openTemplates}
+					/>
+				) : null
 			}
 			ListFooterComponent={
 				<View className="mt-4">
@@ -146,7 +185,7 @@ function BuildBanner({ onPress }: { onPress: () => void }) {
 	return (
 		<Pressable
 			onPress={onPress}
-			className="gap-1 rounded-lg border border-border-info bg-surface-info px-3 py-2"
+			className="focus-ring gap-1 rounded-lg border border-border-info bg-surface-info px-3 py-2"
 			accessibilityRole="button"
 			accessibilityLabel="View build progress"
 		>

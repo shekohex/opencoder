@@ -1,6 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import type { Href } from "expo-router";
-import { Link } from "expo-router";
+import { Link, useLocalSearchParams } from "expo-router";
 import { Pressable, SectionList, View } from "react-native";
 
 import { AppText } from "@/components/app-text";
@@ -8,7 +8,13 @@ import { Button } from "@/components/button";
 import { Container } from "@/components/container";
 
 import { projectGroups } from "@/components/workspace-mockups/mock-data";
-import { ROW_HEIGHTS } from "@/components/workspace-mockups/shared";
+import {
+	EmptyStateCard,
+	ErrorBanner,
+	type ListState,
+	LoadingList,
+	ROW_HEIGHTS,
+} from "@/components/workspace-mockups/shared";
 import { useWorkspaceNav } from "@/lib/workspace-nav";
 
 const BACK_ROUTE = "/workspaces" as Href;
@@ -17,17 +23,26 @@ const NEXT_ROUTE = "/workspaces/sessions" as Href;
 export default function WorkspacesProjectsScreen() {
 	const rowHeight = ROW_HEIGHTS.mobile;
 	const { setSelectedProjectId } = useWorkspaceNav();
+	const { state } = useLocalSearchParams<{ state?: string }>();
+	const listState: ListState =
+		state === "loading" || state === "error" || state === "empty"
+			? state
+			: "ready";
+	const hasProjects = projectGroups.some((group) => group.rows.length > 0);
+	const resolvedListState: ListState =
+		listState === "ready" && !hasProjects ? "empty" : listState;
 
 	const sections = projectGroups.map((group) => ({
 		title: group.title,
 		data: group.rows,
 	}));
+	const listSections = resolvedListState === "ready" ? sections : [];
 
 	return (
 		<Container>
 			<SectionList
 				testID="projects-list"
-				sections={sections}
+				sections={listSections}
 				keyExtractor={(item, index) => `${item.name}-${index}`}
 				className="flex-1 bg-background"
 				contentContainerStyle={{ padding: 16 }}
@@ -36,8 +51,10 @@ export default function WorkspacesProjectsScreen() {
 					<Link key={project.name} href={NEXT_ROUTE} asChild>
 						<Pressable
 							onPress={() => setSelectedProjectId(project.name)}
-							className="rounded-lg border border-border bg-surface px-3"
+							className="focus-ring rounded-lg border border-border bg-surface px-3"
 							style={{ height: rowHeight }}
+							accessibilityRole="button"
+							accessibilityLabel={`Open project ${project.name}`}
 						>
 							<View className="flex-row items-center justify-between">
 								<AppText className="font-medium text-foreground-strong text-sm">
@@ -67,12 +84,27 @@ export default function WorkspacesProjectsScreen() {
 							backLabel="Workspaces"
 							backHref={BACK_ROUTE}
 						/>
+						{resolvedListState === "error" && (
+							<View className="mt-3">
+								<ErrorBanner
+									title="Server offline"
+									subtitle="Open Code server is unreachable."
+									ctaLabel="Retry"
+								/>
+							</View>
+						)}
 					</View>
 				}
-				ListFooterComponent={
-					<View className="mt-4">
-						<ErrorCard />
-					</View>
+				ListEmptyComponent={
+					resolvedListState === "loading" ? (
+						<LoadingList count={5} rowHeight={rowHeight} />
+					) : resolvedListState === "empty" ? (
+						<EmptyStateCard
+							title="No projects yet"
+							subtitle="Open Coder or check the server connection."
+							ctaLabel="Open Coder"
+						/>
+					) : null
 				}
 			/>
 		</Container>
@@ -91,7 +123,7 @@ function MobileHeader({
 	return (
 		<View className="gap-2">
 			<Link href={backHref} asChild>
-				<Pressable className="flex-row items-center gap-2">
+				<Pressable className="focus-ring flex-row items-center gap-2 rounded-full">
 					<Feather name="chevron-left" size={14} color="var(--color-icon)" />
 					<AppText className="text-foreground-weak text-xs">
 						{backLabel}
@@ -106,22 +138,6 @@ function MobileHeader({
 					New
 				</Button>
 			</View>
-		</View>
-	);
-}
-
-function ErrorCard() {
-	return (
-		<View className="gap-2 rounded-lg border border-border-critical bg-surface-critical px-3 py-3">
-			<AppText className="font-semibold text-foreground-strong text-sm">
-				Sync issue
-			</AppText>
-			<AppText className="text-foreground-weak text-xs">
-				Unable to load the latest project status.
-			</AppText>
-			<Button size="sm" variant="outline">
-				Retry
-			</Button>
 		</View>
 	);
 }

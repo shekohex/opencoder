@@ -1,6 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import type { Href } from "expo-router";
-import { Link } from "expo-router";
+import { Link, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { FlatList, Pressable, View } from "react-native";
 
@@ -9,7 +9,13 @@ import { Button } from "@/components/button";
 import { Container } from "@/components/container";
 
 import { sessionRows } from "@/components/workspace-mockups/mock-data";
-import { ROW_HEIGHTS } from "@/components/workspace-mockups/shared";
+import {
+	EmptyStateCard,
+	ErrorBanner,
+	type ListState,
+	LoadingList,
+	ROW_HEIGHTS,
+} from "@/components/workspace-mockups/shared";
 import { useWorkspaceNav } from "@/lib/workspace-nav";
 
 const BACK_ROUTE = "/workspaces/projects" as Href;
@@ -38,6 +44,13 @@ export default function WorkspacesSessionsScreen() {
 	const rowHeight = ROW_HEIGHTS.mobile;
 	const [sessions, setSessions] = useState(sessionRows);
 	const { setSelectedSessionId } = useWorkspaceNav();
+	const { state } = useLocalSearchParams<{ state?: string }>();
+	const listState: ListState =
+		state === "loading" || state === "error" || state === "empty"
+			? state
+			: "ready";
+	const resolvedListState: ListState =
+		listState === "ready" && sessions.length === 0 ? "empty" : listState;
 
 	const handleCreateSession = () => {
 		const nextSession = buildNewSession(sessions);
@@ -49,7 +62,7 @@ export default function WorkspacesSessionsScreen() {
 		<Container>
 			<FlatList
 				testID="sessions-list"
-				data={sessions}
+				data={resolvedListState === "ready" ? sessions : []}
 				keyExtractor={(item) => item.name}
 				className="flex-1 bg-background"
 				contentContainerStyle={{ padding: 16 }}
@@ -58,8 +71,10 @@ export default function WorkspacesSessionsScreen() {
 					<Link key={session.name} href={NEXT_ROUTE} asChild>
 						<Pressable
 							onPress={() => setSelectedSessionId(session.name)}
-							className={`rounded-lg border px-3 ${"border-border bg-surface"}`}
+							className={`focus-ring rounded-lg border px-3 ${"border-border bg-surface"}`}
 							style={{ height: rowHeight }}
+							accessibilityRole="button"
+							accessibilityLabel={`Open session ${session.name}`}
 						>
 							<View className="flex-row items-center justify-between">
 								<AppText className="font-medium text-foreground-strong text-sm">
@@ -83,7 +98,28 @@ export default function WorkspacesSessionsScreen() {
 							backHref={BACK_ROUTE}
 							onNew={handleCreateSession}
 						/>
+						{resolvedListState === "error" && (
+							<View className="mt-3">
+								<ErrorBanner
+									title="Server offline"
+									subtitle="Open Code server is unreachable."
+									ctaLabel="Retry"
+								/>
+							</View>
+						)}
 					</View>
+				}
+				ListEmptyComponent={
+					resolvedListState === "loading" ? (
+						<LoadingList count={5} rowHeight={rowHeight} />
+					) : resolvedListState === "empty" ? (
+						<EmptyStateCard
+							title="No sessions yet"
+							subtitle="Create a session to start chatting."
+							ctaLabel="New session"
+							onPress={handleCreateSession}
+						/>
+					) : null
 				}
 				ListFooterComponent={
 					<View className="mt-4">
@@ -111,7 +147,7 @@ function MobileHeader({
 	return (
 		<View className="gap-2">
 			<Link href={backHref} asChild>
-				<Pressable className="flex-row items-center gap-2">
+				<Pressable className="focus-ring flex-row items-center gap-2 rounded-full">
 					<Feather name="chevron-left" size={14} color="var(--color-icon)" />
 					<AppText className="text-foreground-weak text-xs">
 						{backLabel}

@@ -211,7 +211,7 @@ export function WorkspaceCard({
 			<Pressable
 				onPress={onPress}
 				accessibilityRole="button"
-				className="flex-1"
+				className="focus-ring flex-1 rounded-lg"
 			>
 				{CardContent}
 			</Pressable>
