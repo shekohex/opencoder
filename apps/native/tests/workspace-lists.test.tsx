@@ -3,6 +3,8 @@ import type React from "react";
 
 import WorkspacesProjectsScreen from "@/app/(app)/(drawer)/workspaces/projects";
 import WorkspacesSessionsScreen from "@/app/(app)/(drawer)/workspaces/sessions";
+import { workspaceGroups } from "@/components/workspace-mockups/mock-data";
+import { AppShell } from "@/components/workspace-mockups/shared";
 import { FontProvider } from "@/lib/font-context";
 import { ThemeProvider } from "@/lib/theme-context";
 import { WorkspaceNavProvider } from "@/lib/workspace-nav";
@@ -48,5 +50,27 @@ describe("Workspace lists", () => {
 			},
 		});
 		expect(list).toBeTruthy();
+	});
+
+	it("does not log contextType warning in workspace list", () => {
+		const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+
+		render(
+			<AppShell breakpoint="desktop" workspaceGroups={workspaceGroups} />,
+			{
+				wrapper: createWrapper(),
+			},
+		);
+
+		const warningCalls = errorSpy.mock.calls
+			.flat()
+			.filter((value) => typeof value === "string")
+			.filter((value) =>
+				value.includes("Function components do not support contextType."),
+			);
+
+		expect(warningCalls).toHaveLength(0);
+
+		errorSpy.mockRestore();
 	});
 });
