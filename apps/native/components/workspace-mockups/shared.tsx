@@ -23,7 +23,6 @@ import Animated, {
 import { Accordion } from "@/components/accordion";
 import {
 	AccordionContext,
-	useAccordionContext,
 	useAccordionItemContext,
 } from "@/components/accordion.shared";
 import { AppText } from "@/components/app-text";
@@ -418,10 +417,15 @@ function TopBar() {
 	);
 }
 
-function AccordionVirtualizedList<T>(props: FlatListProps<T>) {
-	const accordionContext = useAccordionContext();
+class AccordionVirtualizedList<T> extends React.PureComponent<
+	FlatListProps<T>
+> {
+	static contextType = AccordionContext;
+	declare context: React.ContextType<typeof AccordionContext>;
 
-	const CellRendererComponent = useMemo(() => {
+	render() {
+		const accordionContext = this.context;
+
 		class AccordionCellRenderer extends React.PureComponent<
 			AccordionCellRendererProps<T>
 		> {
@@ -438,12 +442,11 @@ function AccordionVirtualizedList<T>(props: FlatListProps<T>) {
 			}
 		}
 
-		return AccordionCellRenderer;
-	}, [accordionContext]);
+		const { CellRendererComponent: _CellRendererComponent, ...rest } =
+			this.props;
 
-	const { CellRendererComponent: _CellRendererComponent, ...rest } = props;
-
-	return <FlatList {...rest} CellRendererComponent={CellRendererComponent} />;
+		return <FlatList {...rest} CellRendererComponent={AccordionCellRenderer} />;
+	}
 }
 
 function WorkspaceSidebarContent({
