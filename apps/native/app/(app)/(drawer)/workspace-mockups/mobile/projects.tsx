@@ -32,7 +32,7 @@ export default function WorkspaceMockupsMobileProjects() {
 				renderItem={({ item: project }) => (
 					<Link key={project.name} href={NEXT_ROUTE} asChild>
 						<Pressable
-							className="rounded-lg border border-border bg-surface px-3"
+							className="rounded-xl border border-border bg-surface px-3"
 							style={{ height: rowHeight }}
 						>
 							<View className="flex-row items-center justify-between">
@@ -109,7 +109,7 @@ function MobileHeader({
 
 function ErrorCard() {
 	return (
-		<View className="gap-2 rounded-lg border border-border-critical bg-surface-critical px-3 py-3">
+		<View className="gap-2 rounded-xl border border-border-critical bg-surface-critical px-3 py-3">
 			<AppText className="font-semibold text-foreground-strong text-sm">
 				Sync issue
 			</AppText>

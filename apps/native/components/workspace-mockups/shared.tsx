@@ -689,7 +689,7 @@ function ChatPanel({
 					messageRows.map((message, index) => (
 						<View
 							key={`${message.role}-${index}`}
-							className={`rounded-lg px-3 py-2 ${
+							className={`rounded-xl px-3 py-2 ${
 								message.role === "user"
 									? "self-end bg-surface-interactive"
 									: "self-start bg-surface"
@@ -703,7 +703,7 @@ function ChatPanel({
 					))}
 			</View>
 			<View className="border-border border-t bg-surface px-4 py-3">
-				<View className="flex-row items-center gap-2 rounded-lg border border-border bg-input px-3 py-2">
+				<View className="flex-row items-center gap-2 rounded-xl border border-border bg-input px-3 py-2">
 					<AppText className="text-foreground-weak text-sm">Message...</AppText>
 					<View className="ml-auto">
 						<Feather name="send" size={14} color="var(--color-icon)" />
@@ -811,7 +811,7 @@ function ProjectRow({
 	return (
 		<Pressable
 			onPress={onPress}
-			className={`focus-ring justify-center rounded-lg px-3 ${
+			className={`focus-ring justify-center rounded-xl px-3 ${
 				isSelected ? "bg-surface" : "bg-transparent"
 			}`}
 			style={{ height }}
@@ -847,7 +847,7 @@ function SessionRow({
 	return (
 		<Pressable
 			onPress={onPress}
-			className={`focus-ring justify-center rounded-lg px-3 ${
+			className={`focus-ring justify-center rounded-xl px-3 ${
 				isActive ? "bg-surface" : "bg-transparent"
 			}`}
 			style={{ height }}
@@ -867,7 +867,7 @@ function SessionRow({
 
 function BuildBanner() {
 	return (
-		<View className="gap-1 rounded-lg border border-border-info bg-surface-info px-3 py-2">
+		<View className="gap-1 rounded-xl border border-border-info bg-surface-info px-3 py-2">
 			<View className="flex-row items-center justify-between">
 				<View className="flex-row items-center gap-2">
 					<View className="h-2 w-2 rounded-full bg-surface-info" />
@@ -918,7 +918,7 @@ function ErrorCard({
 	secondaryLabel?: string;
 }) {
 	return (
-		<View className="gap-2 rounded-lg border border-border-critical bg-surface-critical px-3 py-3">
+		<View className="gap-2 rounded-xl border border-border-critical bg-surface-critical px-3 py-3">
 			<View className="flex-row items-center gap-2">
 				<Feather name="alert-triangle" size={14} color="var(--color-icon)" />
 				<AppText className="font-semibold text-foreground-strong text-sm">
@@ -954,7 +954,7 @@ export function ErrorBanner({
 	ctaLabel: string;
 }) {
 	return (
-		<View className="gap-2 rounded-lg border border-border-critical bg-surface-critical px-3 py-3">
+		<View className="gap-2 rounded-xl border border-border-critical bg-surface-critical px-3 py-3">
 			<View className="flex-row items-center gap-2">
 				<Feather name="alert-triangle" size={14} color="var(--color-icon)" />
 				<AppText className="font-semibold text-foreground-strong text-sm">
@@ -981,7 +981,7 @@ export function EmptyStateCard({
 	onPress?: () => void;
 }) {
 	return (
-		<View className="gap-2 rounded-lg border border-border bg-surface px-3 py-3">
+		<View className="gap-2 rounded-xl border border-border bg-surface px-3 py-3">
 			<AppText className="font-semibold text-foreground-strong text-sm">
 				{title}
 			</AppText>
@@ -1019,7 +1019,7 @@ export function LoadingList({
 			{keys.map((key) => (
 				<View
 					key={key}
-					className="justify-center rounded-lg border border-border bg-surface px-3"
+					className="justify-center rounded-xl border border-border bg-surface px-3"
 					style={{ height: rowHeight }}
 				>
 					<View className="gap-2">

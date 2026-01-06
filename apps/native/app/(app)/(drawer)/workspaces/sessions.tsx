@@ -71,7 +71,7 @@ export default function WorkspacesSessionsScreen() {
 					<Link key={session.name} href={NEXT_ROUTE} asChild>
 						<Pressable
 							onPress={() => setSelectedSessionId(session.name)}
-							className={`focus-ring rounded-lg border px-3 ${"border-border bg-surface"}`}
+							className={`focus-ring rounded-xl border px-3 ${"border-border bg-surface"}`}
 							style={{ height: rowHeight }}
 							accessibilityRole="button"
 							accessibilityLabel={`Open session ${session.name}`}

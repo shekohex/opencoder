@@ -35,7 +35,7 @@ export default function WorkspaceMockupsMobileWorkspaces() {
 				renderItem={({ item: row, section }) => (
 					<Link key={row.name} href={NEXT_ROUTE} asChild>
 						<Pressable
-							className="flex-row items-center gap-3 rounded-lg border border-border bg-surface px-3"
+							className="flex-row items-center gap-3 rounded-xl border border-border bg-surface px-3"
 							style={{ height: rowHeight }}
 						>
 							<View className="h-8 w-8 items-center justify-center rounded-full bg-surface-weak">

@@ -39,6 +39,13 @@ describe("ThemeProvider", () => {
 	});
 
 	it("bumps theme version and invalidates variables on change", async () => {
+		const expectedRadii = {
+			"--radius-xs": "2px",
+			"--radius-sm": "4px",
+			"--radius-md": "6px",
+			"--radius-lg": "8px",
+			"--radius-xl": "10px",
+		};
 		const { getByTestId } = render(
 			<ThemeProvider>
 				<ThemeProbe />
@@ -49,7 +56,10 @@ describe("ThemeProvider", () => {
 
 		expect(getByTestId("themeVersion").props.children).toBe("1");
 		expect(Uniwind.setTheme).toHaveBeenCalledWith("light");
-		expect(Uniwind.updateCSSVariables).toHaveBeenCalledWith("light", {});
+		expect(Uniwind.updateCSSVariables).toHaveBeenCalledWith(
+			"light",
+			expectedRadii,
+		);
 
 		await act(async () => {
 			fireEvent.press(getByTestId("setTheme"));
@@ -59,7 +69,7 @@ describe("ThemeProvider", () => {
 		expect(Uniwind.setTheme).toHaveBeenCalledWith("opencode-light");
 		expect(Uniwind.updateCSSVariables).toHaveBeenCalledWith(
 			"opencode-light",
-			{},
+			expectedRadii,
 		);
 
 		await act(async () => {
@@ -70,7 +80,7 @@ describe("ThemeProvider", () => {
 		expect(Uniwind.setTheme).toHaveBeenCalledWith("opencode-dark");
 		expect(Uniwind.updateCSSVariables).toHaveBeenCalledWith(
 			"opencode-dark",
-			{},
+			expectedRadii,
 		);
 	});
 });

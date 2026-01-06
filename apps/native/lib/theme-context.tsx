@@ -17,6 +17,7 @@ import {
 	type ThemeMode,
 	type ThemeName,
 } from "./themes";
+import { radii } from "./tokens";
 
 const storage = createMMKV({ id: "theme-storage" });
 
@@ -88,8 +89,13 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 		const resolvedTheme = uniwindTheme as UniwindThemeName;
 
 		Uniwind.setTheme(resolvedTheme);
-		// Trigger variable invalidation for className-only components.
-		Uniwind.updateCSSVariables(resolvedTheme, {});
+		Uniwind.updateCSSVariables(resolvedTheme, {
+			"--radius-xs": `${radii.xs}px`,
+			"--radius-sm": `${radii.sm}px`,
+			"--radius-md": `${radii.md}px`,
+			"--radius-lg": `${radii.lg}px`,
+			"--radius-xl": `${radii.xl}px`,
+		});
 		setThemeVersion((current) => current + 1);
 	}, [themeName, mode]);
 

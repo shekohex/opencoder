@@ -60,7 +60,7 @@ export default function WorkspaceMockupsMobileSessions() {
 						<Link key={session.name} href={NEXT_ROUTE} asChild>
 							<Pressable
 								onPress={() => setSelectedSessionId(session.name)}
-								className={`rounded-lg border px-3 ${
+								className={`rounded-xl border px-3 ${
 									isActive
 										? "border-border-selected bg-surface"
 										: "border-border bg-surface"

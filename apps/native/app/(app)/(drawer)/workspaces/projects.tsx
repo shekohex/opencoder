@@ -51,7 +51,7 @@ export default function WorkspacesProjectsScreen() {
 					<Link key={project.name} href={NEXT_ROUTE} asChild>
 						<Pressable
 							onPress={() => setSelectedProjectId(project.name)}
-							className="focus-ring rounded-lg border border-border bg-surface px-3"
+							className="focus-ring rounded-xl border border-border bg-surface px-3"
 							style={{ height: rowHeight }}
 							accessibilityRole="button"
 							accessibilityLabel={`Open project ${project.name}`}

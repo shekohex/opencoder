@@ -67,7 +67,7 @@ export function WorkspaceItem({
 
 	return (
 		<View
-			className={`flex-row items-center gap-3 rounded-lg border px-3 ${
+			className={`flex-row items-center gap-3 rounded-xl border px-3 ${
 				isSelected
 					? "border-border-selected bg-surface"
 					: "border-border bg-transparent"

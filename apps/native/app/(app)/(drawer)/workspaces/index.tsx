@@ -105,7 +105,7 @@ function MobileWorkspaces({
 			renderItem={({ item, section }) => (
 				<Link key={item.name} href={NEXT_ROUTE} asChild>
 					<Pressable
-						className="focus-ring rounded-lg"
+						className="focus-ring rounded-xl"
 						accessibilityRole="button"
 						accessibilityLabel={`Open workspace ${item.name}`}
 					>
@@ -185,7 +185,7 @@ function BuildBanner({ onPress }: { onPress: () => void }) {
 	return (
 		<Pressable
 			onPress={onPress}
-			className="focus-ring gap-1 rounded-lg border border-border-info bg-surface-info px-3 py-2"
+			className="focus-ring gap-1 rounded-xl border border-border-info bg-surface-info px-3 py-2"
 			accessibilityRole="button"
 			accessibilityLabel="View build progress"
 		>

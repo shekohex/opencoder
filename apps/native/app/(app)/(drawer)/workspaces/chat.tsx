@@ -70,7 +70,7 @@ export default function WorkspacesChatScreen() {
 						messageRows.map((message, index) => (
 							<View
 								key={`${message.role}-mobile-${index}`}
-								className={`rounded-lg px-3 py-2 ${
+								className={`rounded-xl px-3 py-2 ${
 									message.role === "user"
 										? "self-end bg-surface-interactive"
 										: "self-start bg-surface"
@@ -84,7 +84,7 @@ export default function WorkspacesChatScreen() {
 						))}
 				</ScrollView>
 				<View className="border-border border-t bg-surface px-4 py-3">
-					<View className="flex-row items-center gap-2 rounded-lg border border-border bg-input px-3 py-2">
+					<View className="flex-row items-center gap-2 rounded-xl border border-border bg-input px-3 py-2">
 						<AppText className="text-foreground-weak text-sm">
 							Message...
 						</AppText>
