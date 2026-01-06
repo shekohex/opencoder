@@ -2,7 +2,13 @@ import { Feather } from "@expo/vector-icons";
 import { Logo } from "@opencoder/branding";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, FlatList, Pressable, View } from "react-native";
+import {
+	ActivityIndicator,
+	FlatList,
+	Pressable,
+	ScrollView,
+	View,
+} from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
 	useAnimatedStyle,
@@ -469,12 +475,11 @@ function WorkspaceSidebarContent({
 			)}
 			{listState === "ready" && (
 				<Accordion type="single" collapsible>
-					<FlatList
-						data={workspaceRows}
-						keyExtractor={(item) => item.name}
+					<ScrollView
 						style={{ flex: 1 }}
 						contentContainerStyle={{ paddingBottom: 12 }}
-						renderItem={({ item: row }) => {
+					>
+						{workspaceRows.map((row) => {
 							const isSelected = row.name === selectedWorkspaceId;
 							const workspaceValue = `workspace-${row.name}`;
 
@@ -517,8 +522,8 @@ function WorkspaceSidebarContent({
 									</Accordion.Content>
 								</Accordion.Item>
 							);
-						}}
-					/>
+						})}
+					</ScrollView>
 				</Accordion>
 			)}
 		</View>
