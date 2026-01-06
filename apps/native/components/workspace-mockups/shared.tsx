@@ -22,10 +22,12 @@ import {
 	messageRows,
 	projectGroups,
 	sessionRows,
-	workspaceGroups,
+	workspaceGroups as workspaceGroupsSeed,
 } from "./mock-data";
 
 export type BreakpointName = "desktop" | "tablet";
+
+type WorkspaceGroup = (typeof workspaceGroupsSeed)[number];
 
 export const ROW_HEIGHTS = {
 	desktop: 64,
@@ -62,6 +64,45 @@ const RIGHT_PANEL_WIDTH = 240;
 const RESIZE_HANDLE_WIDTH = 10;
 
 type SessionRowData = (typeof sessionRows)[number];
+
+const cloneWorkspaceGroups = (groups: WorkspaceGroup[]) =>
+	groups.map((group) => ({
+		...group,
+		rows: group.rows.map((row) => ({
+			...row,
+			badges: [...row.badges],
+		})),
+	}));
+
+const getHasActiveBuilds = (groups: WorkspaceGroup[]) =>
+	groups.some((group) =>
+		group.rows.some((row) => {
+			const status = row.status.toLowerCase();
+			return status.includes("starting") || status.includes("building");
+		}),
+	);
+
+export function useWorkspacePolling() {
+	const [workspaceGroups, setWorkspaceGroups] = useState(() =>
+		cloneWorkspaceGroups(workspaceGroupsSeed),
+	);
+	const hasActiveBuilds = useMemo(
+		() => getHasActiveBuilds(workspaceGroups),
+		[workspaceGroups],
+	);
+	const intervalMs = hasActiveBuilds ? 5000 : 30000;
+
+	useEffect(() => {
+		const intervalId = setInterval(() => {
+			setWorkspaceGroups((prev) => cloneWorkspaceGroups(prev));
+			console.log(`[workspaces] refresh ${intervalMs}ms`);
+		}, intervalMs);
+
+		return () => clearInterval(intervalId);
+	}, [intervalMs]);
+
+	return { workspaceGroups, hasActiveBuilds, intervalMs };
+}
 
 function buildNewSession(sessions: SessionRowData[]) {
 	const existingNames = new Set(sessions.map((session) => session.name));
@@ -360,6 +401,7 @@ function TopBar() {
 
 function WorkspaceSidebarContent({
 	rowHeight,
+	workspaceGroups,
 	selectedWorkspaceId,
 	selectedProjectId,
 	onSelectProject,
@@ -367,12 +409,14 @@ function WorkspaceSidebarContent({
 	onCreateWorkspace,
 }: {
 	rowHeight: number;
+	workspaceGroups?: WorkspaceGroup[];
 	selectedWorkspaceId: string | null;
 	selectedProjectId: string | null;
 	onSelectProject: (id: string) => void;
 	onSelectWorkspace: (id: string) => void;
 	onCreateWorkspace?: () => void;
 }) {
+	const resolvedWorkspaceGroups = workspaceGroups ?? workspaceGroupsSeed;
 	const handleWorkspacePress = useCallback(
 		(workspaceName: string) => {
 			onSelectWorkspace(workspaceName);
@@ -382,13 +426,13 @@ function WorkspaceSidebarContent({
 
 	const workspaceRows = useMemo(
 		() =>
-			workspaceGroups.flatMap((group) =>
+			resolvedWorkspaceGroups.flatMap((group) =>
 				group.rows.map((row) => ({
 					...row,
 					ownerInitials: group.ownerInitials,
 				})),
 			),
-		[],
+		[resolvedWorkspaceGroups],
 	);
 
 	return (
@@ -461,7 +505,7 @@ function WorkspaceAccordionTrigger({
 	isSelected,
 	onPress,
 }: {
-	row: (typeof workspaceGroups)[number]["rows"][number];
+	row: WorkspaceGroup["rows"][number];
 	ownerInitials: string;
 	rowHeight: number;
 	isSelected: boolean;
@@ -809,6 +853,7 @@ export function AppShell({
 	height,
 	availableWidth,
 	isFramed = true,
+	workspaceGroups,
 	onCreateWorkspace,
 }: {
 	breakpoint: BreakpointName;
@@ -816,6 +861,7 @@ export function AppShell({
 	height?: number;
 	availableWidth?: number;
 	isFramed?: boolean;
+	workspaceGroups: WorkspaceGroup[];
 	onCreateWorkspace?: () => void;
 }) {
 	const {
@@ -981,6 +1027,7 @@ export function AppShell({
 				>
 					<WorkspaceSidebarContent
 						rowHeight={rowHeight}
+						workspaceGroups={workspaceGroups}
 						selectedWorkspaceId={selectedWorkspaceId}
 						selectedProjectId={selectedProjectId}
 						onSelectProject={setSelectedProjectId}

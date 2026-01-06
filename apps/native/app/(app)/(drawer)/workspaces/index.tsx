@@ -6,14 +6,12 @@ import { Pressable, SectionList, View } from "react-native";
 import { AppText } from "@/components/app-text";
 import { Button } from "@/components/button";
 import { Container } from "@/components/container";
-import {
-	buildStatus,
-	workspaceGroups,
-} from "@/components/workspace-mockups/mock-data";
+import { buildStatus } from "@/components/workspace-mockups/mock-data";
 import {
 	AppShell,
 	LogoEmptyState,
 	ROW_HEIGHTS,
+	useWorkspacePolling,
 } from "@/components/workspace-mockups/shared";
 import { WorkspaceItem } from "@/components/workspace-mockups/workspace-item";
 import { useWorkspaceLayout } from "@/lib/hooks/use-workspace-layout";
@@ -25,6 +23,7 @@ const NEXT_ROUTE = "/workspaces/projects" as Href;
 export default function WorkspacesScreen() {
 	const { width, height } = useWorkspaceLayout();
 	const { openTemplates } = useCoderBrowser();
+	const { workspaceGroups, hasActiveBuilds } = useWorkspacePolling();
 	const frameHeight = Math.max(640, height);
 	const availableWidth = width;
 
@@ -42,11 +41,15 @@ export default function WorkspacesScreen() {
 						availableWidth={availableWidth}
 						height={frameHeight}
 						isFramed={false}
+						workspaceGroups={workspaceGroups}
 						onCreateWorkspace={openTemplates}
 					/>
 				</View>
 			) : (
-				<MobileWorkspaces />
+				<MobileWorkspaces
+					workspaceGroups={workspaceGroups}
+					hasActiveBuilds={hasActiveBuilds}
+				/>
 			)}
 		</Container>
 	);
@@ -54,7 +57,13 @@ export default function WorkspacesScreen() {
 
 const COMPACT_WIDTH_THRESHOLD = 360;
 
-function MobileWorkspaces() {
+function MobileWorkspaces({
+	workspaceGroups,
+	hasActiveBuilds,
+}: {
+	workspaceGroups: typeof import("@/components/workspace-mockups/mock-data").workspaceGroups;
+	hasActiveBuilds: boolean;
+}) {
 	const { width } = useWorkspaceLayout();
 	const { openTemplates, openBuildPage } = useCoderBrowser();
 	const rowHeight = ROW_HEIGHTS.mobile;
@@ -65,8 +74,6 @@ function MobileWorkspaces() {
 		workspaceCount: group.rows.length,
 		data: group.rows,
 	}));
-
-	const hasActiveBuild = buildStatus.stage !== "";
 
 	const handleOpenBuildPage = () => {
 		openBuildPage("me", "my-workspace", 1);
@@ -120,7 +127,7 @@ function MobileWorkspaces() {
 							{isCompact ? null : "New"}
 						</Button>
 					</View>
-					{hasActiveBuild && <BuildBanner onPress={handleOpenBuildPage} />}
+					{hasActiveBuilds && <BuildBanner onPress={handleOpenBuildPage} />}
 				</View>
 			}
 			ListFooterComponent={
