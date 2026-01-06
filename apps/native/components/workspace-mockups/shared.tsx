@@ -1,16 +1,19 @@
 import { Feather } from "@expo/vector-icons";
 import { Logo } from "@opencoder/branding";
-import type { ReactNode } from "react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+	type ReactNode,
+	useCallback,
+	useEffect,
+	useMemo,
+	useState,
+} from "react";
 import {
 	ActivityIndicator,
+	type CellRendererProps,
 	FlatList,
 	type FlatListProps,
-	type LayoutChangeEvent,
 	Pressable,
-	type StyleProp,
 	View,
-	type ViewStyle,
 } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -79,13 +82,7 @@ const RESIZE_HANDLE_WIDTH = 10;
 
 type SessionRowData = (typeof sessionRows)[number];
 
-type AccordionCellRendererProps<T> = {
-	children?: ReactNode;
-	item: T;
-	index: number;
-	style?: StyleProp<ViewStyle>;
-	onLayout?: (event: LayoutChangeEvent) => void;
-};
+type AccordionCellRendererProps<T> = CellRendererProps<T>;
 
 const cloneWorkspaceGroups = (groups: WorkspaceGroup[]) =>
 	groups.map((group) => ({
@@ -424,24 +421,29 @@ function TopBar() {
 function AccordionVirtualizedList<T>(props: FlatListProps<T>) {
 	const accordionContext = useAccordionContext();
 
-	const cellRenderer = useCallback(
-		(cellProps: AccordionCellRendererProps<T>) => {
-			const { children, style, onLayout } = cellProps;
+	const CellRendererComponent = useMemo(() => {
+		class AccordionCellRenderer extends React.PureComponent<
+			AccordionCellRendererProps<T>
+		> {
+			render() {
+				const { children, style, onLayout } = this.props;
 
-			return (
-				<AccordionContext.Provider value={accordionContext}>
-					<View style={style} onLayout={onLayout}>
-						{children}
-					</View>
-				</AccordionContext.Provider>
-			);
-		},
-		[accordionContext],
-	);
+				return (
+					<AccordionContext.Provider value={accordionContext}>
+						<View style={style} onLayout={onLayout}>
+							{children}
+						</View>
+					</AccordionContext.Provider>
+				);
+			}
+		}
+
+		return AccordionCellRenderer;
+	}, [accordionContext]);
 
 	const { CellRendererComponent: _CellRendererComponent, ...rest } = props;
 
-	return <FlatList {...rest} CellRendererComponent={cellRenderer} />;
+	return <FlatList {...rest} CellRendererComponent={CellRendererComponent} />;
 }
 
 function WorkspaceSidebarContent({
