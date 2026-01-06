@@ -5,9 +5,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
 	ActivityIndicator,
 	FlatList,
+	type FlatListProps,
+	type LayoutChangeEvent,
 	Pressable,
-	ScrollView,
+	type StyleProp,
 	View,
+	type ViewStyle,
 } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -15,7 +18,11 @@ import Animated, {
 	useSharedValue,
 } from "react-native-reanimated";
 import { Accordion } from "@/components/accordion";
-import { useAccordionItemContext } from "@/components/accordion.shared";
+import {
+	AccordionContext,
+	useAccordionContext,
+	useAccordionItemContext,
+} from "@/components/accordion.shared";
 import { AppText } from "@/components/app-text";
 import { Button } from "@/components/button";
 import { WorkspaceCard } from "@/components/workspace-mockups/workspace-card";
@@ -71,6 +78,14 @@ const RIGHT_PANEL_WIDTH = 240;
 const RESIZE_HANDLE_WIDTH = 10;
 
 type SessionRowData = (typeof sessionRows)[number];
+
+type AccordionCellRendererProps<T> = {
+	children?: ReactNode;
+	item: T;
+	index: number;
+	style?: StyleProp<ViewStyle>;
+	onLayout?: (event: LayoutChangeEvent) => void;
+};
 
 const cloneWorkspaceGroups = (groups: WorkspaceGroup[]) =>
 	groups.map((group) => ({
@@ -406,6 +421,29 @@ function TopBar() {
 	);
 }
 
+function AccordionVirtualizedList<T>(props: FlatListProps<T>) {
+	const accordionContext = useAccordionContext();
+
+	const cellRenderer = useCallback(
+		(cellProps: AccordionCellRendererProps<T>) => {
+			const { children, style, onLayout } = cellProps;
+
+			return (
+				<AccordionContext.Provider value={accordionContext}>
+					<View style={style} onLayout={onLayout}>
+						{children}
+					</View>
+				</AccordionContext.Provider>
+			);
+		},
+		[accordionContext],
+	);
+
+	const { CellRendererComponent: _CellRendererComponent, ...rest } = props;
+
+	return <FlatList {...rest} CellRendererComponent={cellRenderer} />;
+}
+
 function WorkspaceSidebarContent({
 	rowHeight,
 	workspaceGroups,
@@ -475,11 +513,12 @@ function WorkspaceSidebarContent({
 			)}
 			{listState === "ready" && (
 				<Accordion type="single" collapsible>
-					<ScrollView
+					<AccordionVirtualizedList
+						data={workspaceRows}
+						keyExtractor={(item) => item.name}
 						style={{ flex: 1 }}
 						contentContainerStyle={{ paddingBottom: 12 }}
-					>
-						{workspaceRows.map((row) => {
+						renderItem={({ item: row }) => {
 							const isSelected = row.name === selectedWorkspaceId;
 							const workspaceValue = `workspace-${row.name}`;
 
@@ -522,8 +561,8 @@ function WorkspaceSidebarContent({
 									</Accordion.Content>
 								</Accordion.Item>
 							);
-						})}
-					</ScrollView>
+						}}
+					/>
 				</Accordion>
 			)}
 		</View>
