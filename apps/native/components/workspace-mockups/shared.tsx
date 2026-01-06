@@ -1,30 +1,18 @@
 import { Feather } from "@expo/vector-icons";
 import { Logo } from "@opencoder/branding";
-import React, {
+import {
 	type ReactNode,
 	useCallback,
 	useEffect,
 	useMemo,
 	useState,
 } from "react";
-import {
-	ActivityIndicator,
-	type CellRendererProps,
-	FlatList,
-	type FlatListProps,
-	Pressable,
-	View,
-} from "react-native";
+import { ActivityIndicator, FlatList, Pressable, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
 	useAnimatedStyle,
 	useSharedValue,
 } from "react-native-reanimated";
-import { Accordion } from "@/components/accordion";
-import {
-	AccordionContext,
-	useAccordionItemContext,
-} from "@/components/accordion.shared";
 import { AppText } from "@/components/app-text";
 import { Button } from "@/components/button";
 import { WorkspaceCard } from "@/components/workspace-mockups/workspace-card";
@@ -80,8 +68,6 @@ const RIGHT_PANEL_WIDTH = 240;
 const RESIZE_HANDLE_WIDTH = 10;
 
 type SessionRowData = (typeof sessionRows)[number];
-
-type AccordionCellRendererProps<T> = CellRendererProps<T>;
 
 const cloneWorkspaceGroups = (groups: WorkspaceGroup[]) =>
 	groups.map((group) => ({
@@ -417,38 +403,6 @@ function TopBar() {
 	);
 }
 
-class AccordionVirtualizedList<T> extends React.PureComponent<
-	FlatListProps<T>
-> {
-	static contextType = AccordionContext;
-	declare context: React.ContextType<typeof AccordionContext>;
-
-	render() {
-		const accordionContext = this.context;
-
-		class AccordionCellRenderer extends React.PureComponent<
-			AccordionCellRendererProps<T>
-		> {
-			render() {
-				const { children, style, onLayout } = this.props;
-
-				return (
-					<AccordionContext.Provider value={accordionContext}>
-						<View style={style} onLayout={onLayout}>
-							{children}
-						</View>
-					</AccordionContext.Provider>
-				);
-			}
-		}
-
-		const { CellRendererComponent: _CellRendererComponent, ...rest } =
-			this.props;
-
-		return <FlatList {...rest} CellRendererComponent={AccordionCellRenderer} />;
-	}
-}
-
 function WorkspaceSidebarContent({
 	rowHeight,
 	workspaceGroups,
@@ -469,12 +423,20 @@ function WorkspaceSidebarContent({
 	listState?: ListState;
 }) {
 	const resolvedWorkspaceGroups = workspaceGroups ?? workspaceGroupsSeed;
+	const [expandedWorkspaceId, setExpandedWorkspaceId] = useState<string | null>(
+		null,
+	);
 	const handleWorkspacePress = useCallback(
 		(workspaceName: string) => {
 			onSelectWorkspace(workspaceName);
 		},
 		[onSelectWorkspace],
 	);
+	const handleWorkspaceToggle = useCallback((workspaceName: string) => {
+		setExpandedWorkspaceId((prev) =>
+			prev === workspaceName ? null : workspaceName,
+		);
+	}, []);
 
 	const workspaceRows = useMemo(
 		() =>
@@ -517,58 +479,61 @@ function WorkspaceSidebarContent({
 				</View>
 			)}
 			{listState === "ready" && (
-				<Accordion type="single" collapsible>
-					<AccordionVirtualizedList
-						data={workspaceRows}
-						keyExtractor={(item) => item.name}
-						style={{ flex: 1 }}
-						contentContainerStyle={{ paddingBottom: 12 }}
-						renderItem={({ item: row }) => {
-							const isSelected = row.name === selectedWorkspaceId;
-							const workspaceValue = `workspace-${row.name}`;
+				<FlatList
+					data={workspaceRows}
+					keyExtractor={(item) => item.name}
+					style={{ flex: 1 }}
+					contentContainerStyle={{ paddingBottom: 12 }}
+					renderItem={({ item: row }) => {
+						const isSelected = row.name === selectedWorkspaceId;
+						const isExpanded = row.name === expandedWorkspaceId;
 
-							return (
-								<Accordion.Item key={workspaceValue} value={workspaceValue}>
-									<WorkspaceAccordionTrigger
-										row={row}
-										ownerInitials={row.ownerInitials}
-										rowHeight={rowHeight}
-										isSelected={isSelected}
-										onPress={() => handleWorkspacePress(row.name)}
-									/>
-									<Accordion.Content>
-										<View className="ml-4 gap-3 border-border border-l pb-2 pl-4">
-											{projectGroups.map((projectGroup) => (
-												<View key={projectGroup.title} className="gap-1">
-													<AppText className="text-foreground-weak text-xs uppercase">
-														{projectGroup.title}
-													</AppText>
-													{projectGroup.rows.map((project) => {
-														const projectKey = `${row.name}-${project.name}`;
-														const isProjectSelected =
-															project.name === selectedProjectId;
+						return (
+							<View>
+								<WorkspaceAccordionTrigger
+									row={row}
+									ownerInitials={row.ownerInitials}
+									rowHeight={rowHeight}
+									isSelected={isSelected}
+									isExpanded={isExpanded}
+									onPress={() => {
+										handleWorkspacePress(row.name);
+										handleWorkspaceToggle(row.name);
+									}}
+									onToggle={() => handleWorkspaceToggle(row.name)}
+								/>
+								{isExpanded && (
+									<View className="ml-4 gap-3 border-border border-l pb-2 pl-4">
+										{projectGroups.map((projectGroup) => (
+											<View key={projectGroup.title} className="gap-1">
+												<AppText className="text-foreground-weak text-xs uppercase">
+													{projectGroup.title}
+												</AppText>
+												{projectGroup.rows.map((project) => {
+													const projectKey = `${row.name}-${project.name}`;
+													const isProjectSelected =
+														project.name === selectedProjectId;
 
-														return (
-															<ProjectRow
-																key={projectKey}
-																name={project.name}
-																status={project.status}
-																lastUsed={project.lastUsed}
-																height={Math.max(rowHeight - 8, 40)}
-																isSelected={isProjectSelected}
-																onPress={() => onSelectProject(project.name)}
-															/>
-														);
-													})}
-												</View>
-											))}
-										</View>
-									</Accordion.Content>
-								</Accordion.Item>
-							);
-						}}
-					/>
-				</Accordion>
+													return (
+														<ProjectRow
+															key={projectKey}
+															name={project.name}
+															status={project.status}
+															lastUsed={project.lastUsed}
+															height={Math.max(rowHeight - 8, 40)}
+															isSelected={isProjectSelected}
+															onPress={() => onSelectProject(project.name)}
+														/>
+													);
+												})}
+											</View>
+										))}
+									</View>
+								)}
+							</View>
+						);
+					}}
+				/>
 			)}
 		</View>
 	);
@@ -579,16 +544,18 @@ function WorkspaceAccordionTrigger({
 	ownerInitials,
 	rowHeight,
 	isSelected,
+	isExpanded,
 	onPress,
+	onToggle,
 }: {
 	row: WorkspaceGroup["rows"][number];
 	ownerInitials: string;
 	rowHeight: number;
 	isSelected: boolean;
+	isExpanded: boolean;
 	onPress: () => void;
+	onToggle: () => void;
 }) {
-	const { isExpanded, toggle } = useAccordionItemContext();
-
 	return (
 		<View className="flex-row items-center py-2">
 			<WorkspaceCard
@@ -599,7 +566,7 @@ function WorkspaceAccordionTrigger({
 				onPress={onPress}
 			/>
 			<Pressable
-				onPress={toggle}
+				onPress={onToggle}
 				className="focus-ring ml-2 h-8 w-8 items-center justify-center rounded-full"
 				accessibilityRole="button"
 				accessibilityState={{ expanded: isExpanded }}
