@@ -5,8 +5,10 @@ Status: Draft
 
 ## Goals
 - Show Coder workspaces after sign-in.
+- Use TanStack Query for Coder API fetches.
 - Open projects via Open Code server per workspace.
 - Drill into sessions and messages.
+- Use TanStack Query for all Coder API calls.
 
 ## Non-goals
 - Message composer details.
@@ -21,6 +23,16 @@ Plain flow:
 - User -> App -> Coder API -> Workspaces.
 - Select workspace -> Open Code server -> Projects.
 - Select project -> Sessions -> Messages.
+
+## Data fetching rules
+- Use TanStack Query for all Coder API calls.
+- Keep each Coder API call in a dedicated hook.
+- Use query keys that include baseUrl + session + user scope.
+- Use staleTime and refetchOnFocus defaults from existing app patterns.
+- Use query error state to drive ListState error UI.
+- Never call Coder API directly in components.
+
+
 
 ```mermaid
 flowchart LR
@@ -85,6 +97,7 @@ flowchart LR
 - Option A selected.
 - Desktop and tablet: persistent nav with two sidebars.
 - Phone: stacked screens.
+- Use TanStack Query for all Coder API reads and mutations.
 
 ## Wireframes (MVP)
 
