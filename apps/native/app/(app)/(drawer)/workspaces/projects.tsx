@@ -22,7 +22,7 @@ const NEXT_ROUTE = "/workspaces/sessions" as Href;
 
 export default function WorkspacesProjectsScreen() {
 	const rowHeight = ROW_HEIGHTS.mobile;
-	const { setSelectedProjectId } = useWorkspaceNav();
+	const { selectedProjectId, setSelectedProjectId } = useWorkspaceNav();
 	const { state } = useLocalSearchParams<{ state?: string }>();
 	const listState: ListState =
 		state === "loading" || state === "error" || state === "empty"
@@ -51,7 +51,11 @@ export default function WorkspacesProjectsScreen() {
 					<Link key={project.name} href={NEXT_ROUTE} asChild>
 						<Pressable
 							onPress={() => setSelectedProjectId(project.name)}
-							className="focus-ring rounded-xl border border-border bg-surface px-3"
+							className={`focus-ring rounded-xl border px-3 ${
+								selectedProjectId === project.name
+									? "border-border-info bg-surface-info"
+									: "border-border bg-surface"
+							}`}
 							style={{ height: rowHeight }}
 							accessibilityRole="button"
 							accessibilityLabel={`Open project ${project.name}`}

@@ -43,7 +43,7 @@ function buildNewSession(sessions: SessionRowData[]) {
 export default function WorkspacesSessionsScreen() {
 	const rowHeight = ROW_HEIGHTS.mobile;
 	const [sessions, setSessions] = useState(sessionRows);
-	const { setSelectedSessionId } = useWorkspaceNav();
+	const { selectedSessionId, setSelectedSessionId } = useWorkspaceNav();
 	const { state } = useLocalSearchParams<{ state?: string }>();
 	const listState: ListState =
 		state === "loading" || state === "error" || state === "empty"
@@ -71,7 +71,11 @@ export default function WorkspacesSessionsScreen() {
 					<Link key={session.name} href={NEXT_ROUTE} asChild>
 						<Pressable
 							onPress={() => setSelectedSessionId(session.name)}
-							className={`focus-ring rounded-xl border px-3 ${"border-border bg-surface"}`}
+							className={`focus-ring rounded-xl border px-3 ${
+								selectedSessionId === session.name
+									? "border-border-info bg-surface-info"
+									: "border-border bg-surface"
+							}`}
 							style={{ height: rowHeight }}
 							accessibilityRole="button"
 							accessibilityLabel={`Open session ${session.name}`}

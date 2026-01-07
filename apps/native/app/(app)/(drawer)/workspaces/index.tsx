@@ -21,6 +21,7 @@ import { WorkspaceItem } from "@/components/workspace-mockups/workspace-item";
 import { useWorkspaceLayout } from "@/lib/hooks/use-workspace-layout";
 import { breakpoints } from "@/lib/tokens";
 import { useCoderBrowser } from "@/lib/use-coder-browser";
+import { useWorkspaceNav } from "@/lib/workspace-nav";
 
 const NEXT_ROUTE = "/workspaces/projects" as Href;
 
@@ -80,6 +81,7 @@ function MobileWorkspaces({
 	listState: ListState;
 }) {
 	const { width } = useWorkspaceLayout();
+	const { setSelectedWorkspaceId } = useWorkspaceNav();
 	const { openTemplates, openBuildPage } = useCoderBrowser();
 	const rowHeight = ROW_HEIGHTS.mobile;
 	const isCompact = width < COMPACT_WIDTH_THRESHOLD;
@@ -105,6 +107,7 @@ function MobileWorkspaces({
 			renderItem={({ item, section }) => (
 				<Link key={item.name} href={NEXT_ROUTE} asChild>
 					<Pressable
+						onPress={() => setSelectedWorkspaceId(item.name)}
 						className="focus-ring rounded-xl"
 						accessibilityRole="button"
 						accessibilityLabel={`Open workspace ${item.name}`}

@@ -32,14 +32,25 @@ export function useWorkspaceNav() {
 }
 
 export function WorkspaceNavProvider({ children }: { children: ReactNode }) {
-	const [selectedWorkspaceId, setSelectedWorkspaceId] =
+	const [selectedWorkspaceId, _setSelectedWorkspaceId] =
 		useState<WorkspaceId>(null);
-	const [selectedProjectId, setSelectedProjectId] = useState<ProjectId>(null);
+	const [selectedProjectId, _setSelectedProjectId] = useState<ProjectId>(null);
 	const [selectedSessionId, setSelectedSessionId] = useState<SessionId>(null);
 
+	const setSelectedWorkspaceId = (id: WorkspaceId) => {
+		_setSelectedWorkspaceId(id);
+		_setSelectedProjectId(null);
+		setSelectedSessionId(null);
+	};
+
+	const setSelectedProjectId = (id: ProjectId) => {
+		_setSelectedProjectId(id);
+		setSelectedSessionId(null);
+	};
+
 	const clearSelection = () => {
-		setSelectedWorkspaceId(null);
-		setSelectedProjectId(null);
+		_setSelectedWorkspaceId(null);
+		_setSelectedProjectId(null);
 		setSelectedSessionId(null);
 	};
 
