@@ -2,6 +2,7 @@ export type StatusTone = "success" | "warning" | "inactive";
 export type WorkspaceBadge = "favorite" | "outdated" | "task" | "shared";
 
 export type WorkspaceRowData = {
+	id?: string;
 	name: string;
 	status: string;
 	statusTone: StatusTone;

@@ -16,6 +16,7 @@ import {
 	LogoEmptyState,
 	ROW_HEIGHTS,
 	useWorkspacePolling,
+	type WorkspaceGroup,
 } from "@/components/workspace-mockups/shared";
 import { WorkspaceItem } from "@/components/workspace-mockups/workspace-item";
 import { useWorkspaceLayout } from "@/lib/hooks/use-workspace-layout";
@@ -28,14 +29,21 @@ const NEXT_ROUTE = "/workspaces/projects" as Href;
 export default function WorkspacesScreen() {
 	const { width, height } = useWorkspaceLayout();
 	const { openTemplates } = useCoderBrowser();
-	const { workspaceGroups, hasActiveBuilds } = useWorkspacePolling();
+	const { workspaceGroups, hasActiveBuilds, isLoading, isError } =
+		useWorkspacePolling();
 	const { state } = useLocalSearchParams<{ state?: string }>();
-	const listState: ListState =
-		state === "loading" || state === "error" || state === "empty"
-			? state
-			: "ready";
-	const resolvedListState: ListState =
-		listState === "ready" && workspaceGroups.length === 0 ? "empty" : listState;
+
+	const getListState = (): ListState => {
+		if (state === "loading" || state === "error" || state === "empty") {
+			return state;
+		}
+		if (isLoading) return "loading";
+		if (isError) return "error";
+		if (workspaceGroups.length === 0) return "empty";
+		return "ready";
+	};
+
+	const resolvedListState = getListState();
 	const frameHeight = Math.max(640, height);
 	const availableWidth = width;
 
@@ -76,7 +84,7 @@ function MobileWorkspaces({
 	hasActiveBuilds,
 	listState,
 }: {
-	workspaceGroups: typeof import("@/components/workspace-mockups/mock-data").workspaceGroups;
+	workspaceGroups: WorkspaceGroup[];
 	hasActiveBuilds: boolean;
 	listState: ListState;
 }) {

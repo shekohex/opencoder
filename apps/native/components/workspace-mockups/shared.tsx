@@ -18,6 +18,12 @@ import { Button } from "@/components/button";
 import { WorkspaceCard } from "@/components/workspace-mockups/workspace-card";
 import { useTheme } from "@/lib/theme-context";
 import { useWorkspaceNav } from "@/lib/workspace-nav";
+import {
+	hasActiveBuilds as checkActiveBuilds,
+	groupWorkspacesByOwner,
+	useWorkspaces,
+	type WorkspaceGroup,
+} from "@/lib/workspace-queries";
 
 import {
 	buildStatus,
@@ -31,7 +37,7 @@ import {
 export type BreakpointName = "desktop" | "tablet";
 export type ListState = "ready" | "loading" | "empty" | "error";
 
-type WorkspaceGroup = (typeof workspaceGroupsSeed)[number];
+export type { WorkspaceGroup } from "@/lib/workspace-queries";
 
 export const ROW_HEIGHTS = {
 	desktop: 64,
@@ -69,43 +75,35 @@ const RESIZE_HANDLE_WIDTH = 10;
 
 type SessionRowData = (typeof sessionRows)[number];
 
-const cloneWorkspaceGroups = (groups: WorkspaceGroup[]) =>
-	groups.map((group) => ({
-		...group,
-		rows: group.rows.map((row) => ({
-			...row,
-			badges: [...row.badges],
-		})),
-	}));
-
-const getHasActiveBuilds = (groups: WorkspaceGroup[]) =>
-	groups.some((group) =>
-		group.rows.some((row) => {
-			const status = row.status.toLowerCase();
-			return status.includes("starting") || status.includes("building");
-		}),
-	);
+const POLLING_INTERVAL_ACTIVE = 5000;
+const POLLING_INTERVAL_IDLE = 30000;
 
 export function useWorkspacePolling() {
-	const [workspaceGroups, setWorkspaceGroups] = useState(() =>
-		cloneWorkspaceGroups(workspaceGroupsSeed),
-	);
-	const hasActiveBuilds = useMemo(
-		() => getHasActiveBuilds(workspaceGroups),
-		[workspaceGroups],
-	);
-	const intervalMs = hasActiveBuilds ? 5000 : 30000;
+	const { data: workspaces, isLoading, isError, refetch } = useWorkspaces();
+
+	const workspaceGroups = useMemo(() => {
+		if (!workspaces) return [];
+		return groupWorkspacesByOwner(workspaces);
+	}, [workspaces]);
+
+	const hasActiveBuilds = useMemo(() => {
+		if (!workspaces) return false;
+		return checkActiveBuilds(workspaces);
+	}, [workspaces]);
+
+	const intervalMs = hasActiveBuilds
+		? POLLING_INTERVAL_ACTIVE
+		: POLLING_INTERVAL_IDLE;
 
 	useEffect(() => {
 		const intervalId = setInterval(() => {
-			setWorkspaceGroups((prev) => cloneWorkspaceGroups(prev));
-			console.log(`[workspaces] refresh ${intervalMs}ms`);
+			refetch();
 		}, intervalMs);
 
 		return () => clearInterval(intervalId);
-	}, [intervalMs]);
+	}, [intervalMs, refetch]);
 
-	return { workspaceGroups, hasActiveBuilds, intervalMs };
+	return { workspaceGroups, hasActiveBuilds, intervalMs, isLoading, isError };
 }
 
 function buildNewSession(sessions: SessionRowData[]) {
