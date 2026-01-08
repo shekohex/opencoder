@@ -1,14 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
-import { useSession } from "@/lib/auth";
-import { useWildcardAccessUrl } from "@/lib/deployment-config";
-import {
-	createCoderOpenCodeClient,
-	listOpenCodeProjects,
-} from "@/lib/opencode-client";
-import { isOpenCodeUrlError, resolveOpenCodeUrl } from "@/lib/workspace-apps";
-import { useWorkspaces } from "@/lib/workspace-queries";
+import { listOpenCodeProjects } from "@/lib/opencode-client";
+import { useOpenCodeConnection } from "@/lib/opencode-provider";
 
 export type ProjectRowData = {
 	id: string;
@@ -83,50 +77,30 @@ export const projectsQueryKey = (workspaceId: string | null) =>
 	["opencode-projects", workspaceId] as const;
 
 export function useOpenCodeProjects(workspaceId: string | null) {
-	const { session, baseUrl: coderBaseUrl } = useSession();
-	const { data: workspaces } = useWorkspaces();
-	const { wildcardAccessUrl, isLoading: isLoadingConfig } =
-		useWildcardAccessUrl();
+	const {
+		client,
+		isConnected,
+		isConnecting,
+		connect,
+		error: connectionError,
+	} = useOpenCodeConnection(workspaceId);
 
-	const workspace = useMemo(() => {
-		if (!workspaceId || !workspaces) return null;
-		return workspaces.find((ws) => ws.id === workspaceId) ?? null;
-	}, [workspaceId, workspaces]);
-
-	const openCodeUrlResult = useMemo(() => {
-		if (!workspace || !coderBaseUrl) return null;
-		return resolveOpenCodeUrl(coderBaseUrl, workspace, wildcardAccessUrl);
-	}, [workspace, coderBaseUrl, wildcardAccessUrl]);
+	useEffect(() => {
+		if (workspaceId && !isConnected && !isConnecting) {
+			connect();
+		}
+	}, [workspaceId, isConnected, isConnecting, connect]);
 
 	const query = useQuery({
 		queryKey: projectsQueryKey(workspaceId),
 		queryFn: async () => {
-			if (!openCodeUrlResult) {
-				throw new Error("Cannot resolve OpenCode URL");
+			if (!client) {
+				throw new Error("OpenCode client not available");
 			}
-			if (isOpenCodeUrlError(openCodeUrlResult)) {
-				throw new Error(openCodeUrlResult.message);
-			}
-
-			if (!session) {
-				throw new Error("No session token available");
-			}
-
-			const client = createCoderOpenCodeClient({
-				baseUrl: openCodeUrlResult.baseUrl,
-				sessionToken: session,
-			});
-
 			const projects = await listOpenCodeProjects(client);
 			return projects.map(projectToRowData);
 		},
-		enabled:
-			!!workspaceId &&
-			!!workspace &&
-			!!session &&
-			!!openCodeUrlResult &&
-			!isOpenCodeUrlError(openCodeUrlResult) &&
-			!isLoadingConfig,
+		enabled: !!workspaceId && !!client && isConnected,
 		staleTime: 30 * 1000,
 		gcTime: 5 * 60 * 1000,
 	});
@@ -135,20 +109,12 @@ export function useOpenCodeProjects(workspaceId: string | null) {
 		return groupProjects(query.data ?? []);
 	}, [query.data]);
 
-	const openCodeError = useMemo(() => {
-		if (!openCodeUrlResult) return null;
-		if (isOpenCodeUrlError(openCodeUrlResult)) {
-			return openCodeUrlResult;
-		}
-		return null;
-	}, [openCodeUrlResult]);
-
 	return {
 		projects: query.data ?? [],
 		projectGroups,
-		isLoading: query.isLoading,
-		isError: query.isError || !!openCodeError,
-		error: query.error ?? openCodeError,
+		isLoading: query.isLoading || isConnecting,
+		isError: query.isError || !!connectionError,
+		error: query.error ?? connectionError,
 		refetch: query.refetch,
 	};
 }

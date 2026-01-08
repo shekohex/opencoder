@@ -59,19 +59,22 @@ export function useOpenCodeSessions(
 	const { client, isConnected } = useOpenCodeConnection(workspaceId);
 	const connectionStatus = useWorkspaceConnectionStatus(workspaceId);
 
+	const hasDirectory = !!directory;
+
 	const query = useQuery({
 		queryKey: sessionsQueryKey(workspaceId, directory),
 		queryFn: async () => {
 			if (!client) {
 				throw new Error("OpenCode client not available");
 			}
+			if (!directory) {
+				throw new Error("No directory selected");
+			}
 
-			const result = await client.session.list(
-				directory ? { query: { directory } } : undefined,
-			);
+			const result = await client.session.list({ query: { directory } });
 			return (result.data ?? []).map(sessionToRowData);
 		},
-		enabled: !!workspaceId && !!client && isConnected,
+		enabled: !!workspaceId && !!client && isConnected && hasDirectory,
 		staleTime: 10 * 1000,
 		gcTime: 5 * 60 * 1000,
 	});
@@ -83,6 +86,7 @@ export function useOpenCodeSessions(
 		error: query.error,
 		refetch: query.refetch,
 		connectionStatus,
+		hasDirectory,
 	};
 }
 

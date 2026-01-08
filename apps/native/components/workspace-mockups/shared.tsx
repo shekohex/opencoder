@@ -17,6 +17,11 @@ import { AppText } from "@/components/app-text";
 import { Button } from "@/components/button";
 import { WorkspaceCard } from "@/components/workspace-mockups/workspace-card";
 import { useOpenCodeProjects } from "@/lib/project-queries";
+import {
+	type SessionRowData as RealSessionRowData,
+	useCreateSession,
+	useOpenCodeSessions,
+} from "@/lib/session-queries";
 import { useTheme } from "@/lib/theme-context";
 import { useWorkspaceNav } from "@/lib/workspace-nav";
 import {
@@ -30,7 +35,6 @@ import {
 	buildStatus,
 	emptyStateActions,
 	messageRows,
-	sessionRows,
 	workspaceGroups as workspaceGroupsSeed,
 } from "./mock-data";
 
@@ -73,7 +77,7 @@ const MIDDLE_MAX_WIDTH = {
 const RIGHT_PANEL_WIDTH = 240;
 const RESIZE_HANDLE_WIDTH = 10;
 
-type SessionRowData = (typeof sessionRows)[number];
+type SessionRowData = RealSessionRowData;
 
 const POLLING_INTERVAL_ACTIVE = 5000;
 const POLLING_INTERVAL_IDLE = 30000;
@@ -106,7 +110,7 @@ export function useWorkspacePolling() {
 	return { workspaceGroups, hasActiveBuilds, intervalMs, isLoading, isError };
 }
 
-function buildNewSession(sessions: SessionRowData[]) {
+function _buildNewSession(sessions: SessionRowData[]) {
 	const existingNames = new Set(sessions.map((session) => session.name));
 	let index = 1;
 	let name = "New session";
@@ -131,6 +135,7 @@ export function WorkspaceThreePane({
 	isFramed = true,
 	selectedWorkspaceId,
 	selectedProjectId,
+	selectedProjectWorktree,
 	onSelectProject,
 	onSelectWorkspace,
 	onCreateWorkspace,
@@ -144,17 +149,41 @@ export function WorkspaceThreePane({
 	isFramed?: boolean;
 	selectedWorkspaceId?: string | null;
 	selectedProjectId?: string | null;
-	onSelectProject?: (projectId: string) => void;
+	selectedProjectWorktree?: string | null;
+	onSelectProject?: (projectId: string, worktree?: string) => void;
 	onSelectWorkspace?: (workspaceId: string) => void;
 	onCreateWorkspace?: () => void;
 	selectedSessionId?: string | null;
 	onSelectSession?: (sessionId: string) => void;
 }) {
-	const [sessions, setSessions] = useState(sessionRows);
+	const {
+		sessions: realSessions,
+		isLoading: sessionsLoading,
+		isError: sessionsError,
+		hasDirectory,
+	} = useOpenCodeSessions(
+		selectedWorkspaceId ?? null,
+		selectedProjectWorktree ?? undefined,
+	);
+
+	const createSession = useCreateSession(selectedWorkspaceId ?? null);
+
 	const [localSelectedSessionId, setLocalSelectedSessionId] = useState<
 		string | null
 	>(null);
 	const resolvedSelectedSessionId = selectedSessionId ?? localSelectedSessionId;
+
+	const getSessionListState = (): ListState => {
+		if (!hasDirectory) return "empty";
+		if (sessionsLoading) return "loading";
+		if (sessionsError) return "error";
+		if (realSessions.length === 0) return "empty";
+		return "ready";
+	};
+
+	const sessionListState = getSessionListState();
+	const sessions: SessionRowData[] =
+		sessionListState === "ready" ? realSessions : [];
 
 	const handleSelectSession = (sessionId: string) => {
 		if (onSelectSession) {
@@ -164,10 +193,14 @@ export function WorkspaceThreePane({
 		setLocalSelectedSessionId(sessionId);
 	};
 
-	const handleCreateSession = () => {
-		const nextSession = buildNewSession(sessions);
-		setSessions((prev) => [...prev, nextSession]);
-		handleSelectSession(nextSession.name);
+	const handleCreateSession = async () => {
+		if (!selectedProjectWorktree) return;
+		try {
+			const newSession = await createSession.mutateAsync({
+				directory: selectedProjectWorktree,
+			});
+			handleSelectSession(newSession.id);
+		} catch {}
 	};
 
 	const rowHeight = ROW_HEIGHTS[breakpoint];
@@ -330,6 +363,9 @@ export function WorkspaceThreePane({
 						selectedSessionId={resolvedSelectedSessionId}
 						onSelectSession={handleSelectSession}
 						onCreateSession={handleCreateSession}
+						listState={sessionListState}
+						isCreating={createSession.isPending}
+						noProjectSelected={!hasDirectory}
 					/>
 				</Animated.View>
 				<ResizeHandle gesture={middleHandle} />
@@ -639,13 +675,17 @@ function SessionSidebarContent({
 	onSelectSession,
 	onCreateSession,
 	listState = "ready",
+	isCreating = false,
+	noProjectSelected = false,
 }: {
 	rowHeight: number;
-	sessions: SessionRowData[];
+	sessions: RealSessionRowData[];
 	selectedSessionId: string | null;
 	onSelectSession: (sessionId: string) => void;
 	onCreateSession: () => void;
 	listState?: ListState;
+	isCreating?: boolean;
+	noProjectSelected?: boolean;
 }) {
 	return (
 		<View className="flex-1">
@@ -1108,22 +1148,49 @@ export function AppShell({
 	const {
 		selectedWorkspaceId,
 		selectedProjectId,
+		selectedProjectWorktree,
 		selectedSessionId,
 		setSelectedWorkspaceId,
 		setSelectedProjectId,
 		setSelectedSessionId,
 	} = useWorkspaceNav();
 
-	const [sessions, setSessions] = useState(sessionRows);
+	const {
+		sessions: realSessions,
+		isLoading: sessionsLoading,
+		isError: sessionsError,
+		hasDirectory,
+	} = useOpenCodeSessions(
+		selectedWorkspaceId,
+		selectedProjectWorktree ?? undefined,
+	);
+
+	const createSession = useCreateSession(selectedWorkspaceId);
+
+	const getSessionListState = (): ListState | "no-project" => {
+		if (!hasDirectory) return "no-project";
+		if (sessionsLoading) return "loading";
+		if (sessionsError) return "error";
+		if (realSessions.length === 0) return "empty";
+		return "ready";
+	};
+
+	const sessionListState = getSessionListState();
+	const sessions: RealSessionRowData[] =
+		sessionListState === "ready" ? realSessions : [];
 
 	const handleSelectSession = (sessionId: string) => {
 		setSelectedSessionId(sessionId);
 	};
 
-	const handleCreateSession = () => {
-		const nextSession = buildNewSession(sessions);
-		setSessions((prev) => [...prev, nextSession]);
-		setSelectedSessionId(nextSession.name);
+	const handleCreateSession = async () => {
+		if (!selectedProjectWorktree) return;
+		try {
+			const newSession = await createSession.mutateAsync({
+				directory: selectedProjectWorktree,
+			});
+			setSelectedSessionId(newSession.id);
+		} catch {}
 	};
 
 	const rowHeight = ROW_HEIGHTS[breakpoint];
@@ -1288,7 +1355,15 @@ export function AppShell({
 						selectedSessionId={selectedSessionId}
 						onSelectSession={handleSelectSession}
 						onCreateSession={handleCreateSession}
-						listState={listState}
+						listState={
+							sessionListState === "no-project"
+								? "empty"
+								: sessionListState === "ready"
+									? "ready"
+									: sessionListState
+						}
+						isCreating={createSession.isPending}
+						noProjectSelected={!hasDirectory}
 					/>
 				</Animated.View>
 				<ResizeHandle gesture={middleHandle} />

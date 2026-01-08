@@ -1,6 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import type { Href } from "expo-router";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { FlatList, Pressable, View } from "react-native";
 
 import { AppText } from "@/components/app-text";
@@ -25,6 +25,7 @@ const BACK_ROUTE = "/workspaces/projects" as Href;
 const NEXT_ROUTE = "/workspaces/chat" as Href;
 
 export default function WorkspacesSessionsScreen() {
+	const router = useRouter();
 	const rowHeight = ROW_HEIGHTS.mobile;
 	const {
 		selectedWorkspaceId,
@@ -33,15 +34,26 @@ export default function WorkspacesSessionsScreen() {
 		setSelectedSessionId,
 	} = useWorkspaceNav();
 
-	const { sessions, isLoading, isError, connectionStatus, refetch } =
-		useOpenCodeSessions(
-			selectedWorkspaceId,
-			selectedProjectWorktree ?? undefined,
-		);
+	const {
+		sessions,
+		isLoading,
+		isError,
+		connectionStatus,
+		refetch,
+		hasDirectory,
+	} = useOpenCodeSessions(
+		selectedWorkspaceId,
+		selectedProjectWorktree ?? undefined,
+	);
 
 	const createSession = useCreateSession(selectedWorkspaceId);
 
-	const getListState = (): ListState => {
+	const handleGoToProjects = () => {
+		router.push(BACK_ROUTE);
+	};
+
+	const getListState = (): ListState | "no-project" => {
+		if (!hasDirectory) return "no-project";
 		if (isLoading || connectionStatus === "connecting") return "loading";
 		if (isError || connectionStatus === "error") return "error";
 		if (sessions.length === 0) return "empty";
@@ -91,6 +103,7 @@ export default function WorkspacesSessionsScreen() {
 							backHref={BACK_ROUTE}
 							onNew={handleCreateSession}
 							isCreating={createSession.isPending}
+							isDisabled={!hasDirectory}
 						/>
 						{resolvedListState === "error" && (
 							<View className="mt-3">
@@ -119,7 +132,14 @@ export default function WorkspacesSessionsScreen() {
 					</View>
 				}
 				ListEmptyComponent={
-					resolvedListState === "loading" ? (
+					resolvedListState === "no-project" ? (
+						<EmptyStateCard
+							title="Please select a project"
+							subtitle="Choose a project from the projects list to view its sessions."
+							ctaLabel="Go to Projects"
+							onPress={handleGoToProjects}
+						/>
+					) : resolvedListState === "loading" ? (
 						<LoadingList count={5} rowHeight={rowHeight} />
 					) : resolvedListState === "empty" ? (
 						<EmptyStateCard
@@ -195,12 +215,14 @@ function MobileHeader({
 	backHref,
 	onNew,
 	isCreating,
+	isDisabled,
 }: {
 	title: string;
 	backLabel: string;
 	backHref: Href;
 	onNew: () => void;
 	isCreating?: boolean;
+	isDisabled?: boolean;
 }) {
 	return (
 		<View className="gap-2">
@@ -220,7 +242,7 @@ function MobileHeader({
 					size="sm"
 					variant="outline"
 					onPress={onNew}
-					disabled={isCreating}
+					disabled={isCreating || isDisabled}
 				>
 					{isCreating ? "..." : "New"}
 				</Button>

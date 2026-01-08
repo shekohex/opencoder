@@ -35,7 +35,6 @@ export interface WorkspaceConnection {
 	baseUrl: string;
 	status: ConnectionStatus;
 	error?: string;
-	eventSource?: EventSource;
 }
 
 type WorkspaceEvent = Event;
@@ -69,6 +68,42 @@ interface GlobalOpenCodeProviderProps {
 	children: ReactNode;
 }
 
+type StreamEvent<T> = {
+	id?: string;
+	data: T;
+};
+
+function normalizeEventPayload(payload: unknown): Event | null {
+	if (!payload || typeof payload !== "object") return null;
+
+	const record = payload as Record<string, unknown>;
+	if (typeof record.type === "string") {
+		return record as Event;
+	}
+
+	const nestedPayload = record.payload;
+	if (nestedPayload && typeof nestedPayload === "object") {
+		const nestedRecord = nestedPayload as Record<string, unknown>;
+		if (typeof nestedRecord.type === "string") {
+			if (typeof record.directory === "string" && record.directory.length > 0) {
+				const existingProperties =
+					typeof nestedRecord.properties === "object" &&
+					nestedRecord.properties !== null
+						? (nestedRecord.properties as Record<string, unknown>)
+						: null;
+				const properties = {
+					...(existingProperties ?? {}),
+					directory: record.directory,
+				};
+				return { ...nestedRecord, properties } as Event;
+			}
+			return nestedRecord as Event;
+		}
+	}
+
+	return null;
+}
+
 export function GlobalOpenCodeProvider({
 	children,
 }: GlobalOpenCodeProviderProps) {
@@ -81,8 +116,8 @@ export function GlobalOpenCodeProvider({
 		Map<string, WorkspaceConnection>
 	>(new Map());
 	const eventRef = useRef(createGlobalEmitter<WorkspaceEvent>());
-	const eventSourcesRef = useRef<Map<string, EventSource>>(new Map());
 	const abortControllersRef = useRef<Map<string, AbortController>>(new Map());
+	const connectingRef = useRef<Set<string>>(new Set());
 
 	const getWorkspace = useCallback(
 		(workspaceId: string): TypesGen.Workspace | undefined => {
@@ -115,54 +150,88 @@ export function GlobalOpenCodeProvider({
 		[],
 	);
 
-	const setupEventStream = useCallback(
-		(workspaceId: string, baseUrl: string) => {
-			const existingSource = eventSourcesRef.current.get(workspaceId);
-			if (existingSource) {
-				existingSource.close();
+	const _setupEventStream = useCallback(
+		(workspaceId: string, client: OpencodeClient) => {
+			const existingController = abortControllersRef.current.get(workspaceId);
+			if (existingController) {
+				existingController.abort();
 			}
 
-			const eventUrl = `${baseUrl.replace(/\/+$/, "")}/global/event`;
-			const eventSource = new EventSource(eventUrl, {
-				withCredentials: true,
-			});
+			const abortController = new AbortController();
+			abortControllersRef.current.set(workspaceId, abortController);
 
-			eventSource.onmessage = (event) => {
-				try {
-					const data = JSON.parse(event.data);
-					if (data.payload?.type === "server.heartbeat") {
+			const MAX_RETRIES = 5;
+
+			(async () => {
+				const connectStream = async (attempt: number): Promise<void> => {
+					if (abortController.signal.aborted) return;
+					if (attempt >= MAX_RETRIES) {
+						console.warn(
+							`[OpenCode] SSE max retries (${MAX_RETRIES}) reached for workspace ${workspaceId}`,
+						);
 						return;
 					}
-					eventRef.current.emit(workspaceId, data.payload);
-				} catch {
-					// ignore parse errors
-				}
-			};
 
-			eventSource.onerror = () => {
-				updateConnection(workspaceId, {
-					status: "error",
-					error: "Event stream disconnected",
-				});
-			};
+					if (attempt > 0) {
+						const delay = Math.min(3000 * 2 ** (attempt - 1), 30000);
+						await new Promise((resolve) => setTimeout(resolve, delay));
+						if (abortController.signal.aborted) return;
+					}
 
-			eventSource.onopen = () => {
-				updateConnection(workspaceId, {
-					status: "connected",
-					error: undefined,
-				});
-			};
+					try {
+						const subscribeOptions = {
+							signal: abortController.signal,
+							onSseEvent: (event: StreamEvent<unknown>) => {
+								if (abortController.signal.aborted) return;
+								const normalized = normalizeEventPayload(event.data);
+								if (normalized) {
+									eventRef.current.emit(workspaceId, normalized);
+								}
+							},
+						};
 
-			eventSourcesRef.current.set(workspaceId, eventSource);
-			return eventSource;
+						const result = await client.event.subscribe(subscribeOptions);
+
+						for await (const _ of result.stream) {
+							void _;
+							if (abortController.signal.aborted) {
+								break;
+							}
+						}
+					} catch (error: unknown) {
+						if (
+							(error as Error)?.name === "AbortError" ||
+							abortController.signal.aborted
+						) {
+							return;
+						}
+						console.warn(
+							`[OpenCode] SSE error for workspace ${workspaceId} (attempt ${attempt + 1}/${MAX_RETRIES}):`,
+							error,
+						);
+						await connectStream(attempt + 1);
+						return;
+					}
+
+					if (!abortController.signal.aborted) {
+						await connectStream(attempt + 1);
+					}
+				};
+
+				await connectStream(0);
+			})();
 		},
-		[updateConnection],
+		[],
 	);
 
 	const connect = useCallback(
 		async (workspaceId: string): Promise<void> => {
 			if (!session || !coderBaseUrl) {
 				throw new Error("Not authenticated");
+			}
+
+			if (connectingRef.current.has(workspaceId)) {
+				return;
 			}
 
 			const existing = connections.get(workspaceId);
@@ -178,36 +247,45 @@ export function GlobalOpenCodeProvider({
 				throw new Error(`Workspace ${workspaceId} not found`);
 			}
 
+			connectingRef.current.add(workspaceId);
+
 			updateConnection(workspaceId, {
 				status: "connecting",
 				error: undefined,
 				workspaceId,
 			} as Partial<WorkspaceConnection>);
 
-			const urlResult = resolveOpenCodeUrl(
-				coderBaseUrl,
-				workspace,
-				wildcardAccessUrl,
-			);
-
-			if (isOpenCodeUrlError(urlResult)) {
-				updateConnection(workspaceId, {
-					status: "error",
-					error: urlResult.message,
-				});
-				throw new Error(urlResult.message);
-			}
-
-			const client = createCoderOpenCodeClient({
-				baseUrl: urlResult.baseUrl,
-				sessionToken: session,
-			});
-
 			try {
+				const urlResult = resolveOpenCodeUrl(
+					coderBaseUrl,
+					workspace,
+					wildcardAccessUrl,
+				);
+
+				if (isOpenCodeUrlError(urlResult)) {
+					updateConnection(workspaceId, {
+						status: "error",
+						error: urlResult.message,
+					});
+					throw new Error(urlResult.message);
+				}
+
+				const client = createCoderOpenCodeClient({
+					baseUrl: urlResult.baseUrl,
+					sessionToken: session,
+				});
+
 				const healthResult = await client.config.get();
 				if (!healthResult.data) {
 					throw new Error("Health check failed");
 				}
+
+				updateConnection(workspaceId, {
+					client,
+					baseUrl: urlResult.baseUrl,
+					status: "connected",
+					error: undefined,
+				});
 			} catch (err) {
 				const message =
 					err instanceof Error ? err.message : "Connection failed";
@@ -216,16 +294,9 @@ export function GlobalOpenCodeProvider({
 					error: message,
 				});
 				throw err;
+			} finally {
+				connectingRef.current.delete(workspaceId);
 			}
-
-			updateConnection(workspaceId, {
-				client,
-				baseUrl: urlResult.baseUrl,
-				status: "connected",
-				error: undefined,
-			});
-
-			setupEventStream(workspaceId, urlResult.baseUrl);
 		},
 		[
 			session,
@@ -234,22 +305,17 @@ export function GlobalOpenCodeProvider({
 			getWorkspace,
 			wildcardAccessUrl,
 			updateConnection,
-			setupEventStream,
 		],
 	);
 
 	const disconnect = useCallback((workspaceId: string) => {
-		const eventSource = eventSourcesRef.current.get(workspaceId);
-		if (eventSource) {
-			eventSource.close();
-			eventSourcesRef.current.delete(workspaceId);
-		}
-
 		const controller = abortControllersRef.current.get(workspaceId);
 		if (controller) {
 			controller.abort();
 			abortControllersRef.current.delete(workspaceId);
 		}
+
+		connectingRef.current.delete(workspaceId);
 
 		setConnections((prev) => {
 			const next = new Map(prev);
@@ -282,7 +348,10 @@ export function GlobalOpenCodeProvider({
 
 	const isConnecting = useCallback(
 		(workspaceId: string): boolean => {
-			return connections.get(workspaceId)?.status === "connecting";
+			return (
+				connections.get(workspaceId)?.status === "connecting" ||
+				connectingRef.current.has(workspaceId)
+			);
 		},
 		[connections],
 	);
@@ -308,9 +377,6 @@ export function GlobalOpenCodeProvider({
 
 	useEffect(() => {
 		return () => {
-			for (const eventSource of eventSourcesRef.current.values()) {
-				eventSource.close();
-			}
 			for (const controller of abortControllersRef.current.values()) {
 				controller.abort();
 			}
@@ -397,9 +463,7 @@ export function WorkspaceSDKProvider({
 			!globalOpenCode.hasConnection(workspaceId) &&
 			!globalOpenCode.isConnecting(workspaceId)
 		) {
-			globalOpenCode.connect(workspaceId).catch(() => {
-				// error is stored in connection state
-			});
+			globalOpenCode.connect(workspaceId).catch(() => {});
 		}
 	}, [workspaceId, globalOpenCode]);
 
