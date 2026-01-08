@@ -7,8 +7,38 @@ import WorkspacesSessionsScreen from "@/app/(app)/(drawer)/workspaces/sessions";
 import { workspaceGroups } from "@/components/workspace-mockups/mock-data";
 import { AppShell } from "@/components/workspace-mockups/shared";
 import { FontProvider } from "@/lib/font-context";
+import { GlobalOpenCodeProvider } from "@/lib/opencode-provider";
 import { ThemeProvider } from "@/lib/theme-context";
 import { WorkspaceNavProvider } from "@/lib/workspace-nav";
+
+jest.mock("@/lib/auth", () => ({
+	useSession: () => ({
+		session: "test-token",
+		baseUrl: "https://coder.example.com",
+		isLoading: false,
+	}),
+}));
+
+jest.mock("@/lib/workspace-queries", () => ({
+	useWorkspaces: () => ({
+		data: [
+			{
+				id: "ws-1",
+				name: "test-workspace",
+				latest_build: { status: "running" },
+			},
+		],
+		isLoading: false,
+		isError: false,
+	}),
+}));
+
+jest.mock("@/lib/deployment-config", () => ({
+	useWildcardAccessUrl: () => ({
+		wildcardAccessUrl: null,
+		isLoading: false,
+	}),
+}));
 
 const createWrapper = () => {
 	const queryClient = new QueryClient({
@@ -22,7 +52,9 @@ const createWrapper = () => {
 		<QueryClientProvider client={queryClient}>
 			<ThemeProvider>
 				<FontProvider>
-					<WorkspaceNavProvider>{children}</WorkspaceNavProvider>
+					<GlobalOpenCodeProvider>
+						<WorkspaceNavProvider>{children}</WorkspaceNavProvider>
+					</GlobalOpenCodeProvider>
 				</FontProvider>
 			</ThemeProvider>
 		</QueryClientProvider>

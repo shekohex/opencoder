@@ -3,9 +3,13 @@ import { Redirect } from "expo-router";
 import { useSession } from "@/lib/auth";
 import AppLayout from "../../app/(app)/_layout";
 
-// Mock dependencies
 jest.mock("@/lib/auth", () => ({
 	useSession: jest.fn(),
+}));
+
+jest.mock("@/lib/opencode-provider", () => ({
+	GlobalOpenCodeProvider: ({ children }: { children: React.ReactNode }) =>
+		children,
 }));
 
 jest.mock("expo-router", () => ({

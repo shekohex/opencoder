@@ -3,6 +3,7 @@ import { Redirect, Stack, usePathname, useSegments } from "expo-router";
 import { Text } from "react-native";
 
 import { useSession } from "@/lib/auth";
+import { GlobalOpenCodeProvider } from "@/lib/opencode-provider";
 
 export default function AppLayout() {
 	const { session, isLoading } = useSession();
@@ -21,8 +22,12 @@ export default function AppLayout() {
 		return <Redirect href={`/sign-in${redirectTo}` as Href} />;
 	}
 
-	// This layout can be deferred because it's not the root layout.
 	return (
-		<Stack screenOptions={{ headerShown: false }} initialRouteName="(drawer)" />
+		<GlobalOpenCodeProvider>
+			<Stack
+				screenOptions={{ headerShown: false }}
+				initialRouteName="(drawer)"
+			/>
+		</GlobalOpenCodeProvider>
 	);
 }

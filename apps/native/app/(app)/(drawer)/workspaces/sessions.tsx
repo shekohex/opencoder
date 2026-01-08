@@ -1,14 +1,12 @@
 import { Feather } from "@expo/vector-icons";
 import type { Href } from "expo-router";
-import { Link, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { Link } from "expo-router";
 import { FlatList, Pressable, View } from "react-native";
 
 import { AppText } from "@/components/app-text";
 import { Button } from "@/components/button";
 import { Container } from "@/components/container";
 
-import { sessionRows } from "@/components/workspace-mockups/mock-data";
 import {
 	EmptyStateCard,
 	ErrorBanner,
@@ -16,46 +14,56 @@ import {
 	LoadingList,
 	ROW_HEIGHTS,
 } from "@/components/workspace-mockups/shared";
+import {
+	type SessionRowData,
+	useCreateSession,
+	useOpenCodeSessions,
+} from "@/lib/session-queries";
 import { useWorkspaceNav } from "@/lib/workspace-nav";
 
 const BACK_ROUTE = "/workspaces/projects" as Href;
 const NEXT_ROUTE = "/workspaces/chat" as Href;
 
-type SessionRowData = (typeof sessionRows)[number];
-
-function buildNewSession(sessions: SessionRowData[]) {
-	const existingNames = new Set(sessions.map((session) => session.name));
-	let index = 1;
-	let name = "New session";
-
-	while (existingNames.has(name)) {
-		index += 1;
-		name = `New session ${index}`;
-	}
-
-	return {
-		name,
-		status: "New",
-		lastUsed: "just now",
-	};
-}
-
 export default function WorkspacesSessionsScreen() {
 	const rowHeight = ROW_HEIGHTS.mobile;
-	const [sessions, setSessions] = useState(sessionRows);
-	const { selectedSessionId, setSelectedSessionId } = useWorkspaceNav();
-	const { state } = useLocalSearchParams<{ state?: string }>();
-	const listState: ListState =
-		state === "loading" || state === "error" || state === "empty"
-			? state
-			: "ready";
-	const resolvedListState: ListState =
-		listState === "ready" && sessions.length === 0 ? "empty" : listState;
+	const {
+		selectedWorkspaceId,
+		selectedProjectWorktree,
+		selectedSessionId,
+		setSelectedSessionId,
+	} = useWorkspaceNav();
 
-	const handleCreateSession = () => {
-		const nextSession = buildNewSession(sessions);
-		setSessions((prev) => [...prev, nextSession]);
-		setSelectedSessionId(nextSession.name);
+	const { sessions, isLoading, isError, connectionStatus, refetch } =
+		useOpenCodeSessions(
+			selectedWorkspaceId,
+			selectedProjectWorktree ?? undefined,
+		);
+
+	const createSession = useCreateSession(selectedWorkspaceId);
+
+	const getListState = (): ListState => {
+		if (isLoading || connectionStatus === "connecting") return "loading";
+		if (isError || connectionStatus === "error") return "error";
+		if (sessions.length === 0) return "empty";
+		return "ready";
+	};
+
+	const resolvedListState = getListState();
+
+	const handleCreateSession = async () => {
+		try {
+			const newSession = await createSession.mutateAsync({
+				directory: selectedProjectWorktree ?? undefined,
+				title: undefined,
+			});
+			setSelectedSessionId(newSession.id);
+		} catch {
+			// error handled by mutation state
+		}
+	};
+
+	const handleRetry = () => {
+		refetch();
 	};
 
 	return (
@@ -63,36 +71,17 @@ export default function WorkspacesSessionsScreen() {
 			<FlatList
 				testID="sessions-list"
 				data={resolvedListState === "ready" ? sessions : []}
-				keyExtractor={(item) => item.name}
+				keyExtractor={(item) => item.id}
 				className="flex-1 bg-background"
 				contentContainerStyle={{ padding: 16 }}
 				ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
 				renderItem={({ item: session }) => (
-					<Link key={session.name} href={NEXT_ROUTE} asChild>
-						<Pressable
-							onPress={() => setSelectedSessionId(session.name)}
-							className={`focus-ring rounded-xl border px-3 ${
-								selectedSessionId === session.name
-									? "border-border-info bg-surface-info"
-									: "border-border bg-surface"
-							}`}
-							style={{ height: rowHeight }}
-							accessibilityRole="button"
-							accessibilityLabel={`Open session ${session.name}`}
-						>
-							<View className="flex-row items-center justify-between">
-								<AppText className="font-medium text-foreground-strong text-sm">
-									{session.name}
-								</AppText>
-								<AppText className="text-foreground-weak text-xs">
-									{session.status}
-								</AppText>
-							</View>
-							<AppText className="text-foreground-weak text-xs">
-								Last used {session.lastUsed}
-							</AppText>
-						</Pressable>
-					</Link>
+					<SessionRow
+						session={session}
+						isSelected={selectedSessionId === session.id}
+						onPress={() => setSelectedSessionId(session.id)}
+						rowHeight={rowHeight}
+					/>
 				)}
 				ListHeaderComponent={
 					<View className="mb-4">
@@ -101,13 +90,29 @@ export default function WorkspacesSessionsScreen() {
 							backLabel="Projects"
 							backHref={BACK_ROUTE}
 							onNew={handleCreateSession}
+							isCreating={createSession.isPending}
 						/>
 						{resolvedListState === "error" && (
 							<View className="mt-3">
 								<ErrorBanner
-									title="Server offline"
-									subtitle="Open Code server is unreachable."
+									title="Connection error"
+									subtitle={
+										connectionStatus === "error"
+											? "Cannot connect to OpenCode server."
+											: "Failed to load sessions."
+									}
 									ctaLabel="Retry"
+									onPress={handleRetry}
+								/>
+							</View>
+						)}
+						{createSession.isError && (
+							<View className="mt-3">
+								<ErrorBanner
+									title="Failed to create session"
+									subtitle="Please try again."
+									ctaLabel="Dismiss"
+									onPress={() => createSession.reset()}
 								/>
 							</View>
 						)}
@@ -126,14 +131,61 @@ export default function WorkspacesSessionsScreen() {
 					) : null
 				}
 				ListFooterComponent={
-					<View className="mt-4">
-						<Button size="sm" variant="outline" onPress={handleCreateSession}>
-							New session
-						</Button>
-					</View>
+					resolvedListState === "ready" && sessions.length > 0 ? (
+						<View className="mt-4">
+							<Button
+								size="sm"
+								variant="outline"
+								onPress={handleCreateSession}
+								disabled={createSession.isPending}
+							>
+								{createSession.isPending ? "Creating..." : "New session"}
+							</Button>
+						</View>
+					) : null
 				}
 			/>
 		</Container>
+	);
+}
+
+function SessionRow({
+	session,
+	isSelected,
+	onPress,
+	rowHeight,
+}: {
+	session: SessionRowData;
+	isSelected: boolean;
+	onPress: () => void;
+	rowHeight: number;
+}) {
+	return (
+		<Link href={NEXT_ROUTE} asChild>
+			<Pressable
+				onPress={onPress}
+				className={`focus-ring rounded-xl border px-3 ${
+					isSelected
+						? "border-border-info bg-surface-info"
+						: "border-border bg-surface"
+				}`}
+				style={{ height: rowHeight }}
+				accessibilityRole="button"
+				accessibilityLabel={`Open session ${session.name}`}
+			>
+				<View className="flex-row items-center justify-between">
+					<AppText className="font-medium text-foreground-strong text-sm">
+						{session.name}
+					</AppText>
+					<AppText className="text-foreground-weak text-xs">
+						{session.status}
+					</AppText>
+				</View>
+				<AppText className="text-foreground-weak text-xs">
+					{session.lastUsed}
+				</AppText>
+			</Pressable>
+		</Link>
 	);
 }
 
@@ -142,11 +194,13 @@ function MobileHeader({
 	backLabel,
 	backHref,
 	onNew,
+	isCreating,
 }: {
 	title: string;
 	backLabel: string;
 	backHref: Href;
 	onNew: () => void;
+	isCreating?: boolean;
 }) {
 	return (
 		<View className="gap-2">
@@ -162,8 +216,13 @@ function MobileHeader({
 				<AppText className="font-semibold text-foreground-strong text-lg">
 					{title}
 				</AppText>
-				<Button size="sm" variant="outline" onPress={onNew}>
-					New
+				<Button
+					size="sm"
+					variant="outline"
+					onPress={onNew}
+					disabled={isCreating}
+				>
+					{isCreating ? "..." : "New"}
 				</Button>
 			</View>
 		</View>

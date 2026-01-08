@@ -995,10 +995,12 @@ export function ErrorBanner({
 	title,
 	subtitle,
 	ctaLabel,
+	onPress,
 }: {
 	title: string;
 	subtitle: string;
 	ctaLabel: string;
+	onPress?: () => void;
 }) {
 	return (
 		<View className="gap-2 rounded-xl border border-border-critical bg-surface-critical px-3 py-3">
@@ -1009,7 +1011,12 @@ export function ErrorBanner({
 				</AppText>
 			</View>
 			<AppText className="text-foreground-weak text-xs">{subtitle}</AppText>
-			<Button size="sm" variant="outline" accessibilityLabel={ctaLabel}>
+			<Button
+				size="sm"
+				variant="outline"
+				accessibilityLabel={ctaLabel}
+				onPress={onPress}
+			>
 				{ctaLabel}
 			</Button>
 		</View>
