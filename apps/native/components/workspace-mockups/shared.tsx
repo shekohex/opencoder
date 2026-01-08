@@ -710,10 +710,16 @@ function SessionSidebarContent({
 			{listState === "empty" && (
 				<View className="px-3 pt-3">
 					<EmptyStateCard
-						title="No sessions yet"
-						subtitle="Create a session to start chatting."
-						ctaLabel="New session"
-						onPress={onCreateSession}
+						title={
+							noProjectSelected ? "Select a project first" : "No sessions yet"
+						}
+						subtitle={
+							noProjectSelected
+								? "Choose a project to view its sessions."
+								: "Create a session to start chatting."
+						}
+						ctaLabel={noProjectSelected ? undefined : "New session"}
+						onPress={noProjectSelected ? undefined : onCreateSession}
 					/>
 				</View>
 			)}
@@ -1071,7 +1077,7 @@ export function EmptyStateCard({
 }: {
 	title: string;
 	subtitle: string;
-	ctaLabel: string;
+	ctaLabel?: string;
 	onPress?: () => void;
 }) {
 	return (
@@ -1080,14 +1086,16 @@ export function EmptyStateCard({
 				{title}
 			</AppText>
 			<AppText className="text-foreground-weak text-xs">{subtitle}</AppText>
-			<Button
-				size="sm"
-				variant="outline"
-				onPress={onPress}
-				accessibilityLabel={ctaLabel}
-			>
-				{ctaLabel}
-			</Button>
+			{ctaLabel && (
+				<Button
+					size="sm"
+					variant="outline"
+					onPress={onPress}
+					accessibilityLabel={ctaLabel}
+				>
+					{ctaLabel}
+				</Button>
+			)}
 		</View>
 	);
 }
