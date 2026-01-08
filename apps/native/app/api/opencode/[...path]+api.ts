@@ -49,7 +49,7 @@ async function handleProxy(
 		);
 	}
 
-	const path = `/api/v2/${params.path}`;
+	const path = `/${params.path}`;
 	const url = new URL(request.url);
 	const proxyUrl = targetUrl + path + url.search;
 

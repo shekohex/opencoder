@@ -12,6 +12,9 @@ jest.mock("@coder/sdk", () => ({
 	API: {
 		getWorkspaces: jest.fn(),
 	},
+	TypesGen: {
+		SessionTokenHeader: "Coder-Session-Token",
+	},
 }));
 
 jest.mock("expo-router", () => ({

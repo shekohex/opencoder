@@ -1,13 +1,12 @@
 import { Feather } from "@expo/vector-icons";
 import type { Href } from "expo-router";
-import { Link, useLocalSearchParams } from "expo-router";
+import { Link } from "expo-router";
 import { Pressable, SectionList, View } from "react-native";
 
 import { AppText } from "@/components/app-text";
 import { Button } from "@/components/button";
 import { Container } from "@/components/container";
 
-import { projectGroups } from "@/components/workspace-mockups/mock-data";
 import {
 	EmptyStateCard,
 	ErrorBanner,
@@ -15,6 +14,7 @@ import {
 	LoadingList,
 	ROW_HEIGHTS,
 } from "@/components/workspace-mockups/shared";
+import { useOpenCodeProjects } from "@/lib/project-queries";
 import { useWorkspaceNav } from "@/lib/workspace-nav";
 
 const BACK_ROUTE = "/workspaces" as Href;
@@ -22,15 +22,20 @@ const NEXT_ROUTE = "/workspaces/sessions" as Href;
 
 export default function WorkspacesProjectsScreen() {
 	const rowHeight = ROW_HEIGHTS.mobile;
-	const { selectedProjectId, setSelectedProjectId } = useWorkspaceNav();
-	const { state } = useLocalSearchParams<{ state?: string }>();
-	const listState: ListState =
-		state === "loading" || state === "error" || state === "empty"
-			? state
-			: "ready";
-	const hasProjects = projectGroups.some((group) => group.rows.length > 0);
-	const resolvedListState: ListState =
-		listState === "ready" && !hasProjects ? "empty" : listState;
+	const { selectedWorkspaceId, selectedProjectId, setSelectedProjectId } =
+		useWorkspaceNav();
+	const { projectGroups, isLoading, isError } =
+		useOpenCodeProjects(selectedWorkspaceId);
+
+	const getListState = (): ListState => {
+		if (isLoading) return "loading";
+		if (isError) return "error";
+		const hasProjects = projectGroups.some((group) => group.rows.length > 0);
+		if (!hasProjects) return "empty";
+		return "ready";
+	};
+
+	const resolvedListState = getListState();
 
 	const sections = projectGroups.map((group) => ({
 		title: group.title,
@@ -43,16 +48,16 @@ export default function WorkspacesProjectsScreen() {
 			<SectionList
 				testID="projects-list"
 				sections={listSections}
-				keyExtractor={(item, index) => `${item.name}-${index}`}
+				keyExtractor={(item) => item.id}
 				className="flex-1 bg-background"
 				contentContainerStyle={{ padding: 16 }}
 				ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
 				renderItem={({ item: project }) => (
-					<Link key={project.name} href={NEXT_ROUTE} asChild>
+					<Link key={project.id} href={NEXT_ROUTE} asChild>
 						<Pressable
-							onPress={() => setSelectedProjectId(project.name)}
+							onPress={() => setSelectedProjectId(project.id, project.worktree)}
 							className={`focus-ring rounded-xl border px-3 ${
-								selectedProjectId === project.name
+								selectedProjectId === project.id
 									? "border-border-info bg-surface-info"
 									: "border-border bg-surface"
 							}`}
@@ -92,7 +97,7 @@ export default function WorkspacesProjectsScreen() {
 							<View className="mt-3">
 								<ErrorBanner
 									title="Server offline"
-									subtitle="Open Code server is unreachable."
+									subtitle="OpenCode server is unreachable."
 									ctaLabel="Retry"
 								/>
 							</View>

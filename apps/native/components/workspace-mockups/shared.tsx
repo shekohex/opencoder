@@ -16,6 +16,7 @@ import Animated, {
 import { AppText } from "@/components/app-text";
 import { Button } from "@/components/button";
 import { WorkspaceCard } from "@/components/workspace-mockups/workspace-card";
+import { useOpenCodeProjects } from "@/lib/project-queries";
 import { useTheme } from "@/lib/theme-context";
 import { useWorkspaceNav } from "@/lib/workspace-nav";
 import {
@@ -29,7 +30,6 @@ import {
 	buildStatus,
 	emptyStateActions,
 	messageRows,
-	projectGroups,
 	sessionRows,
 	workspaceGroups as workspaceGroupsSeed,
 } from "./mock-data";
@@ -401,6 +401,75 @@ function TopBar() {
 	);
 }
 
+function WorkspaceProjectsList({
+	workspaceId,
+	selectedProjectId,
+	rowHeight,
+	onSelectProject,
+}: {
+	workspaceId: string | null;
+	selectedProjectId: string | null;
+	rowHeight: number;
+	onSelectProject: (id: string, worktree?: string) => void;
+}) {
+	const { projectGroups, isLoading } = useOpenCodeProjects(workspaceId);
+
+	if (isLoading) {
+		return (
+			<View className="ml-4 gap-3 border-border border-l pb-2 pl-4">
+				<View className="gap-1">
+					<View className="h-3 w-16 rounded bg-surface-secondary" />
+					<View
+						className="rounded-lg bg-surface-secondary"
+						style={{ height: Math.max(rowHeight - 8, 40) }}
+					/>
+					<View
+						className="rounded-lg bg-surface-secondary"
+						style={{ height: Math.max(rowHeight - 8, 40) }}
+					/>
+				</View>
+			</View>
+		);
+	}
+
+	if (projectGroups.length === 0) {
+		return (
+			<View className="ml-4 gap-1 border-border border-l pb-2 pl-4">
+				<AppText className="text-foreground-weak text-xs">
+					No projects yet
+				</AppText>
+			</View>
+		);
+	}
+
+	return (
+		<View className="ml-4 gap-3 border-border border-l pb-2 pl-4">
+			{projectGroups.map((projectGroup) => (
+				<View key={projectGroup.title} className="gap-1">
+					<AppText className="text-foreground-weak text-xs uppercase">
+						{projectGroup.title}
+					</AppText>
+					{projectGroup.rows.map((project) => {
+						const isProjectSelected = project.id === selectedProjectId;
+
+						return (
+							<ProjectRow
+								key={project.id}
+								name={project.name}
+								status={project.status}
+								lastUsed={project.lastUsed}
+								height={Math.max(rowHeight - 8, 40)}
+								isSelected={isProjectSelected}
+								onPress={() => onSelectProject(project.id, project.worktree)}
+							/>
+						);
+					})}
+				</View>
+			))}
+		</View>
+	);
+}
+
 function WorkspaceSidebarContent({
 	rowHeight,
 	workspaceGroups,
@@ -415,7 +484,7 @@ function WorkspaceSidebarContent({
 	workspaceGroups?: WorkspaceGroup[];
 	selectedWorkspaceId: string | null;
 	selectedProjectId: string | null;
-	onSelectProject: (id: string) => void;
+	onSelectProject: (id: string, worktree?: string) => void;
 	onSelectWorkspace: (id: string) => void;
 	onCreateWorkspace?: () => void;
 	listState?: ListState;
@@ -425,8 +494,8 @@ function WorkspaceSidebarContent({
 		null,
 	);
 	const handleWorkspacePress = useCallback(
-		(workspaceName: string) => {
-			onSelectWorkspace(workspaceName);
+		(workspaceId: string) => {
+			onSelectWorkspace(workspaceId);
 		},
 		[onSelectWorkspace],
 	);
@@ -483,7 +552,7 @@ function WorkspaceSidebarContent({
 					style={{ flex: 1 }}
 					contentContainerStyle={{ paddingBottom: 12 }}
 					renderItem={({ item: row }) => {
-						const isSelected = row.name === selectedWorkspaceId;
+						const isSelected = (row.id ?? row.name) === selectedWorkspaceId;
 						const isExpanded = row.name === expandedWorkspaceId;
 
 						return (
@@ -495,38 +564,18 @@ function WorkspaceSidebarContent({
 									isSelected={isSelected}
 									isExpanded={isExpanded}
 									onPress={() => {
-										handleWorkspacePress(row.name);
+										handleWorkspacePress(row.id ?? row.name);
 										handleWorkspaceToggle(row.name);
 									}}
 									onToggle={() => handleWorkspaceToggle(row.name)}
 								/>
 								{isExpanded && (
-									<View className="ml-4 gap-3 border-border border-l pb-2 pl-4">
-										{projectGroups.map((projectGroup) => (
-											<View key={projectGroup.title} className="gap-1">
-												<AppText className="text-foreground-weak text-xs uppercase">
-													{projectGroup.title}
-												</AppText>
-												{projectGroup.rows.map((project) => {
-													const projectKey = `${row.name}-${project.name}`;
-													const isProjectSelected =
-														project.name === selectedProjectId;
-
-													return (
-														<ProjectRow
-															key={projectKey}
-															name={project.name}
-															status={project.status}
-															lastUsed={project.lastUsed}
-															height={Math.max(rowHeight - 8, 40)}
-															isSelected={isProjectSelected}
-															onPress={() => onSelectProject(project.name)}
-														/>
-													);
-												})}
-											</View>
-										))}
-									</View>
+									<WorkspaceProjectsList
+										workspaceId={row.id ?? null}
+										selectedProjectId={selectedProjectId}
+										rowHeight={rowHeight}
+										onSelectProject={onSelectProject}
+									/>
 								)}
 							</View>
 						);

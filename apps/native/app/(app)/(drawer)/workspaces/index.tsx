@@ -115,7 +115,7 @@ function MobileWorkspaces({
 			renderItem={({ item, section }) => (
 				<Link key={item.name} href={NEXT_ROUTE} asChild>
 					<Pressable
-						onPress={() => setSelectedWorkspaceId(item.name)}
+						onPress={() => setSelectedWorkspaceId(item.id ?? item.name)}
 						className="focus-ring rounded-xl"
 						accessibilityRole="button"
 						accessibilityLabel={`Open workspace ${item.name}`}

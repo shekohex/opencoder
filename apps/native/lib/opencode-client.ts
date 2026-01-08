@@ -3,8 +3,10 @@ import {
 	createOpencodeClient as createSdkClient,
 	type OpencodeClient,
 } from "@opencode-ai/sdk";
+import { Platform } from "react-native";
 
 export const SessionTokenHeader = TypesGen.SessionTokenHeader;
+const PROXY_TARGET_HEADER = "X-Proxy-Target";
 
 export interface CoderOpenCodeClientConfig {
 	baseUrl: string;
@@ -17,10 +19,16 @@ export function createCoderOpenCodeClient(
 	const { baseUrl, sessionToken } = config;
 	const normalizedBaseUrl = baseUrl.replace(/\/+$/, "");
 
+	const useProxy = Platform.OS === "web";
+	const clientBaseUrl = useProxy ? "/api/opencode" : normalizedBaseUrl;
+
 	const fetchWithCoderAuth: typeof globalThis.fetch = async (input, init) => {
 		const headers = new Headers(init?.headers);
 		if (!headers.has(SessionTokenHeader)) {
 			headers.set(SessionTokenHeader, sessionToken);
+		}
+		if (useProxy) {
+			headers.set(PROXY_TARGET_HEADER, normalizedBaseUrl);
 		}
 
 		return globalThis.fetch(input, {
@@ -30,7 +38,7 @@ export function createCoderOpenCodeClient(
 	};
 
 	return createSdkClient({
-		baseUrl: normalizedBaseUrl,
+		baseUrl: clientBaseUrl,
 		fetch: fetchWithCoderAuth,
 	});
 }

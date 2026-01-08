@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render } from "@testing-library/react-native";
 import type React from "react";
 
@@ -10,12 +11,21 @@ import { ThemeProvider } from "@/lib/theme-context";
 import { WorkspaceNavProvider } from "@/lib/workspace-nav";
 
 const createWrapper = () => {
+	const queryClient = new QueryClient({
+		defaultOptions: {
+			queries: {
+				retry: false,
+			},
+		},
+	});
 	return ({ children }: { children: React.ReactNode }) => (
-		<ThemeProvider>
-			<FontProvider>
-				<WorkspaceNavProvider>{children}</WorkspaceNavProvider>
-			</FontProvider>
-		</ThemeProvider>
+		<QueryClientProvider client={queryClient}>
+			<ThemeProvider>
+				<FontProvider>
+					<WorkspaceNavProvider>{children}</WorkspaceNavProvider>
+				</FontProvider>
+			</ThemeProvider>
+		</QueryClientProvider>
 	);
 };
 
