@@ -22,6 +22,7 @@ import { SessionProvider, useSession } from "@/lib/auth";
 import { FontProvider } from "@/lib/font-context";
 import { getWebFontMap } from "@/lib/font-registry";
 import { HotkeysProvider } from "@/lib/hotkeys";
+import { NuqsAdapter } from "@/lib/nuqs-adapter";
 import { createQueryClient } from "@/lib/query-client";
 import { ThemeProvider, useTheme } from "@/lib/theme-context";
 
@@ -113,11 +114,13 @@ export default function RootLayout() {
 			) : null}
 			<SessionProvider>
 				<FontProvider>
-					<ThemeProvider>
-						<HotkeysProvider>
-							<RootLayoutContent />
-						</HotkeysProvider>
-					</ThemeProvider>
+					<NuqsAdapter>
+						<ThemeProvider>
+							<HotkeysProvider>
+								<RootLayoutContent />
+							</HotkeysProvider>
+						</ThemeProvider>
+					</NuqsAdapter>
 				</FontProvider>
 			</SessionProvider>
 		</QueryClientProvider>

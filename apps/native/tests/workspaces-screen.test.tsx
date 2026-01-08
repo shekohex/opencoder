@@ -5,6 +5,7 @@ import type React from "react";
 
 import WorkspacesScreen from "@/app/(app)/(drawer)/workspaces/index";
 import { FontProvider } from "@/lib/font-context";
+import { NuqsAdapter } from "@/lib/nuqs-adapter";
 import { ThemeProvider } from "@/lib/theme-context";
 import { WorkspaceNavProvider } from "@/lib/workspace-nav";
 
@@ -18,6 +19,11 @@ jest.mock("@coder/sdk", () => ({
 }));
 
 jest.mock("expo-router", () => ({
+	useGlobalSearchParams: () => ({}),
+	useSegments: () => [],
+	router: {
+		setParams: jest.fn(),
+	},
 	useLocalSearchParams: () => ({}),
 	Link: ({ children }: { children: React.ReactNode }) => children,
 }));
@@ -45,7 +51,9 @@ const createWrapper = () => {
 		<QueryClientProvider client={queryClient}>
 			<ThemeProvider>
 				<FontProvider>
-					<WorkspaceNavProvider>{children}</WorkspaceNavProvider>
+					<NuqsAdapter>
+						<WorkspaceNavProvider>{children}</WorkspaceNavProvider>
+					</NuqsAdapter>
 				</FontProvider>
 			</ThemeProvider>
 		</QueryClientProvider>

@@ -1,9 +1,21 @@
 import { act, renderHook } from "@testing-library/react-native";
 import type { ReactNode } from "react";
+
+jest.mock("expo-router", () => ({
+	useGlobalSearchParams: () => ({}),
+	useSegments: () => [],
+	router: {
+		setParams: jest.fn(),
+	},
+}));
+
+import { NuqsAdapter } from "./nuqs-adapter";
 import { useWorkspaceNav, WorkspaceNavProvider } from "./workspace-nav";
 
 const wrapper = ({ children }: { children: ReactNode }) => (
-	<WorkspaceNavProvider>{children}</WorkspaceNavProvider>
+	<NuqsAdapter>
+		<WorkspaceNavProvider>{children}</WorkspaceNavProvider>
+	</NuqsAdapter>
 );
 
 describe("useWorkspaceNav", () => {

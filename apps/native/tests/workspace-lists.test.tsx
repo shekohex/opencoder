@@ -2,11 +2,24 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render } from "@testing-library/react-native";
 import type React from "react";
 
+jest.mock("expo-router", () => ({
+	useGlobalSearchParams: () => ({}),
+	useSegments: () => [],
+	router: {
+		setParams: jest.fn(),
+	},
+	useRouter: () => ({
+		push: jest.fn(),
+	}),
+	Link: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 import WorkspacesProjectsScreen from "@/app/(app)/(drawer)/workspaces/projects";
 import WorkspacesSessionsScreen from "@/app/(app)/(drawer)/workspaces/sessions";
 import { workspaceGroups } from "@/components/workspace-mockups/mock-data";
 import { AppShell } from "@/components/workspace-mockups/shared";
 import { FontProvider } from "@/lib/font-context";
+import { NuqsAdapter } from "@/lib/nuqs-adapter";
 import { GlobalOpenCodeProvider } from "@/lib/opencode-provider";
 import { ThemeProvider } from "@/lib/theme-context";
 import { WorkspaceNavProvider } from "@/lib/workspace-nav";
@@ -52,9 +65,11 @@ const createWrapper = () => {
 		<QueryClientProvider client={queryClient}>
 			<ThemeProvider>
 				<FontProvider>
-					<GlobalOpenCodeProvider>
-						<WorkspaceNavProvider>{children}</WorkspaceNavProvider>
-					</GlobalOpenCodeProvider>
+					<NuqsAdapter>
+						<GlobalOpenCodeProvider>
+							<WorkspaceNavProvider>{children}</WorkspaceNavProvider>
+						</GlobalOpenCodeProvider>
+					</NuqsAdapter>
 				</FontProvider>
 			</ThemeProvider>
 		</QueryClientProvider>

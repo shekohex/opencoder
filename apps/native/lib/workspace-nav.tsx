@@ -1,4 +1,6 @@
-import { createContext, type ReactNode, useContext, useState } from "react";
+import { createContext, type ReactNode, useContext } from "react";
+
+import { useWorkspaceQueryParams } from "./workspace-query-params";
 
 export type WorkspaceId = string | null;
 export type ProjectId = string | null;
@@ -34,40 +36,46 @@ export function useWorkspaceNav() {
 }
 
 export function WorkspaceNavProvider({ children }: { children: ReactNode }) {
-	const [selectedWorkspaceId, _setSelectedWorkspaceId] =
-		useState<WorkspaceId>(null);
-	const [selectedProjectId, _setSelectedProjectId] = useState<ProjectId>(null);
-	const [selectedProjectWorktree, _setSelectedProjectWorktree] =
-		useState<ProjectWorktree>(null);
-	const [selectedSessionId, setSelectedSessionId] = useState<SessionId>(null);
+	const {
+		workspaceId,
+		projectId,
+		worktree,
+		sessionId,
+		setWorkspaceId,
+		setProjectId,
+		setWorktree,
+		setSessionId,
+	} = useWorkspaceQueryParams();
 
 	const setSelectedWorkspaceId = (id: WorkspaceId) => {
-		_setSelectedWorkspaceId(id);
-		_setSelectedProjectId(null);
-		_setSelectedProjectWorktree(null);
-		setSelectedSessionId(null);
+		setWorkspaceId(id);
+		setProjectId(null);
+		setWorktree(null);
+		setSessionId(null);
 	};
 
 	const setSelectedProjectId = (id: ProjectId, worktree?: string) => {
-		_setSelectedProjectId(id);
-		_setSelectedProjectWorktree(worktree ?? null);
-		setSelectedSessionId(null);
+		setProjectId(id);
+		setWorktree(worktree ?? null);
+		setSessionId(null);
 	};
 
+	const setSelectedSessionId = setSessionId;
+
 	const clearSelection = () => {
-		_setSelectedWorkspaceId(null);
-		_setSelectedProjectId(null);
-		_setSelectedProjectWorktree(null);
-		setSelectedSessionId(null);
+		setWorkspaceId(null);
+		setProjectId(null);
+		setWorktree(null);
+		setSessionId(null);
 	};
 
 	return (
 		<WorkspaceNavContext.Provider
 			value={{
-				selectedWorkspaceId,
-				selectedProjectId,
-				selectedProjectWorktree,
-				selectedSessionId,
+				selectedWorkspaceId: workspaceId,
+				selectedProjectId: projectId,
+				selectedProjectWorktree: worktree,
+				selectedSessionId: sessionId,
 				setSelectedWorkspaceId,
 				setSelectedProjectId,
 				setSelectedSessionId,
