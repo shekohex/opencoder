@@ -3,8 +3,10 @@ import { Link, Slot } from "expo-router";
 import { Drawer } from "expo-router/drawer";
 import { useWindowDimensions } from "react-native";
 import { HeaderButton } from "@/components/header-button";
+import { DesktopShell } from "@/components/sidebar";
 import { useTheme } from "@/lib/theme-context";
 import { breakpoints } from "@/lib/tokens";
+import { WorkspaceNavProvider } from "@/lib/workspace-nav";
 
 const DrawerLayout = () => {
 	const { theme } = useTheme();
@@ -14,7 +16,13 @@ const DrawerLayout = () => {
 	const isDesktopOrTablet = width >= breakpoints.md;
 
 	if (isDesktopOrTablet) {
-		return <Slot />;
+		return (
+			<WorkspaceNavProvider>
+				<DesktopShell>
+					<Slot />
+				</DesktopShell>
+			</WorkspaceNavProvider>
+		);
 	}
 
 	return (
