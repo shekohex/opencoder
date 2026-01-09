@@ -2,6 +2,12 @@ import { useRouter } from "expo-router";
 import type { ReactNode } from "react";
 import { useCallback, useMemo } from "react";
 import { FlatList, Pressable, View } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import Animated, {
+	runOnJS,
+	useAnimatedStyle,
+	useSharedValue,
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "@/components/app-text";
 import {
@@ -16,7 +22,15 @@ import {
 	type SessionRowData,
 	useOpenCodeSessions,
 } from "@/lib/session-queries";
-import { useSidebarState } from "@/lib/sidebar-state";
+import {
+	SESSIONS_SIDEBAR_MAX_WIDTH,
+	SESSIONS_SIDEBAR_MIN_WIDTH,
+	SIDEBAR_COLLAPSED_WIDTH,
+	SIDEBAR_EXPANDED_MAX_WIDTH,
+	SIDEBAR_EXPANDED_MIN_WIDTH,
+	useSidebarState,
+} from "@/lib/sidebar-state";
+import { storage } from "@/lib/storage";
 import { useWorkspaceNav } from "@/lib/workspace-nav";
 import {
 	groupWorkspacesByOwner,
@@ -28,6 +42,26 @@ import { type ProjectItem, ProjectsInlineList } from "./projects-inline-list";
 import { SessionsSidebar } from "./sessions-sidebar";
 
 const ROW_HEIGHT = 64;
+const RESIZE_HANDLE_WIDTH = 6;
+const STORAGE_KEY_WORKSPACES_WIDTH = "sidebar-workspaces-width";
+const STORAGE_KEY_SESSIONS_WIDTH = "sidebar-sessions-width";
+
+function ResizeHandle({
+	gesture,
+}: {
+	gesture: ReturnType<typeof Gesture.Pan>;
+}) {
+	return (
+		<GestureDetector gesture={gesture}>
+			<View
+				style={{ width: RESIZE_HANDLE_WIDTH, pointerEvents: "box-only" }}
+				className="items-center justify-center"
+			>
+				<View className="h-10 w-1 rounded-full bg-border" />
+			</View>
+		</GestureDetector>
+	);
+}
 
 export function DesktopShell({ children }: { children?: ReactNode }) {
 	const insets = useSafeAreaInsets();
@@ -107,40 +141,132 @@ export function DesktopShell({ children }: { children?: ReactNode }) {
 				? "empty"
 				: "ready";
 
+	const getInitialWorkspacesWidth = () => {
+		const stored = storage.getString(STORAGE_KEY_WORKSPACES_WIDTH);
+		return stored ? Number(stored) : SIDEBAR_EXPANDED_MIN_WIDTH;
+	};
+
+	const getInitialSessionsWidth = () => {
+		const stored = storage.getString(STORAGE_KEY_SESSIONS_WIDTH);
+		return stored ? Number(stored) : SESSIONS_SIDEBAR_MIN_WIDTH;
+	};
+
+	const workspacesWidth = useSharedValue(getInitialWorkspacesWidth());
+	const sessionsWidth = useSharedValue(getInitialSessionsWidth());
+	const startWorkspacesWidth = useSharedValue(workspacesWidth.value);
+	const startSessionsWidth = useSharedValue(sessionsWidth.value);
+
+	const persistWorkspacesWidth = useCallback((width: number) => {
+		storage.set(STORAGE_KEY_WORKSPACES_WIDTH, width);
+	}, []);
+
+	const persistSessionsWidth = useCallback((width: number) => {
+		storage.set(STORAGE_KEY_SESSIONS_WIDTH, width);
+	}, []);
+
+	const workspacesGesture = useMemo(
+		() =>
+			Gesture.Pan()
+				.hitSlop(12)
+				.activeOffsetX([-8, 8])
+				.shouldCancelWhenOutside(false)
+				.onBegin(() => {
+					startWorkspacesWidth.value = workspacesWidth.value;
+				})
+				.onChange((event) => {
+					const nextWidth = Math.min(
+						SIDEBAR_EXPANDED_MAX_WIDTH,
+						Math.max(
+							SIDEBAR_EXPANDED_MIN_WIDTH,
+							startWorkspacesWidth.value + event.translationX,
+						),
+					);
+					workspacesWidth.value = nextWidth;
+				})
+				.onEnd(() => {
+					runOnJS(persistWorkspacesWidth)(workspacesWidth.value);
+				}),
+		[workspacesWidth, startWorkspacesWidth, persistWorkspacesWidth],
+	);
+
+	const sessionsGesture = useMemo(
+		() =>
+			Gesture.Pan()
+				.hitSlop(12)
+				.activeOffsetX([-8, 8])
+				.shouldCancelWhenOutside(false)
+				.onBegin(() => {
+					startSessionsWidth.value = sessionsWidth.value;
+				})
+				.onChange((event) => {
+					const nextWidth = Math.min(
+						SESSIONS_SIDEBAR_MAX_WIDTH,
+						Math.max(
+							SESSIONS_SIDEBAR_MIN_WIDTH,
+							startSessionsWidth.value + event.translationX,
+						),
+					);
+					sessionsWidth.value = nextWidth;
+				})
+				.onEnd(() => {
+					runOnJS(persistSessionsWidth)(sessionsWidth.value);
+				}),
+		[sessionsWidth, startSessionsWidth, persistSessionsWidth],
+	);
+
+	const workspacesSidebarStyle = useAnimatedStyle(() => ({
+		width: workspacesCollapsed
+			? SIDEBAR_COLLAPSED_WIDTH
+			: workspacesWidth.value,
+	}));
+
+	const sessionsSidebarStyle = useAnimatedStyle(() => ({
+		width: sessionsCollapsed ? 0 : sessionsWidth.value,
+		opacity: sessionsCollapsed ? 0 : 1,
+	}));
+
 	return (
 		<View
 			className="flex-1 flex-row bg-background"
 			style={{ paddingTop: insets.top }}
 		>
-			<DesktopSidebar
-				collapsed={workspacesCollapsed}
-				status={connectionStatus}
-				onSettingsPress={handleSettingsPress}
-				onTogglePress={toggleWorkspacesSidebar}
-			>
-				<WorkspacesList
-					workspaceGroups={workspaceGroups}
-					selectedWorkspaceId={selectedWorkspaceId}
-					selectedProjectId={selectedProjectId}
-					onSelectWorkspace={handleWorkspaceSelect}
-					onSelectProject={handleProjectSelect}
-					listState={listState}
+			<Animated.View style={workspacesSidebarStyle}>
+				<DesktopSidebar
 					collapsed={workspacesCollapsed}
-				/>
-			</DesktopSidebar>
+					status={connectionStatus}
+					onSettingsPress={handleSettingsPress}
+					onTogglePress={toggleWorkspacesSidebar}
+				>
+					<WorkspacesList
+						workspaceGroups={workspaceGroups}
+						selectedWorkspaceId={selectedWorkspaceId}
+						selectedProjectId={selectedProjectId}
+						onSelectWorkspace={handleWorkspaceSelect}
+						onSelectProject={handleProjectSelect}
+						listState={listState}
+						collapsed={workspacesCollapsed}
+					/>
+				</DesktopSidebar>
+			</Animated.View>
+			{!workspacesCollapsed && <ResizeHandle gesture={workspacesGesture} />}
 
-			<SessionsSidebar
-				collapsed={sessionsCollapsed}
-				projectName={selectedProjectWorktree?.split("/").pop()}
-				onTogglePress={collapseSessionsSidebar}
-			>
-				<SessionsList
-					workspaceId={selectedWorkspaceId}
-					worktree={selectedProjectWorktree}
-					selectedSessionId={selectedSessionId}
-					onSelectSession={handleSessionSelect}
-				/>
-			</SessionsSidebar>
+			<Animated.View style={sessionsSidebarStyle}>
+				{!sessionsCollapsed && (
+					<SessionsSidebar
+						collapsed={false}
+						projectName={selectedProjectWorktree?.split("/").pop()}
+						onTogglePress={collapseSessionsSidebar}
+					>
+						<SessionsList
+							workspaceId={selectedWorkspaceId}
+							worktree={selectedProjectWorktree}
+							selectedSessionId={selectedSessionId}
+							onSelectSession={handleSessionSelect}
+						/>
+					</SessionsSidebar>
+				)}
+			</Animated.View>
+			{!sessionsCollapsed && <ResizeHandle gesture={sessionsGesture} />}
 
 			<View className="flex-1">{children}</View>
 		</View>

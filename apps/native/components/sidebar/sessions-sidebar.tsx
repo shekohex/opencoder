@@ -1,50 +1,27 @@
 import { Ionicons } from "@expo/vector-icons";
 import type { ReactNode } from "react";
 import { Pressable, View } from "react-native";
-import Animated, {
-	useAnimatedStyle,
-	withSpring,
-} from "react-native-reanimated";
 import { AppText } from "@/components/app-text";
-import { SESSIONS_SIDEBAR_MIN_WIDTH } from "@/lib/sidebar-state";
-
-const SPRING_CONFIG = {
-	damping: 20,
-	stiffness: 200,
-	mass: 0.8,
-};
 
 export function SessionsSidebar({
 	collapsed = true,
-	width = SESSIONS_SIDEBAR_MIN_WIDTH,
 	projectName,
 	onTogglePress,
 	onNewSessionPress,
 	children,
 }: {
 	collapsed?: boolean;
-	width?: number;
 	projectName?: string;
 	onTogglePress?: () => void;
 	onNewSessionPress?: () => void;
 	children?: ReactNode;
 }) {
-	const targetWidth = collapsed ? 0 : width;
-
-	const animatedStyle = useAnimatedStyle(() => ({
-		width: withSpring(targetWidth, SPRING_CONFIG),
-		opacity: withSpring(collapsed ? 0 : 1, SPRING_CONFIG),
-	}));
-
 	if (collapsed) {
 		return null;
 	}
 
 	return (
-		<Animated.View
-			className="h-full border-border border-r bg-background"
-			style={animatedStyle}
-		>
+		<View className="h-full flex-1 border-border border-r bg-background">
 			<View className="flex-row items-center justify-between border-border border-b px-3 py-3">
 				<AppText
 					className="flex-1 font-semibold text-foreground-strong text-sm"
@@ -75,6 +52,6 @@ export function SessionsSidebar({
 					</AppText>
 				</Pressable>
 			</View>
-		</Animated.View>
+		</View>
 	);
 }
