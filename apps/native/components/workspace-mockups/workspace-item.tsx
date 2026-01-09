@@ -18,6 +18,10 @@ const STATUS_STYLES: Record<StatusTone, { pill: string; dot: string }> = {
 		pill: "bg-surface-weak text-foreground-weak border-border",
 		dot: "bg-surface-weak",
 	},
+	error: {
+		pill: "bg-surface-danger text-foreground-danger border-border-danger",
+		dot: "bg-surface-danger",
+	},
 };
 
 export function WorkspaceStatusPill({

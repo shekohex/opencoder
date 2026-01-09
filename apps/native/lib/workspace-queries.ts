@@ -43,7 +43,7 @@ function getStatusTone(
 	agentHealthy: boolean,
 ): StatusTone {
 	if (status === "running" && !agentHealthy) {
-		return "warning";
+		return "error";
 	}
 	switch (status) {
 		case "running":

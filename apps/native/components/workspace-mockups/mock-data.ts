@@ -1,4 +1,4 @@
-export type StatusTone = "success" | "warning" | "inactive";
+export type StatusTone = "success" | "warning" | "inactive" | "error";
 export type WorkspaceBadge = "favorite" | "outdated" | "task" | "shared";
 
 export type WorkspaceRowData = {

@@ -28,6 +28,10 @@ const STATUS_DOT_STYLES: Record<StatusTone, { dot: string; ring: string }> = {
 		dot: "bg-surface-weak",
 		ring: "bg-surface-weak",
 	},
+	error: {
+		dot: "bg-surface-danger",
+		ring: "bg-surface-danger",
+	},
 };
 
 const BADGE_STYLES: Record<
