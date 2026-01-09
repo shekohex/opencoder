@@ -35,9 +35,6 @@ jest.mock("@/lib/workspace-nav", () => ({
 		selectedProjectId: "proj-1",
 		selectedProjectWorktree: "/home/coder/project",
 		selectedSessionId: null,
-		setSelectedWorkspaceId: jest.fn(),
-		setSelectedProjectId: jest.fn(),
-		setSelectedSessionId: jest.fn(),
 	}),
 }));
 

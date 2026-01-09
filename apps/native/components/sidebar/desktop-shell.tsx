@@ -1,4 +1,4 @@
-import { useGlobalSearchParams, usePathname, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import type { ReactNode } from "react";
 import { useCallback, useMemo } from "react";
 import { FlatList, Pressable, View } from "react-native";
@@ -37,6 +37,7 @@ import {
 	useWorkspaces,
 	type WorkspaceGroup,
 } from "@/lib/workspace-queries";
+import { buildWorkspacePath } from "@/lib/workspace-query-params";
 import { DesktopSidebar } from "./desktop-sidebar";
 import { type ProjectItem, ProjectsInlineList } from "./projects-inline-list";
 import { SessionsSidebar } from "./sessions-sidebar";
@@ -66,21 +67,6 @@ function ResizeHandle({
 export function DesktopShell({ children }: { children?: ReactNode }) {
 	const insets = useSafeAreaInsets();
 	const router = useRouter();
-	const pathname = usePathname();
-	const searchParams = useGlobalSearchParams();
-	const isOnWorkspaces = pathname.startsWith("/workspaces");
-
-	const navigateToWorkspaces = useCallback(
-		(overrides?: Record<string, string | null | undefined>) => {
-			if (isOnWorkspaces) return;
-			const params = { ...searchParams, ...overrides };
-			for (const key of Object.keys(params)) {
-				if (params[key] == null) delete params[key];
-			}
-			router.push({ pathname: "/workspaces", params });
-		},
-		[isOnWorkspaces, searchParams, router],
-	);
 
 	const {
 		workspacesCollapsed,
@@ -95,9 +81,6 @@ export function DesktopShell({ children }: { children?: ReactNode }) {
 		selectedProjectId,
 		selectedProjectWorktree,
 		selectedSessionId,
-		setSelectedWorkspaceId,
-		setSelectedProjectId,
-		setSelectedSessionId,
 	} = useWorkspaceNav();
 
 	const { data: workspaces, isLoading, isError } = useWorkspaces();
@@ -128,27 +111,37 @@ export function DesktopShell({ children }: { children?: ReactNode }) {
 
 	const handleWorkspaceSelect = useCallback(
 		(workspaceId: string) => {
-			setSelectedWorkspaceId(workspaceId);
-			navigateToWorkspaces({ ws: workspaceId });
+			router.replace(buildWorkspacePath({ workspaceId }));
 		},
-		[setSelectedWorkspaceId, navigateToWorkspaces],
+		[router],
 	);
 
 	const handleProjectSelect = useCallback(
 		(projectId: string, worktree?: string) => {
-			setSelectedProjectId(projectId, worktree);
 			expandSessionsSidebar();
-			navigateToWorkspaces({ proj: projectId, wt: worktree });
+			router.replace(
+				buildWorkspacePath({
+					workspaceId: selectedWorkspaceId,
+					projectId,
+					worktree,
+				}),
+			);
 		},
-		[setSelectedProjectId, expandSessionsSidebar, navigateToWorkspaces],
+		[router, selectedWorkspaceId, expandSessionsSidebar],
 	);
 
 	const handleSessionSelect = useCallback(
 		(sessionId: string) => {
-			setSelectedSessionId(sessionId);
-			navigateToWorkspaces({ sess: sessionId });
+			router.replace(
+				buildWorkspacePath({
+					workspaceId: selectedWorkspaceId,
+					projectId: selectedProjectId,
+					sessionId,
+					worktree: selectedProjectWorktree,
+				}),
+			);
 		},
-		[setSelectedSessionId, navigateToWorkspaces],
+		[router, selectedWorkspaceId, selectedProjectId, selectedProjectWorktree],
 	);
 
 	const listState: ListState = isLoading

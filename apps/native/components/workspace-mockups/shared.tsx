@@ -1,5 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import { Logo } from "@opencoder/branding";
+import { useRouter } from "expo-router";
 import {
 	type ReactNode,
 	useCallback,
@@ -37,6 +38,7 @@ import {
 	useWorkspaces,
 	type WorkspaceGroup,
 } from "@/lib/workspace-queries";
+import { buildWorkspacePath } from "@/lib/workspace-query-params";
 
 import {
 	buildStatus,
@@ -1003,14 +1005,12 @@ export function AppShell({
 	onCreateWorkspace?: () => void;
 	listState?: ListState;
 }) {
+	const router = useRouter();
 	const {
 		selectedWorkspaceId,
 		selectedProjectId,
 		selectedProjectWorktree,
 		selectedSessionId,
-		setSelectedWorkspaceId,
-		setSelectedProjectId,
-		setSelectedSessionId,
 	} = useWorkspaceNav();
 
 	const {
@@ -1037,9 +1037,39 @@ export function AppShell({
 	const sessions: RealSessionRowData[] =
 		sessionListState === "ready" ? realSessions : [];
 
-	const handleSelectSession = (sessionId: string) => {
-		setSelectedSessionId(sessionId);
-	};
+	const handleSelectWorkspace = useCallback(
+		(workspaceId: string) => {
+			router.replace(buildWorkspacePath({ workspaceId }));
+		},
+		[router],
+	);
+
+	const handleSelectProject = useCallback(
+		(projectId: string, worktree?: string) => {
+			router.replace(
+				buildWorkspacePath({
+					workspaceId: selectedWorkspaceId,
+					projectId,
+					worktree,
+				}),
+			);
+		},
+		[router, selectedWorkspaceId],
+	);
+
+	const handleSelectSession = useCallback(
+		(sessionId: string) => {
+			router.replace(
+				buildWorkspacePath({
+					workspaceId: selectedWorkspaceId,
+					projectId: selectedProjectId,
+					sessionId,
+					worktree: selectedProjectWorktree,
+				}),
+			);
+		},
+		[router, selectedWorkspaceId, selectedProjectId, selectedProjectWorktree],
+	);
 
 	const handleCreateSession = async () => {
 		if (!selectedProjectWorktree) return;
@@ -1047,7 +1077,14 @@ export function AppShell({
 			const newSession = await createSession.mutateAsync({
 				directory: selectedProjectWorktree,
 			});
-			setSelectedSessionId(newSession.id);
+			router.replace(
+				buildWorkspacePath({
+					workspaceId: selectedWorkspaceId,
+					projectId: selectedProjectId,
+					sessionId: newSession.id,
+					worktree: selectedProjectWorktree,
+				}),
+			);
 		} catch {}
 	};
 
@@ -1202,8 +1239,8 @@ export function AppShell({
 						workspaceGroups={workspaceGroups}
 						selectedWorkspaceId={selectedWorkspaceId}
 						selectedProjectId={selectedProjectId}
-						onSelectProject={setSelectedProjectId}
-						onSelectWorkspace={setSelectedWorkspaceId}
+						onSelectProject={handleSelectProject}
+						onSelectWorkspace={handleSelectWorkspace}
 						onCreateWorkspace={onCreateWorkspace}
 						listState={listState}
 					/>

@@ -1,8 +1,10 @@
-import { act, renderHook } from "@testing-library/react-native";
+import { renderHook } from "@testing-library/react-native";
 import type { ReactNode } from "react";
 
+const mockSearchParams = jest.fn(() => ({}));
+
 jest.mock("expo-router", () => ({
-	useGlobalSearchParams: () => ({}),
+	useGlobalSearchParams: () => mockSearchParams(),
 	useLocalSearchParams: () => ({}),
 	useSegments: () => [],
 	router: {
@@ -20,69 +22,40 @@ const wrapper = ({ children }: { children: ReactNode }) => (
 );
 
 describe("useWorkspaceNav", () => {
-	it("should initialize with null values", () => {
+	beforeEach(() => {
+		mockSearchParams.mockReturnValue({});
+	});
+
+	it("should initialize with null values when no route params", () => {
 		const { result } = renderHook(() => useWorkspaceNav(), { wrapper });
 
 		expect(result.current.selectedWorkspaceId).toBeNull();
 		expect(result.current.selectedProjectId).toBeNull();
 		expect(result.current.selectedSessionId).toBeNull();
+		expect(result.current.selectedProjectWorktree).toBeNull();
 	});
 
-	it("should reset project and session when workspace changes", () => {
+	it("should read workspaceId from route params", () => {
+		mockSearchParams.mockReturnValue({ workspaceId: "ws-1" });
+
 		const { result } = renderHook(() => useWorkspaceNav(), { wrapper });
 
-		act(() => {
-			result.current.setSelectedWorkspaceId("ws-1");
-			result.current.setSelectedProjectId("proj-1");
-			result.current.setSelectedSessionId("sess-1");
+		expect(result.current.selectedWorkspaceId).toBe("ws-1");
+		expect(result.current.selectedProjectId).toBeNull();
+		expect(result.current.selectedSessionId).toBeNull();
+	});
+
+	it("should read all params from route", () => {
+		mockSearchParams.mockReturnValue({
+			workspaceId: "ws-1",
+			projectId: "proj-1",
+			sessionId: "sess-1",
 		});
+
+		const { result } = renderHook(() => useWorkspaceNav(), { wrapper });
 
 		expect(result.current.selectedWorkspaceId).toBe("ws-1");
 		expect(result.current.selectedProjectId).toBe("proj-1");
 		expect(result.current.selectedSessionId).toBe("sess-1");
-
-		act(() => {
-			result.current.setSelectedWorkspaceId("ws-2");
-		});
-
-		expect(result.current.selectedWorkspaceId).toBe("ws-2");
-		expect(result.current.selectedProjectId).toBeNull();
-		expect(result.current.selectedSessionId).toBeNull();
-	});
-
-	it("should reset session when project changes", () => {
-		const { result } = renderHook(() => useWorkspaceNav(), { wrapper });
-
-		act(() => {
-			result.current.setSelectedWorkspaceId("ws-1");
-			result.current.setSelectedProjectId("proj-1");
-			result.current.setSelectedSessionId("sess-1");
-		});
-
-		act(() => {
-			result.current.setSelectedProjectId("proj-2");
-		});
-
-		expect(result.current.selectedWorkspaceId).toBe("ws-1");
-		expect(result.current.selectedProjectId).toBe("proj-2");
-		expect(result.current.selectedSessionId).toBeNull();
-	});
-
-	it("should clear all selections", () => {
-		const { result } = renderHook(() => useWorkspaceNav(), { wrapper });
-
-		act(() => {
-			result.current.setSelectedWorkspaceId("ws-1");
-			result.current.setSelectedProjectId("proj-1");
-			result.current.setSelectedSessionId("sess-1");
-		});
-
-		act(() => {
-			result.current.clearSelection();
-		});
-
-		expect(result.current.selectedWorkspaceId).toBeNull();
-		expect(result.current.selectedProjectId).toBeNull();
-		expect(result.current.selectedSessionId).toBeNull();
 	});
 });
