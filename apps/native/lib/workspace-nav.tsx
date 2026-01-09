@@ -1,7 +1,7 @@
-import { useGlobalSearchParams } from "expo-router";
+import { useGlobalSearchParams, useRouter } from "expo-router";
 import { createContext, type ReactNode, useCallback, useContext } from "react";
 
-import { useWorkspaceQueryParams } from "./workspace-query-params";
+import { buildWorkspacePath, useWorktreeParam } from "./workspace-query-params";
 
 export type WorkspaceId = string | null;
 export type ProjectId = string | null;
@@ -15,25 +15,69 @@ export type WorkspaceNavState = {
 	selectedSessionId: SessionId;
 };
 
-export type WorkspaceNavActions = {
-	setSelectedWorkspaceId: (id: WorkspaceId) => void;
-	setSelectedProjectId: (id: ProjectId, worktree?: string) => void;
-	setSelectedSessionId: (id: SessionId) => void;
-	clearSelection: () => void;
-};
+const WorkspaceNavContext = createContext<WorkspaceNavState | null>(null);
 
-type WorkspaceNavContextValue = WorkspaceNavState & WorkspaceNavActions;
-
-const WorkspaceNavContext = createContext<WorkspaceNavContextValue | null>(
-	null,
-);
-
-export function useWorkspaceNav() {
+export function useWorkspaceNav(): WorkspaceNavState {
 	const context = useContext(WorkspaceNavContext);
 	if (!context) {
 		throw new Error("useWorkspaceNav must be used within WorkspaceNavProvider");
 	}
 	return context;
+}
+
+export function useWorkspaceNavigation() {
+	const router = useRouter();
+	const state = useWorkspaceNav();
+
+	const navigateToWorkspace = useCallback(
+		(workspaceId: string) => {
+			router.replace(buildWorkspacePath({ workspaceId }));
+		},
+		[router],
+	);
+
+	const navigateToProject = useCallback(
+		(projectId: string, worktree?: string) => {
+			router.replace(
+				buildWorkspacePath({
+					workspaceId: state.selectedWorkspaceId,
+					projectId,
+					worktree,
+				}),
+			);
+		},
+		[router, state.selectedWorkspaceId],
+	);
+
+	const navigateToSession = useCallback(
+		(sessionId: string) => {
+			router.replace(
+				buildWorkspacePath({
+					workspaceId: state.selectedWorkspaceId,
+					projectId: state.selectedProjectId,
+					sessionId,
+					worktree: state.selectedProjectWorktree,
+				}),
+			);
+		},
+		[
+			router,
+			state.selectedWorkspaceId,
+			state.selectedProjectId,
+			state.selectedProjectWorktree,
+		],
+	);
+
+	const navigateToWorkspaces = useCallback(() => {
+		router.replace(buildWorkspacePath({}));
+	}, [router]);
+
+	return {
+		navigateToWorkspace,
+		navigateToProject,
+		navigateToSession,
+		navigateToWorkspaces,
+	};
 }
 
 export function WorkspaceNavProvider({ children }: { children: ReactNode }) {
@@ -43,48 +87,11 @@ export function WorkspaceNavProvider({ children }: { children: ReactNode }) {
 		sessionId?: string;
 	}>();
 
-	const {
-		workspaceId: queryWorkspaceId,
-		projectId: queryProjectId,
-		worktree,
-		sessionId: querySessionId,
-		setWorkspaceId,
-		setProjectId,
-		setWorktree,
-		setSessionId,
-	} = useWorkspaceQueryParams();
+	const { worktree } = useWorktreeParam();
 
-	const selectedWorkspaceId = routeParams.workspaceId ?? queryWorkspaceId;
-	const selectedProjectId = routeParams.projectId ?? queryProjectId;
-	const selectedSessionId = routeParams.sessionId ?? querySessionId;
-
-	const setSelectedWorkspaceId = useCallback(
-		(id: WorkspaceId) => {
-			setWorkspaceId(id);
-			setProjectId(null);
-			setWorktree(null);
-			setSessionId(null);
-		},
-		[setWorkspaceId, setProjectId, setWorktree, setSessionId],
-	);
-
-	const setSelectedProjectId = useCallback(
-		(id: ProjectId, wt?: string) => {
-			setProjectId(id);
-			setWorktree(wt ?? null);
-			setSessionId(null);
-		},
-		[setProjectId, setWorktree, setSessionId],
-	);
-
-	const setSelectedSessionId = setSessionId;
-
-	const clearSelection = useCallback(() => {
-		setWorkspaceId(null);
-		setProjectId(null);
-		setWorktree(null);
-		setSessionId(null);
-	}, [setWorkspaceId, setProjectId, setWorktree, setSessionId]);
+	const selectedWorkspaceId = routeParams.workspaceId ?? null;
+	const selectedProjectId = routeParams.projectId ?? null;
+	const selectedSessionId = routeParams.sessionId ?? null;
 
 	return (
 		<WorkspaceNavContext.Provider
@@ -93,10 +100,6 @@ export function WorkspaceNavProvider({ children }: { children: ReactNode }) {
 				selectedProjectId,
 				selectedProjectWorktree: worktree,
 				selectedSessionId,
-				setSelectedWorkspaceId,
-				setSelectedProjectId,
-				setSelectedSessionId,
-				clearSelection,
 			}}
 		>
 			{children}
