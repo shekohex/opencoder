@@ -244,7 +244,7 @@ export function GlobalOpenCodeProvider({
 
 			const workspace = getWorkspace(workspaceId);
 			if (!workspace) {
-				throw new Error(`Workspace ${workspaceId} not found`);
+				return;
 			}
 
 			connectingRef.current.add(workspaceId);
