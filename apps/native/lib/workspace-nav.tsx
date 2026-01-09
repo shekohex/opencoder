@@ -1,4 +1,4 @@
-import { useLocalSearchParams } from "expo-router";
+import { useGlobalSearchParams } from "expo-router";
 import { createContext, type ReactNode, useCallback, useContext } from "react";
 
 import { useWorkspaceQueryParams } from "./workspace-query-params";
@@ -37,7 +37,7 @@ export function useWorkspaceNav() {
 }
 
 export function WorkspaceNavProvider({ children }: { children: ReactNode }) {
-	const routeParams = useLocalSearchParams<{
+	const routeParams = useGlobalSearchParams<{
 		workspaceId?: string;
 		projectId?: string;
 		sessionId?: string;
