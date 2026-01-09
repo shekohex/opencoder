@@ -456,10 +456,10 @@ export function WorkspaceSDKProvider({
 	const connection = globalOpenCode.getConnection(workspaceId);
 
 	useEffect(() => {
-		if (
-			!globalOpenCode.hasConnection(workspaceId) &&
-			!globalOpenCode.isConnecting(workspaceId)
-		) {
+		const conn = globalOpenCode.getConnection(workspaceId);
+		const shouldConnect =
+			!conn || (conn.status !== "connected" && conn.status !== "error");
+		if (shouldConnect && !globalOpenCode.isConnecting(workspaceId)) {
 			globalOpenCode.connect(workspaceId).catch(() => {});
 		}
 	}, [workspaceId, globalOpenCode]);
