@@ -15,6 +15,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { AppText } from "@/components/app-text";
 import { Button } from "@/components/button";
+import { ProjectsListContent } from "@/components/projects-list";
 import { WorkspaceCard } from "@/components/workspace-mockups/workspace-card";
 import { useOpenCodeProjects } from "@/lib/project-queries";
 import {
@@ -364,7 +365,6 @@ export function WorkspaceThreePane({
 						onSelectSession={handleSelectSession}
 						onCreateSession={handleCreateSession}
 						listState={sessionListState}
-						isCreating={createSession.isPending}
 						noProjectSelected={!hasDirectory}
 					/>
 				</Animated.View>
@@ -451,75 +451,17 @@ function WorkspaceProjectsList({
 	const { projectGroups, isLoading, isError, error } =
 		useOpenCodeProjects(workspaceId);
 
-	const isAgentUnhealthy =
-		isError && error && String(error).toLowerCase().includes("agent");
-
-	if (isLoading) {
-		return (
-			<View className="ml-4 gap-3 border-border border-l pb-2 pl-4">
-				<View className="gap-1">
-					<View className="h-3 w-16 rounded bg-surface-secondary" />
-					<View
-						className="rounded-lg bg-surface-secondary"
-						style={{ height: Math.max(rowHeight - 8, 40) }}
-					/>
-					<View
-						className="rounded-lg bg-surface-secondary"
-						style={{ height: Math.max(rowHeight - 8, 40) }}
-					/>
-				</View>
-			</View>
-		);
-	}
-
-	if (isAgentUnhealthy) {
-		return (
-			<View className="ml-4 gap-1 border-border border-l pb-2 pl-4">
-				<AppText className="text-foreground-critical text-xs">
-					Agent unavailable
-				</AppText>
-				<AppText className="text-foreground-weak text-xs">
-					Restart workspace to reconnect
-				</AppText>
-			</View>
-		);
-	}
-
-	if (isError || projectGroups.length === 0) {
-		return (
-			<View className="ml-4 gap-1 border-border border-l pb-2 pl-4">
-				<AppText className="text-foreground-weak text-xs">
-					No projects yet
-				</AppText>
-			</View>
-		);
-	}
-
 	return (
-		<View className="ml-4 gap-3 border-border border-l pb-2 pl-4">
-			{projectGroups.map((projectGroup) => (
-				<View key={projectGroup.title} className="gap-1">
-					<AppText className="text-foreground-weak text-xs uppercase">
-						{projectGroup.title}
-					</AppText>
-					{projectGroup.rows.map((project) => {
-						const isProjectSelected = project.id === selectedProjectId;
-
-						return (
-							<ProjectRow
-								key={project.id}
-								name={project.name}
-								status={project.status}
-								lastUsed={project.lastUsed}
-								height={Math.max(rowHeight - 8, 40)}
-								isSelected={isProjectSelected}
-								onPress={() => onSelectProject(project.id, project.worktree)}
-							/>
-						);
-					})}
-				</View>
-			))}
-		</View>
+		<ProjectsListContent
+			projectGroups={projectGroups}
+			isLoading={isLoading}
+			isError={isError}
+			error={error}
+			selectedProjectId={selectedProjectId}
+			onSelectProject={onSelectProject}
+			variant="sidebar"
+			rowHeight={rowHeight}
+		/>
 	);
 }
 
@@ -707,7 +649,6 @@ function SessionSidebarContent({
 	onSelectSession,
 	onCreateSession,
 	listState = "ready",
-	isCreating = false,
 	noProjectSelected = false,
 }: {
 	rowHeight: number;
@@ -716,7 +657,6 @@ function SessionSidebarContent({
 	onSelectSession: (sessionId: string) => void;
 	onCreateSession: () => void;
 	listState?: ListState;
-	isCreating?: boolean;
 	noProjectSelected?: boolean;
 }) {
 	return (
@@ -915,42 +855,6 @@ function ResizeHandle({
 				<View className="h-10 w-1 rounded-full bg-border" />
 			</View>
 		</GestureDetector>
-	);
-}
-
-function ProjectRow({
-	name,
-	status,
-	lastUsed,
-	height,
-	isSelected,
-	onPress,
-}: {
-	name: string;
-	status: string;
-	lastUsed: string;
-	height: number;
-	isSelected?: boolean;
-	onPress?: () => void;
-}) {
-	return (
-		<Pressable
-			onPress={onPress}
-			className={`focus-ring justify-center rounded-xl px-3 ${
-				isSelected ? "bg-surface" : "bg-transparent"
-			}`}
-			style={{ height }}
-			accessibilityRole="button"
-			accessibilityLabel={`${name} project`}
-		>
-			<View className="flex-row items-center justify-between">
-				<AppText className="text-foreground-strong text-sm">{name}</AppText>
-				<AppText className="text-foreground-weak text-xs">{status}</AppText>
-			</View>
-			<AppText className="text-foreground-weak text-xs">
-				Updated {lastUsed}
-			</AppText>
-		</Pressable>
 	);
 }
 
@@ -1402,7 +1306,6 @@ export function AppShell({
 									? "ready"
 									: sessionListState
 						}
-						isCreating={createSession.isPending}
 						noProjectSelected={!hasDirectory}
 					/>
 				</Animated.View>

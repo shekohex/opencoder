@@ -26,6 +26,7 @@
 			"!**/wrangler.jsonc",
 			"!**/.source",
 			"!**/convex/_generated",
+			"!**/__mocks__",
 			"!**/uniwind-types.d.ts",
 			"!.agent/skills",
 			"!.opencode/skill",

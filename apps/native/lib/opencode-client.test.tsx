@@ -6,10 +6,16 @@ import {
 
 jest.mock("@opencode-ai/sdk");
 
+interface MockClient {
+	config: { get: jest.Mock };
+	project: { list: jest.Mock };
+	session: { list: jest.Mock; create: jest.Mock };
+}
+
 describe("createCoderOpenCodeClient", () => {
 	const originalFetch = globalThis.fetch;
-	let _mockClient: any;
-	let setMockClientGetImplementation: any;
+	let _mockClient: MockClient;
+	let setMockClientGetImplementation: (fetchMock: typeof fetch) => void;
 
 	beforeAll(() => {
 		_mockClient = jest.requireMock("@opencode-ai/sdk").mockClient;
@@ -53,7 +59,7 @@ describe("createCoderOpenCodeClient", () => {
 
 describe("checkOpenCodeHealth", () => {
 	const originalFetch = globalThis.fetch;
-	let mockClient: any;
+	let mockClient: MockClient;
 
 	beforeAll(() => {
 		mockClient = jest.requireMock("@opencode-ai/sdk").mockClient;

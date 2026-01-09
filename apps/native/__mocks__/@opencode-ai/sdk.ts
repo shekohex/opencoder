@@ -11,17 +11,22 @@ export const mockClient = {
 	},
 };
 
-let capturedConfig: any = null;
+interface CapturedConfig {
+	baseUrl: string;
+	fetch: typeof fetch;
+}
 
-export const createOpencodeClient = jest.fn((config: any) => {
+let capturedConfig: CapturedConfig | null = null;
+
+export const createOpencodeClient = jest.fn((config: CapturedConfig) => {
 	capturedConfig = config;
 	return mockClient;
 });
 
-export const setMockClientGetImplementation = (_fetchMock: any) => {
+export const setMockClientGetImplementation = (_fetchMock: typeof fetch) => {
 	mockClient.config.get = jest.fn(async () => {
-		const response = await capturedConfig.fetch(
-			`${capturedConfig.baseUrl}/config`,
+		const response = await capturedConfig!.fetch(
+			`${capturedConfig!.baseUrl}/config`,
 			{},
 		);
 		if (!response.ok) {
