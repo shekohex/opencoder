@@ -17,7 +17,34 @@ export function useWorkspaces() {
 	});
 }
 
-function getStatusTone(status: TypesGen.WorkspaceStatus): StatusTone {
+function getAgentHealth(
+	workspace: TypesGen.Workspace,
+): { healthy: boolean; reason?: string } | null {
+	const resources = workspace.latest_build?.resources;
+	if (!resources) return null;
+
+	for (const resource of resources) {
+		const agents = resource.agents;
+		if (!agents) continue;
+		for (const agent of agents) {
+			if (agent.status !== "connected") {
+				return { healthy: false, reason: `Agent ${agent.status}` };
+			}
+			if (agent.health && !agent.health.healthy) {
+				return { healthy: false, reason: agent.health.reason };
+			}
+		}
+	}
+	return { healthy: true };
+}
+
+function getStatusTone(
+	status: TypesGen.WorkspaceStatus,
+	agentHealthy: boolean,
+): StatusTone {
+	if (status === "running" && !agentHealthy) {
+		return "warning";
+	}
 	switch (status) {
 		case "running":
 			return "success";
@@ -73,11 +100,19 @@ export function workspaceToRowData(
 	workspace: TypesGen.Workspace,
 ): WorkspaceRowData {
 	const status = workspace.latest_build.status;
+	const agentHealth = getAgentHealth(workspace);
+	const isAgentHealthy = agentHealth?.healthy ?? true;
+
+	let displayStatus = formatStatusLabel(status);
+	if (status === "running" && !isAgentHealthy && agentHealth?.reason) {
+		displayStatus = agentHealth.reason;
+	}
+
 	return {
 		id: workspace.id,
 		name: workspace.name,
-		status: formatStatusLabel(status),
-		statusTone: getStatusTone(status),
+		status: displayStatus,
+		statusTone: getStatusTone(status, isAgentHealthy),
 		lastUsed: formatLastUsed(workspace.last_used_at),
 		badges: getWorkspaceBadges(workspace),
 	};
