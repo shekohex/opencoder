@@ -1,12 +1,10 @@
 import { Feather } from "@expo/vector-icons";
-import { Link, useLocalSearchParams } from "expo-router";
-import { useMemo } from "react";
-import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
+import { Link } from "expo-router";
+import { Pressable, ScrollView, View } from "react-native";
 
 import { AppText } from "@/components/app-text";
 import { Button } from "@/components/button";
 import { Container } from "@/components/container";
-
 import { messageRows } from "@/components/workspace-mockups/mock-data";
 import {
 	EmptyStateCard,
@@ -15,40 +13,31 @@ import {
 import { useProjectName } from "@/lib/project-queries";
 import { useSessionById } from "@/lib/session-queries";
 import { useWorkspaceNav } from "@/lib/workspace-nav";
-import { buildWorkspaceHref } from "@/lib/workspace-query-params";
+import { buildWorkspacePath } from "@/lib/workspace-query-params";
 
-export default function WorkspacesChatScreen() {
+export default function WorkspaceChatScreen() {
 	const {
 		selectedWorkspaceId,
 		selectedProjectId,
 		selectedProjectWorktree,
 		selectedSessionId,
 	} = useWorkspaceNav();
+
 	const session = useSessionById(
 		selectedWorkspaceId,
 		selectedProjectWorktree,
 		selectedSessionId,
 	);
 	const projectName = useProjectName(selectedProjectWorktree);
-	const { state } = useLocalSearchParams<{ state?: string }>();
 
-	const backHref = useMemo(
-		() =>
-			buildWorkspaceHref("/workspaces/sessions", {
-				workspaceId: selectedWorkspaceId,
-				projectId: selectedProjectId,
-				worktree: selectedProjectWorktree,
-			}),
-		[selectedWorkspaceId, selectedProjectId, selectedProjectWorktree],
-	);
-	const messageState: ListState =
-		state === "loading" || state === "error" || state === "empty"
-			? state
-			: "ready";
+	const backHref = buildWorkspacePath({
+		workspaceId: selectedWorkspaceId,
+		projectId: selectedProjectId,
+		worktree: selectedProjectWorktree,
+	});
+
 	const resolvedMessageState: ListState =
-		messageState === "ready" && messageRows.length === 0
-			? "empty"
-			: messageState;
+		messageRows.length === 0 ? "empty" : "ready";
 
 	return (
 		<Container>
@@ -79,11 +68,6 @@ export default function WorkspacesChatScreen() {
 					</View>
 				</View>
 				<ScrollView className="flex-1" contentContainerClassName="gap-3 p-4">
-					{resolvedMessageState === "loading" && (
-						<View className="flex-1 items-center justify-center py-8">
-							<ActivityIndicator color="var(--color-icon)" />
-						</View>
-					)}
 					{resolvedMessageState === "empty" && (
 						<EmptyStateCard
 							title="No messages yet"

@@ -4,6 +4,7 @@ import type React from "react";
 
 jest.mock("expo-router", () => ({
 	useGlobalSearchParams: () => ({}),
+	useLocalSearchParams: () => ({}),
 	useSegments: () => [],
 	router: {
 		setParams: jest.fn(),
@@ -11,11 +12,14 @@ jest.mock("expo-router", () => ({
 	useRouter: () => ({
 		push: jest.fn(),
 	}),
+	useNavigation: () => ({
+		dispatch: jest.fn(),
+	}),
 	Link: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-import WorkspacesProjectsScreen from "@/app/(app)/(drawer)/workspaces/projects";
-import WorkspacesSessionsScreen from "@/app/(app)/(drawer)/workspaces/sessions";
+import WorkspaceSessionsScreen from "@/app/(app)/(drawer)/workspaces/[workspaceId]/[projectId]/index";
+import WorkspaceProjectsScreen from "@/app/(app)/(drawer)/workspaces/[workspaceId]/index";
 import { workspaceGroups } from "@/components/workspace-mockups/mock-data";
 import { AppShell } from "@/components/workspace-mockups/shared";
 import { FontProvider } from "@/lib/font-context";
@@ -44,6 +48,7 @@ jest.mock("@/lib/workspace-queries", () => ({
 		isLoading: false,
 		isError: false,
 	}),
+	useWorkspaceName: () => "test-workspace",
 }));
 
 jest.mock("@/lib/deployment-config", () => ({
@@ -78,7 +83,7 @@ const createWrapper = () => {
 
 describe("Workspace lists", () => {
 	it("scrolls the projects list", () => {
-		const { getByTestId } = render(<WorkspacesProjectsScreen />, {
+		const { getByTestId } = render(<WorkspaceProjectsScreen />, {
 			wrapper: createWrapper(),
 		});
 
@@ -94,7 +99,7 @@ describe("Workspace lists", () => {
 	});
 
 	it("scrolls the sessions list", () => {
-		const { getByTestId } = render(<WorkspacesSessionsScreen />, {
+		const { getByTestId } = render(<WorkspaceSessionsScreen />, {
 			wrapper: createWrapper(),
 		});
 

@@ -1,3 +1,4 @@
+import { useLocalSearchParams } from "expo-router";
 import { createContext, type ReactNode, useCallback, useContext } from "react";
 
 import { useWorkspaceQueryParams } from "./workspace-query-params";
@@ -36,16 +37,26 @@ export function useWorkspaceNav() {
 }
 
 export function WorkspaceNavProvider({ children }: { children: ReactNode }) {
+	const routeParams = useLocalSearchParams<{
+		workspaceId?: string;
+		projectId?: string;
+		sessionId?: string;
+	}>();
+
 	const {
-		workspaceId,
-		projectId,
+		workspaceId: queryWorkspaceId,
+		projectId: queryProjectId,
 		worktree,
-		sessionId,
+		sessionId: querySessionId,
 		setWorkspaceId,
 		setProjectId,
 		setWorktree,
 		setSessionId,
 	} = useWorkspaceQueryParams();
+
+	const selectedWorkspaceId = routeParams.workspaceId ?? queryWorkspaceId;
+	const selectedProjectId = routeParams.projectId ?? queryProjectId;
+	const selectedSessionId = routeParams.sessionId ?? querySessionId;
 
 	const setSelectedWorkspaceId = useCallback(
 		(id: WorkspaceId) => {
@@ -58,9 +69,9 @@ export function WorkspaceNavProvider({ children }: { children: ReactNode }) {
 	);
 
 	const setSelectedProjectId = useCallback(
-		(id: ProjectId, worktree?: string) => {
+		(id: ProjectId, wt?: string) => {
 			setProjectId(id);
-			setWorktree(worktree ?? null);
+			setWorktree(wt ?? null);
 			setSessionId(null);
 		},
 		[setProjectId, setWorktree, setSessionId],
@@ -78,10 +89,10 @@ export function WorkspaceNavProvider({ children }: { children: ReactNode }) {
 	return (
 		<WorkspaceNavContext.Provider
 			value={{
-				selectedWorkspaceId: workspaceId,
-				selectedProjectId: projectId,
+				selectedWorkspaceId,
+				selectedProjectId,
 				selectedProjectWorktree: worktree,
-				selectedSessionId: sessionId,
+				selectedSessionId,
 				setSelectedWorkspaceId,
 				setSelectedProjectId,
 				setSelectedSessionId,

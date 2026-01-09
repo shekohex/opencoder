@@ -12,21 +12,20 @@ import { ROW_HEIGHTS } from "@/components/workspace-mockups/shared";
 import { useOpenCodeProjects } from "@/lib/project-queries";
 import { useWorkspaceNav } from "@/lib/workspace-nav";
 import { useWorkspaceName } from "@/lib/workspace-queries";
-import { buildWorkspaceHref } from "@/lib/workspace-query-params";
+import { buildWorkspacePath } from "@/lib/workspace-query-params";
 
 const BACK_ROUTE = "/workspaces" as Href;
 
-export default function WorkspacesProjectsScreen() {
+export default function WorkspaceProjectsScreen() {
 	const rowHeight = ROW_HEIGHTS.mobile;
-	const { selectedWorkspaceId, selectedProjectId, setSelectedProjectId } =
-		useWorkspaceNav();
+	const { selectedWorkspaceId } = useWorkspaceNav();
 	const { projectGroups, isLoading, isError, error } =
 		useOpenCodeProjects(selectedWorkspaceId);
 	const workspaceName = useWorkspaceName(selectedWorkspaceId);
 
 	const buildNextHref = useCallback(
 		(projectId: string, worktree: string) =>
-			buildWorkspaceHref("/workspaces/sessions", {
+			buildWorkspacePath({
 				workspaceId: selectedWorkspaceId,
 				projectId,
 				worktree,
@@ -41,8 +40,8 @@ export default function WorkspacesProjectsScreen() {
 				isLoading={isLoading}
 				isError={isError}
 				error={error}
-				selectedProjectId={selectedProjectId}
-				onSelectProject={setSelectedProjectId}
+				selectedProjectId={null}
+				onSelectProject={() => {}}
 				variant="page"
 				rowHeight={rowHeight}
 				buildNextHref={buildNextHref}

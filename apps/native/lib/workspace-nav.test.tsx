@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 jest.mock("expo-router", () => ({
 	useGlobalSearchParams: () => ({}),
+	useLocalSearchParams: () => ({}),
 	useSegments: () => [],
 	router: {
 		setParams: jest.fn(),

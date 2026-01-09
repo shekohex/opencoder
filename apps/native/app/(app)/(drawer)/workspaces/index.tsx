@@ -29,11 +29,10 @@ import { useCoderBrowser } from "@/lib/use-coder-browser";
 import { useDocumentTitle } from "@/lib/use-document-title";
 import { useWorkspaceNav } from "@/lib/workspace-nav";
 import { useWorkspaces } from "@/lib/workspace-queries";
-import { buildWorkspaceHref } from "@/lib/workspace-query-params";
+import { buildWorkspacePath } from "@/lib/workspace-query-params";
 
 export default function WorkspacesScreen() {
 	const { width, height } = useWorkspaceLayout();
-	const { openTemplates } = useCoderBrowser();
 	const { workspaceGroups, hasActiveBuilds, isLoading, isError } =
 		useWorkspacePolling();
 	const { state } = useLocalSearchParams<{ state?: string }>();
@@ -135,7 +134,6 @@ function MobileWorkspaces({
 	listState: ListState;
 }) {
 	const { width } = useWorkspaceLayout();
-	const { setSelectedWorkspaceId } = useWorkspaceNav();
 	const { openTemplates, openBuildPage } = useCoderBrowser();
 	const navigation = useNavigation();
 	const rowHeight = ROW_HEIGHTS.mobile;
@@ -162,13 +160,12 @@ function MobileWorkspaces({
 			renderItem={({ item, section }) => (
 				<Link
 					key={item.name}
-					href={buildWorkspaceHref("/workspaces/projects", {
+					href={buildWorkspacePath({
 						workspaceId: item.id ?? item.name,
 					})}
 					asChild
 				>
 					<Pressable
-						onPress={() => setSelectedWorkspaceId(item.id ?? item.name)}
 						className="focus-ring rounded-2xl"
 						accessibilityRole="button"
 						accessibilityLabel={`Open workspace ${item.name}`}

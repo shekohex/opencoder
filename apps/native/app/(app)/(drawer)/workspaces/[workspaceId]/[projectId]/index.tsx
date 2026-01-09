@@ -1,13 +1,11 @@
 import { Feather } from "@expo/vector-icons";
 import type { Href } from "expo-router";
 import { Link, useRouter } from "expo-router";
-import { useMemo } from "react";
 import { FlatList, Pressable, View } from "react-native";
 
 import { AppText } from "@/components/app-text";
 import { Button } from "@/components/button";
 import { Container } from "@/components/container";
-
 import {
 	EmptyStateCard,
 	ErrorBanner,
@@ -23,18 +21,13 @@ import {
 } from "@/lib/session-queries";
 import { useWorkspaceNav } from "@/lib/workspace-nav";
 import { useWorkspaceName } from "@/lib/workspace-queries";
-import { buildWorkspaceHref } from "@/lib/workspace-query-params";
+import { buildWorkspacePath } from "@/lib/workspace-query-params";
 
-export default function WorkspacesSessionsScreen() {
+export default function WorkspaceSessionsScreen() {
 	const router = useRouter();
 	const rowHeight = ROW_HEIGHTS.mobile;
-	const {
-		selectedWorkspaceId,
-		selectedProjectId,
-		selectedProjectWorktree,
-		selectedSessionId,
-		setSelectedSessionId,
-	} = useWorkspaceNav();
+	const { selectedWorkspaceId, selectedProjectId, selectedProjectWorktree } =
+		useWorkspaceNav();
 
 	const {
 		sessions,
@@ -52,24 +45,20 @@ export default function WorkspacesSessionsScreen() {
 	const workspaceName = useWorkspaceName(selectedWorkspaceId);
 	const projectName = useProjectName(selectedProjectWorktree);
 
-	const backHref = useMemo(
-		() =>
-			buildWorkspaceHref("/workspaces/projects", {
-				workspaceId: selectedWorkspaceId,
-			}),
-		[selectedWorkspaceId],
-	);
+	const backHref = buildWorkspacePath({
+		workspaceId: selectedWorkspaceId,
+	});
 
 	const handleGoToProjects = () => {
 		router.push(backHref);
 	};
 
 	const buildSessionHref = (sessionId: string) =>
-		buildWorkspaceHref("/workspaces/chat", {
+		buildWorkspacePath({
 			workspaceId: selectedWorkspaceId,
 			projectId: selectedProjectId,
-			worktree: selectedProjectWorktree,
 			sessionId,
+			worktree: selectedProjectWorktree,
 		});
 
 	const getListState = (): ListState | "no-project" => {
@@ -88,10 +77,8 @@ export default function WorkspacesSessionsScreen() {
 				directory: selectedProjectWorktree ?? undefined,
 				title: undefined,
 			});
-			setSelectedSessionId(newSession.id);
-		} catch {
-			// error handled by mutation state
-		}
+			router.push(buildSessionHref(newSession.id));
+		} catch {}
 	};
 
 	const handleRetry = () => {
@@ -110,8 +97,6 @@ export default function WorkspacesSessionsScreen() {
 				renderItem={({ item: session }) => (
 					<SessionRow
 						session={session}
-						isSelected={selectedSessionId === session.id}
-						onPress={() => setSelectedSessionId(session.id)}
 						rowHeight={rowHeight}
 						href={buildSessionHref(session.id)}
 					/>
@@ -192,26 +177,17 @@ export default function WorkspacesSessionsScreen() {
 
 function SessionRow({
 	session,
-	isSelected,
-	onPress,
 	rowHeight,
 	href,
 }: {
 	session: SessionRowData;
-	isSelected: boolean;
-	onPress: () => void;
 	rowHeight: number;
 	href: Href;
 }) {
 	return (
 		<Link href={href} asChild>
 			<Pressable
-				onPress={onPress}
-				className={`focus-ring justify-center rounded-2xl border px-4 ${
-					isSelected
-						? "border-border-info bg-surface-info"
-						: "border-border bg-surface"
-				}`}
+				className="focus-ring justify-center rounded-2xl border border-border bg-surface px-4"
 				style={{ height: rowHeight }}
 				accessibilityRole="button"
 				accessibilityLabel={`Open session ${session.name}`}

@@ -10,32 +10,32 @@ export const workspaceParamKeys = {
 
 export type WorkspaceNavLevel = "workspaces" | "projects" | "sessions" | "chat";
 
-export function buildWorkspaceHref(
-	basePath: string,
-	params: {
-		workspaceId?: string | null;
-		projectId?: string | null;
-		worktree?: string | null;
-		sessionId?: string | null;
-	},
-): Href {
-	const searchParams = new URLSearchParams();
+export function buildWorkspacePath(params: {
+	workspaceId?: string | null;
+	projectId?: string | null;
+	sessionId?: string | null;
+	worktree?: string | null;
+}): Href {
+	const { workspaceId, projectId, sessionId, worktree } = params;
 
-	if (params.workspaceId) {
-		searchParams.set(workspaceParamKeys.workspace, params.workspaceId);
-	}
-	if (params.projectId) {
-		searchParams.set(workspaceParamKeys.project, params.projectId);
-	}
-	if (params.worktree) {
-		searchParams.set(workspaceParamKeys.worktree, params.worktree);
-	}
-	if (params.sessionId) {
-		searchParams.set(workspaceParamKeys.session, params.sessionId);
+	let path = "/workspaces";
+
+	if (workspaceId) {
+		path = `${path}/${workspaceId}`;
+		if (projectId) {
+			path = `${path}/${projectId}`;
+			if (sessionId) {
+				path = `${path}/${sessionId}`;
+			}
+		}
 	}
 
-	const queryString = searchParams.toString();
-	return (queryString ? `${basePath}?${queryString}` : basePath) as Href;
+	if (worktree) {
+		const encoded = encodeURIComponent(worktree);
+		path = `${path}?${workspaceParamKeys.worktree}=${encoded}`;
+	}
+
+	return path as Href;
 }
 
 export function useWorkspaceQueryParams() {
