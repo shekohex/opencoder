@@ -37,7 +37,7 @@ export function ProjectRow({
 
 	const baseClassName = isSidebar
 		? "focus-ring justify-center rounded-xl px-3"
-		: "focus-ring rounded-xl border px-3";
+		: "focus-ring justify-center rounded-2xl border px-4";
 
 	const content = (
 		<Pressable
@@ -49,7 +49,7 @@ export function ProjectRow({
 		>
 			<View className="flex-row items-center justify-between">
 				<AppText
-					className={`text-foreground-strong text-sm ${isSidebar ? "" : "font-medium"}`}
+					className={`text-foreground-strong ${isSidebar ? "text-sm" : "font-medium text-base"}`}
 				>
 					{name}
 				</AppText>

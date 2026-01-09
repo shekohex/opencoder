@@ -118,3 +118,8 @@ export function useOpenCodeProjects(workspaceId: string | null) {
 		refetch: query.refetch,
 	};
 }
+
+export function useProjectName(worktree: string | null) {
+	if (!worktree) return null;
+	return getProjectName(worktree);
+}

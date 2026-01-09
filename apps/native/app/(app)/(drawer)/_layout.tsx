@@ -73,7 +73,7 @@ const DrawerLayout = () => {
 			<Drawer.Screen
 				name="workspaces"
 				options={{
-					headerTitle: "Workspaces",
+					headerShown: false,
 					drawerLabel: "Workspaces",
 					drawerIcon: ({ size, color }) => (
 						<Ionicons name="briefcase-outline" size={size} color={color} />

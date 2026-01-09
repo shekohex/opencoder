@@ -173,3 +173,9 @@ export function hasActiveBuilds(
 		);
 	});
 }
+
+export function useWorkspaceName(workspaceId: string | null) {
+	const { data: workspaces } = useWorkspaces();
+	if (!workspaces || !workspaceId) return null;
+	return workspaces.find((w) => w.id === workspaceId)?.name ?? null;
+}

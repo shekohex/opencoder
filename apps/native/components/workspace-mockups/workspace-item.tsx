@@ -71,16 +71,16 @@ export function WorkspaceItem({
 
 	return (
 		<View
-			className={`flex-row items-center gap-3 rounded-xl border px-3 ${
+			className={`flex-row items-center gap-3 rounded-2xl border px-4 ${
 				isSelected
 					? "border-border-selected bg-surface"
 					: "border-border bg-transparent"
 			}`}
 			style={{ height: rowHeight }}
 		>
-			<View className="h-8 w-8 items-center justify-center rounded-full bg-surface-weak">
+			<View className="h-10 w-10 items-center justify-center rounded-full bg-surface-weak">
 				{avatar ?? (
-					<AppText className="font-semibold text-foreground-strong text-xs">
+					<AppText className="font-semibold text-foreground-strong text-sm">
 						{ownerInitials}
 					</AppText>
 				)}
@@ -88,7 +88,7 @@ export function WorkspaceItem({
 			<View className="flex-1 gap-1">
 				<View className="flex-row items-center justify-between gap-2">
 					<AppText
-						className="font-medium text-foreground-strong text-sm"
+						className="font-medium text-base text-foreground-strong"
 						numberOfLines={1}
 					>
 						{row.name}

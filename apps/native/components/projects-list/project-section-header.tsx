@@ -13,8 +13,8 @@ export function ProjectSectionHeader({
 }: ProjectSectionHeaderProps) {
 	if (variant === "page") {
 		return (
-			<View className="gap-2 pt-4">
-				<AppText className="text-foreground-weak text-xs uppercase">
+			<View className="pt-6 pb-3">
+				<AppText className="font-medium text-foreground-weak text-sm uppercase tracking-wide">
 					{title}
 				</AppText>
 			</View>

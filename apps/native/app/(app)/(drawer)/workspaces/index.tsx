@@ -1,6 +1,6 @@
 import { Feather } from "@expo/vector-icons";
-import type { Href } from "expo-router";
-import { Link, useLocalSearchParams } from "expo-router";
+import { DrawerActions } from "@react-navigation/native";
+import { Link, useLocalSearchParams, useNavigation } from "expo-router";
 import { useMemo } from "react";
 import { Pressable, SectionList, View } from "react-native";
 
@@ -29,8 +29,7 @@ import { useCoderBrowser } from "@/lib/use-coder-browser";
 import { useDocumentTitle } from "@/lib/use-document-title";
 import { useWorkspaceNav } from "@/lib/workspace-nav";
 import { useWorkspaces } from "@/lib/workspace-queries";
-
-const NEXT_ROUTE = "/workspaces/projects" as Href;
+import { buildWorkspaceHref } from "@/lib/workspace-query-params";
 
 export default function WorkspacesScreen() {
 	const { width, height } = useWorkspaceLayout();
@@ -138,6 +137,7 @@ function MobileWorkspaces({
 	const { width } = useWorkspaceLayout();
 	const { setSelectedWorkspaceId } = useWorkspaceNav();
 	const { openTemplates, openBuildPage } = useCoderBrowser();
+	const navigation = useNavigation();
 	const rowHeight = ROW_HEIGHTS.mobile;
 	const isCompact = width < COMPACT_WIDTH_THRESHOLD;
 	const sections = workspaceGroups.map((group) => ({
@@ -157,13 +157,19 @@ function MobileWorkspaces({
 			sections={listSections}
 			keyExtractor={(item, index) => `${item.name}-${index}`}
 			className="flex-1 bg-background"
-			contentContainerStyle={{ padding: 16 }}
-			ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+			contentContainerStyle={{ padding: 20 }}
+			ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
 			renderItem={({ item, section }) => (
-				<Link key={item.name} href={NEXT_ROUTE} asChild>
+				<Link
+					key={item.name}
+					href={buildWorkspaceHref("/workspaces/projects", {
+						workspaceId: item.id ?? item.name,
+					})}
+					asChild
+				>
 					<Pressable
 						onPress={() => setSelectedWorkspaceId(item.id ?? item.name)}
-						className="focus-ring rounded-xl"
+						className="focus-ring rounded-2xl"
 						accessibilityRole="button"
 						accessibilityLabel={`Open workspace ${item.name}`}
 					>
@@ -176,9 +182,9 @@ function MobileWorkspaces({
 				</Link>
 			)}
 			renderSectionHeader={({ section }) => (
-				<View className="gap-2 pt-4">
+				<View className="pt-6 pb-3">
 					<View className="flex-row items-center justify-between">
-						<AppText className="text-foreground-weak text-xs uppercase">
+						<AppText className="font-medium text-foreground-weak text-sm uppercase tracking-wide">
 							{section.title}
 						</AppText>
 						<AppText className="text-foreground-weaker text-xs">
@@ -188,11 +194,22 @@ function MobileWorkspaces({
 				</View>
 			)}
 			ListHeaderComponent={
-				<View className="gap-4">
+				<View className="gap-5">
 					<View className="flex-row items-center justify-between">
-						<AppText className="font-semibold text-foreground-strong text-lg">
-							Workspaces
-						</AppText>
+						<View className="flex-row items-center gap-3">
+							<Pressable
+								onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+								className="focus-ring -ml-2 items-center justify-center rounded-full"
+								style={{ width: 44, height: 44 }}
+								accessibilityRole="button"
+								accessibilityLabel="Open menu"
+							>
+								<Feather name="menu" size={20} color="var(--color-icon)" />
+							</Pressable>
+							<AppText className="font-semibold text-foreground-strong text-xl">
+								Workspaces
+							</AppText>
+						</View>
 						<Button
 							size="sm"
 							variant="outline"
@@ -228,7 +245,7 @@ function MobileWorkspaces({
 				) : null
 			}
 			ListFooterComponent={
-				<View className="mt-4">
+				<View className="mt-6">
 					<LogoEmptyState
 						title="Invite your team"
 						subtitle="Share workspaces and keep sessions in sync across projects."
@@ -243,14 +260,14 @@ function BuildBanner({ onPress }: { onPress: () => void }) {
 	return (
 		<Pressable
 			onPress={onPress}
-			className="focus-ring gap-1 rounded-xl border border-border-info bg-surface-info px-3 py-2"
+			className="focus-ring gap-2 rounded-2xl border border-border-info bg-surface-info px-4 py-3"
 			accessibilityRole="button"
 			accessibilityLabel="View build progress"
 		>
 			<View className="flex-row items-center justify-between">
 				<View className="flex-row items-center gap-2">
 					<View className="h-2 w-2 rounded-full bg-icon-info" />
-					<AppText className="font-semibold text-foreground-strong text-xs">
+					<AppText className="font-semibold text-foreground-strong text-sm">
 						{buildStatus.title}
 					</AppText>
 				</View>
@@ -258,7 +275,7 @@ function BuildBanner({ onPress }: { onPress: () => void }) {
 					{buildStatus.detail}
 				</AppText>
 			</View>
-			<AppText className="text-foreground-weak text-xs">
+			<AppText className="text-foreground-weak text-sm">
 				{buildStatus.stage}
 			</AppText>
 		</Pressable>

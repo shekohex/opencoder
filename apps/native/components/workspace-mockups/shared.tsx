@@ -53,7 +53,7 @@ export { EmptyStateCard, ErrorBanner, type ListState, LoadingList };
 export const ROW_HEIGHTS = {
 	desktop: 64,
 	tablet: 60,
-	mobile: 56,
+	mobile: 68,
 } as const;
 
 export const SIDEBAR_WIDTHS = {
@@ -400,22 +400,22 @@ export function LogoEmptyState({
 	const { mode } = useTheme();
 
 	return (
-		<View className="items-center gap-3 rounded-xl border border-border bg-surface px-4 py-5">
+		<View className="items-center gap-4 rounded-2xl border border-border bg-surface px-5 py-6">
 			<Logo mode={mode} width={140} height={28} />
-			<View className="items-center gap-1">
-				<AppText className="font-semibold text-foreground-strong text-sm">
+			<View className="items-center gap-2">
+				<AppText className="font-semibold text-base text-foreground-strong">
 					{title}
 				</AppText>
-				<AppText className="text-center text-foreground-weak text-xs">
+				<AppText className="text-center text-foreground-weak text-sm">
 					{subtitle}
 				</AppText>
 			</View>
-			<View className="w-full gap-2">
+			<View className="w-full gap-3">
 				{emptyStateActions.map((action, index) => (
 					<Button
 						key={action}
 						variant={index === 0 ? "secondary" : "outline"}
-						size="sm"
+						size="md"
 						className="w-full"
 					>
 						{action}

@@ -23,7 +23,7 @@ export interface ProjectsListContentProps {
 	onSelectProject: (id: string, worktree?: string) => void;
 	variant: "sidebar" | "page";
 	rowHeight: number;
-	nextHref?: Href;
+	buildNextHref?: (projectId: string, worktree: string) => Href;
 	headerComponent?: React.ReactNode;
 }
 
@@ -36,7 +36,7 @@ export function ProjectsListContent({
 	onSelectProject,
 	variant,
 	rowHeight,
-	nextHref,
+	buildNextHref,
 	headerComponent,
 }: ProjectsListContentProps) {
 	const isAgentUnhealthy = isError && isAgentUnhealthyError(error);
@@ -64,7 +64,7 @@ export function ProjectsListContent({
 			selectedProjectId={selectedProjectId}
 			onSelectProject={onSelectProject}
 			rowHeight={rowHeight}
-			nextHref={nextHref}
+			buildNextHref={buildNextHref}
 			headerComponent={headerComponent}
 		/>
 	);
@@ -153,7 +153,7 @@ interface PageProjectsListProps {
 	selectedProjectId: string | null;
 	onSelectProject: (id: string, worktree?: string) => void;
 	rowHeight: number;
-	nextHref?: Href;
+	buildNextHref?: (projectId: string, worktree: string) => Href;
 	headerComponent?: React.ReactNode;
 }
 
@@ -164,7 +164,7 @@ function PageProjectsList({
 	selectedProjectId,
 	onSelectProject,
 	rowHeight,
-	nextHref,
+	buildNextHref,
 	headerComponent,
 }: PageProjectsListProps) {
 	const sections =
@@ -181,8 +181,8 @@ function PageProjectsList({
 			sections={sections}
 			keyExtractor={(item) => item.id}
 			className="flex-1 bg-background"
-			contentContainerStyle={{ padding: 16 }}
-			ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+			contentContainerStyle={{ padding: 20 }}
+			ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
 			renderItem={({ item: project }) => (
 				<ProjectRow
 					key={project.id}
@@ -193,7 +193,7 @@ function PageProjectsList({
 					isSelected={project.id === selectedProjectId}
 					onPress={() => onSelectProject(project.id, project.worktree)}
 					variant="page"
-					href={nextHref}
+					href={buildNextHref?.(project.id, project.worktree)}
 				/>
 			)}
 			renderSectionHeader={({ section }) => (
