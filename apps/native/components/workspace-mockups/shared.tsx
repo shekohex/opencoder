@@ -529,6 +529,21 @@ function WorkspaceSidebarContent({
 	const [expandedWorkspaceId, setExpandedWorkspaceId] = useState<string | null>(
 		null,
 	);
+
+	useEffect(() => {
+		if (selectedWorkspaceId) {
+			const selectedWorkspaceName = resolvedWorkspaceGroups
+				.flatMap((group) => group.rows)
+				.find((row) => (row.id ?? row.name) === selectedWorkspaceId)?.name;
+			if (
+				selectedWorkspaceName &&
+				selectedWorkspaceName !== expandedWorkspaceId
+			) {
+				setExpandedWorkspaceId(selectedWorkspaceName);
+			}
+		}
+	}, [selectedWorkspaceId, resolvedWorkspaceGroups, expandedWorkspaceId]);
+
 	const handleWorkspacePress = useCallback(
 		(workspaceId: string) => {
 			onSelectWorkspace(workspaceId);
@@ -726,7 +741,7 @@ function SessionSidebarContent({
 			{listState === "ready" && (
 				<FlatList
 					data={sessions}
-					keyExtractor={(item) => item.name}
+					keyExtractor={(item) => item.id}
 					style={{ flex: 1 }}
 					contentContainerStyle={{
 						paddingHorizontal: 12,
@@ -740,8 +755,8 @@ function SessionSidebarContent({
 							status={session.status}
 							lastUsed={session.lastUsed}
 							height={rowHeight}
-							isActive={session.name === selectedSessionId}
-							onPress={() => onSelectSession(session.name)}
+							isActive={session.id === selectedSessionId}
+							onPress={() => onSelectSession(session.id)}
 						/>
 					)}
 				/>
