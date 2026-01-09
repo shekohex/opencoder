@@ -448,7 +448,11 @@ function WorkspaceProjectsList({
 	rowHeight: number;
 	onSelectProject: (id: string, worktree?: string) => void;
 }) {
-	const { projectGroups, isLoading } = useOpenCodeProjects(workspaceId);
+	const { projectGroups, isLoading, isError, error } =
+		useOpenCodeProjects(workspaceId);
+
+	const isAgentUnhealthy =
+		isError && error && String(error).toLowerCase().includes("agent");
 
 	if (isLoading) {
 		return (
@@ -468,7 +472,20 @@ function WorkspaceProjectsList({
 		);
 	}
 
-	if (projectGroups.length === 0) {
+	if (isAgentUnhealthy) {
+		return (
+			<View className="ml-4 gap-1 border-border border-l pb-2 pl-4">
+				<AppText className="text-foreground-critical text-xs">
+					Agent unavailable
+				</AppText>
+				<AppText className="text-foreground-weak text-xs">
+					Restart workspace to reconnect
+				</AppText>
+			</View>
+		);
+	}
+
+	if (isError || projectGroups.length === 0) {
 		return (
 			<View className="ml-4 gap-1 border-border border-l pb-2 pl-4">
 				<AppText className="text-foreground-weak text-xs">
