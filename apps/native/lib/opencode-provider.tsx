@@ -130,15 +130,13 @@ export function GlobalOpenCodeProvider({
 		(workspaceId: string, update: Partial<WorkspaceConnection>) => {
 			setConnections((prev) => {
 				const existing = prev.get(workspaceId);
-				if (!existing && !update.client) return prev;
-
 				const next = new Map(prev);
 				if (existing) {
 					next.set(workspaceId, { ...existing, ...update });
-				} else if (update.client) {
+				} else {
 					next.set(workspaceId, {
 						workspaceId,
-						client: update.client,
+						client: update.client as OpencodeClient,
 						baseUrl: update.baseUrl ?? "",
 						status: update.status ?? "disconnected",
 						error: update.error,

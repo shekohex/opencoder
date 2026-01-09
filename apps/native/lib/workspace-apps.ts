@@ -103,7 +103,12 @@ export interface OpenCodeUrlResult {
 }
 
 export interface OpenCodeUrlError {
-	type: "no_resources" | "no_agents" | "no_app" | "workspace_not_running";
+	type:
+		| "no_resources"
+		| "no_agents"
+		| "no_app"
+		| "workspace_not_running"
+		| "agent_unhealthy";
 	message: string;
 }
 
@@ -141,6 +146,21 @@ export function resolveOpenCodeUrl(
 		return {
 			type: "no_app",
 			message: `OpenCode app not found (expected slug "${OPENCODE_APP_SLUG}" or port ${OPENCODE_DEFAULT_PORT})`,
+		};
+	}
+
+	const agent = appInfo.agent;
+	if (agent.status !== "connected") {
+		return {
+			type: "agent_unhealthy",
+			message: `Agent "${agent.name}" is ${agent.status}`,
+		};
+	}
+
+	if (!agent.health?.healthy) {
+		return {
+			type: "agent_unhealthy",
+			message: agent.health?.reason || `Agent "${agent.name}" is unhealthy`,
 		};
 	}
 

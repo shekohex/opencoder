@@ -34,6 +34,7 @@ function createMockAgent(
 		id: "agent-1",
 		name: "main",
 		status: "connected",
+		health: { healthy: true },
 		apps,
 		...overrides,
 	} as TypesGen.WorkspaceAgent;
@@ -287,6 +288,36 @@ describe("resolveOpenCodeUrl", () => {
 		if (!isOpenCodeUrlError(result)) {
 			expect(result.baseUrl).toContain("opencode");
 			expect(result.appInfo.app.slug).toBe(OPENCODE_APP_SLUG);
+		}
+	});
+
+	it("returns error when agent is disconnected", () => {
+		const opencodeApp = createMockApp({ slug: OPENCODE_APP_SLUG });
+		const agent = createMockAgent([opencodeApp], { status: "disconnected" });
+		const workspace = createMockWorkspace([agent]);
+
+		const result = resolveOpenCodeUrl("https://coder.example.com", workspace);
+
+		expect(isOpenCodeUrlError(result)).toBe(true);
+		if (isOpenCodeUrlError(result)) {
+			expect(result.type).toBe("agent_unhealthy");
+			expect(result.message).toContain("disconnected");
+		}
+	});
+
+	it("returns error when agent health is unhealthy", () => {
+		const opencodeApp = createMockApp({ slug: OPENCODE_APP_SLUG });
+		const agent = createMockAgent([opencodeApp], {
+			health: { healthy: false, reason: "agent has lost connection" },
+		});
+		const workspace = createMockWorkspace([agent]);
+
+		const result = resolveOpenCodeUrl("https://coder.example.com", workspace);
+
+		expect(isOpenCodeUrlError(result)).toBe(true);
+		if (isOpenCodeUrlError(result)) {
+			expect(result.type).toBe("agent_unhealthy");
+			expect(result.message).toBe("agent has lost connection");
 		}
 	});
 });
