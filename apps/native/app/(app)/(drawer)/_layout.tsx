@@ -1,12 +1,29 @@
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { Link } from "expo-router";
+import { Link, Slot } from "expo-router";
 import { Drawer } from "expo-router/drawer";
+import { useWindowDimensions } from "react-native";
 import { HeaderButton } from "@/components/header-button";
+import { DesktopShell } from "@/components/sidebar";
 import { useTheme } from "@/lib/theme-context";
+import { breakpoints } from "@/lib/tokens";
+import { WorkspaceNavProvider } from "@/lib/workspace-nav";
 
 const DrawerLayout = () => {
 	const { theme } = useTheme();
 	const navColors = theme.navTheme;
+	const { width } = useWindowDimensions();
+
+	const isDesktopOrTablet = width >= breakpoints.md;
+
+	if (isDesktopOrTablet) {
+		return (
+			<WorkspaceNavProvider>
+				<DesktopShell>
+					<Slot />
+				</DesktopShell>
+			</WorkspaceNavProvider>
+		);
+	}
 
 	return (
 		<Drawer
@@ -50,16 +67,6 @@ const DrawerLayout = () => {
 						<Link href="/modal" asChild>
 							<HeaderButton />
 						</Link>
-					),
-				}}
-			/>
-			<Drawer.Screen
-				name="workspace-mockups"
-				options={{
-					headerTitle: "Workspace Mockups",
-					drawerLabel: "Workspace Mockups",
-					drawerIcon: ({ size, color }) => (
-						<Ionicons name="grid-outline" size={size} color={color} />
 					),
 				}}
 			/>

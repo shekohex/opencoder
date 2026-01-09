@@ -1,9 +1,13 @@
 {
 	"$schema": "https://opencode.ai/config.json",
+	"plugin": ["opencode-anthropic-auth@latest"],
 	"permission": {
 		"external_directory": "allow",
 		"bash": {
 			"bd close *": "ask"
 		}
+	},
+	"experimental": {
+		"batch_tool": false
 	}
 }

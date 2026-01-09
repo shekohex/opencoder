@@ -81,7 +81,7 @@ const MIDDLE_MAX_WIDTH = {
 	tablet: 260,
 } as const;
 
-const RIGHT_PANEL_WIDTH = 240;
+export const RIGHT_PANEL_WIDTH = 240;
 const RESIZE_HANDLE_WIDTH = 10;
 
 type SessionRowData = RealSessionRowData;
@@ -728,7 +728,7 @@ function SessionSidebarContent({
 	);
 }
 
-function ChatPanel({
+export function ChatPanel({
 	sessionTitle,
 	messageState = "ready",
 }: {
@@ -785,7 +785,7 @@ function ChatPanel({
 	);
 }
 
-function InfoSidebar({
+export function InfoSidebar({
 	width,
 	sessions,
 }: {

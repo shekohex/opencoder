@@ -178,6 +178,7 @@ bd sync  # Force immediate export/commit/push
 1. You can find the full `opencode` codebase at `/tmp/opencode`
 2. You can find the full `coder` codebase at `/tmp/coder`
 3. You can find the full `openchamber` codebase at `/tmp/openchamber`
+4. You can find the full `happy` codebase at `/tmp/happy`
 
 </code_reference>
 

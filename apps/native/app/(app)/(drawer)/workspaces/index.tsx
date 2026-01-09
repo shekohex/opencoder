@@ -1,6 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import type { Href } from "expo-router";
 import { Link, useLocalSearchParams } from "expo-router";
+import { useMemo } from "react";
 import { Pressable, SectionList, View } from "react-native";
 
 import { AppText } from "@/components/app-text";
@@ -8,21 +9,26 @@ import { Button } from "@/components/button";
 import { Container } from "@/components/container";
 import { buildStatus } from "@/components/workspace-mockups/mock-data";
 import {
-	AppShell,
+	ChatPanel,
 	EmptyStateCard,
 	ErrorBanner,
+	InfoSidebar,
 	type ListState,
 	LoadingList,
 	LogoEmptyState,
+	RIGHT_PANEL_WIDTH,
 	ROW_HEIGHTS,
 	useWorkspacePolling,
 	type WorkspaceGroup,
 } from "@/components/workspace-mockups/shared";
 import { WorkspaceItem } from "@/components/workspace-mockups/workspace-item";
 import { useWorkspaceLayout } from "@/lib/hooks/use-workspace-layout";
+import { useOpenCodeSessions } from "@/lib/session-queries";
 import { breakpoints } from "@/lib/tokens";
 import { useCoderBrowser } from "@/lib/use-coder-browser";
+import { useDocumentTitle } from "@/lib/use-document-title";
 import { useWorkspaceNav } from "@/lib/workspace-nav";
+import { useWorkspaces } from "@/lib/workspace-queries";
 
 const NEXT_ROUTE = "/workspaces/projects" as Href;
 
@@ -44,8 +50,8 @@ export default function WorkspacesScreen() {
 	};
 
 	const resolvedListState = getListState();
-	const frameHeight = Math.max(640, height);
-	const availableWidth = width;
+	const _frameHeight = Math.max(640, height);
+	const _availableWidth = width;
 
 	const isDesktop = width >= breakpoints.lg;
 	const isTablet = width >= breakpoints.md && width < breakpoints.lg;
@@ -54,18 +60,10 @@ export default function WorkspacesScreen() {
 	return (
 		<Container>
 			{isDesktop || isTablet ? (
-				<View className="flex-1 bg-background">
-					<AppShell
-						breakpoint={isDesktop ? "desktop" : "tablet"}
-						showRightPanel={showRightPanel}
-						availableWidth={availableWidth}
-						height={frameHeight}
-						isFramed={false}
-						workspaceGroups={workspaceGroups}
-						onCreateWorkspace={openTemplates}
-						listState={resolvedListState}
-					/>
-				</View>
+				<DesktopContent
+					showRightPanel={showRightPanel}
+					listState={resolvedListState}
+				/>
 			) : (
 				<MobileWorkspaces
 					workspaceGroups={workspaceGroups}
@@ -74,6 +72,55 @@ export default function WorkspacesScreen() {
 				/>
 			)}
 		</Container>
+	);
+}
+
+function DesktopContent({
+	showRightPanel,
+	listState,
+}: {
+	showRightPanel: boolean;
+	listState: ListState;
+}) {
+	const { selectedWorkspaceId, selectedProjectWorktree, selectedSessionId } =
+		useWorkspaceNav();
+	const { sessions } = useOpenCodeSessions(
+		selectedWorkspaceId,
+		selectedProjectWorktree ?? undefined,
+	);
+	const { data: workspaces } = useWorkspaces();
+
+	const workspaceName = useMemo(() => {
+		if (!workspaces || !selectedWorkspaceId) return null;
+		return workspaces.find((w) => w.id === selectedWorkspaceId)?.name ?? null;
+	}, [workspaces, selectedWorkspaceId]);
+
+	const projectName = useMemo(() => {
+		if (!selectedProjectWorktree) return null;
+		return selectedProjectWorktree.split("/").pop() ?? null;
+	}, [selectedProjectWorktree]);
+
+	const sessionName = useMemo(() => {
+		if (!sessions || !selectedSessionId) return null;
+		return sessions.find((s) => s.id === selectedSessionId)?.name ?? null;
+	}, [sessions, selectedSessionId]);
+
+	useDocumentTitle({
+		session: sessionName,
+		project: projectName,
+		workspace: workspaceName,
+	});
+
+	return (
+		<View className="flex-1 flex-row bg-background">
+			<ChatPanel
+				sessionTitle={selectedSessionId ?? undefined}
+				messageState={listState}
+			/>
+			{showRightPanel && (
+				<InfoSidebar width={RIGHT_PANEL_WIDTH} sessions={sessions} />
+			)}
+		</View>
 	);
 }
 
