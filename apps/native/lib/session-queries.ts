@@ -90,6 +90,15 @@ export function useOpenCodeSessions(
 	};
 }
 
+export function useSessionById(
+	workspaceId: string | null,
+	directory: string | null | undefined,
+	sessionId: string | null,
+) {
+	const { sessions } = useOpenCodeSessions(workspaceId, directory ?? undefined);
+	return sessions.find((s) => s.id === sessionId) ?? null;
+}
+
 export function useCreateSession(workspaceId: string | null) {
 	const queryClient = useQueryClient();
 	const { client, isConnected } = useOpenCodeConnection(workspaceId);

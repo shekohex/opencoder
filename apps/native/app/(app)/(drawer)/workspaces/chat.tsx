@@ -12,12 +12,19 @@ import {
 	EmptyStateCard,
 	type ListState,
 } from "@/components/workspace-mockups/shared";
+import { useSessionById } from "@/lib/session-queries";
 import { useWorkspaceNav } from "@/lib/workspace-nav";
 
 const BACK_ROUTE = "/workspaces/sessions" as Href;
 
 export default function WorkspacesChatScreen() {
-	const { selectedSessionId } = useWorkspaceNav();
+	const { selectedWorkspaceId, selectedProjectWorktree, selectedSessionId } =
+		useWorkspaceNav();
+	const session = useSessionById(
+		selectedWorkspaceId,
+		selectedProjectWorktree,
+		selectedSessionId,
+	);
 	const { state } = useLocalSearchParams<{ state?: string }>();
 	const messageState: ListState =
 		state === "loading" || state === "error" || state === "empty"
@@ -46,7 +53,7 @@ export default function WorkspacesChatScreen() {
 					</Link>
 					<View className="mt-2 flex-row items-center justify-between">
 						<AppText className="font-semibold text-foreground-strong text-lg">
-							{selectedSessionId ?? "Session"}
+							{session?.name ?? "Session"}
 						</AppText>
 						<Button size="sm" variant="outline">
 							Share
