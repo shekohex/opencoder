@@ -1,7 +1,7 @@
 import { View } from "react-native";
 
 import { AppText } from "@/components/app-text";
-import { ErrorBanner } from "@/components/workspace-mockups/shared";
+import { ErrorBanner } from "@/components/list-states";
 
 export function AgentUnavailableInline() {
 	return (

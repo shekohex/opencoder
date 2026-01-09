@@ -6,7 +6,7 @@ import {
 	ErrorBanner,
 	type ListState,
 	LoadingList,
-} from "@/components/workspace-mockups/shared";
+} from "@/components/list-states";
 import type { ProjectGroup } from "@/lib/project-queries";
 
 import { AgentUnavailableBanner, AgentUnavailableInline } from "./agent-status";

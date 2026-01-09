@@ -1,4 +1,4 @@
-import type { ListState } from "@/components/workspace-mockups/shared";
+import type { ListState } from "@/components/list-states";
 
 export function isAgentUnhealthyError(error: unknown): boolean {
 	return error != null && String(error).toLowerCase().includes("agent");
