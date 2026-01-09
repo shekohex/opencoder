@@ -114,7 +114,7 @@ function DesktopContent({
 	return (
 		<View className="flex-1 flex-row bg-background">
 			<ChatPanel
-				sessionTitle={selectedSessionId ?? undefined}
+				sessionTitle={sessionName ?? undefined}
 				messageState={listState}
 			/>
 			{showRightPanel && (
