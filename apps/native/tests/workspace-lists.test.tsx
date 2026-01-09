@@ -18,8 +18,8 @@ jest.mock("expo-router", () => ({
 	Link: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-import WorkspaceSessionsScreen from "@/app/(app)/(drawer)/workspaces/[workspaceId]/[projectId]/index.native";
-import WorkspaceProjectsScreen from "@/app/(app)/(drawer)/workspaces/[workspaceId]/index.native";
+import WorkspaceSessionsScreen from "@/app/(app)/(drawer)/workspaces/[workspaceId]/[projectId]/index";
+import WorkspaceProjectsScreen from "@/app/(app)/(drawer)/workspaces/[workspaceId]/index";
 import { workspaceGroups } from "@/components/workspace-mockups/mock-data";
 import { AppShell } from "@/components/workspace-mockups/shared";
 import { FontProvider } from "@/lib/font-context";
