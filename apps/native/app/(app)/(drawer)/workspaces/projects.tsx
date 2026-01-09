@@ -24,8 +24,11 @@ export default function WorkspacesProjectsScreen() {
 	const rowHeight = ROW_HEIGHTS.mobile;
 	const { selectedWorkspaceId, selectedProjectId, setSelectedProjectId } =
 		useWorkspaceNav();
-	const { projectGroups, isLoading, isError } =
+	const { projectGroups, isLoading, isError, error } =
 		useOpenCodeProjects(selectedWorkspaceId);
+
+	const isAgentUnhealthy =
+		isError && error && String(error).toLowerCase().includes("agent");
 
 	const getListState = (): ListState => {
 		if (isLoading) return "loading";
@@ -96,9 +99,15 @@ export default function WorkspacesProjectsScreen() {
 						{resolvedListState === "error" && (
 							<View className="mt-3">
 								<ErrorBanner
-									title="Server offline"
-									subtitle="OpenCode server is unreachable."
-									ctaLabel="Retry"
+									title={
+										isAgentUnhealthy ? "Agent unavailable" : "Server offline"
+									}
+									subtitle={
+										isAgentUnhealthy
+											? "Workspace agent is disconnected. Try restarting the workspace."
+											: "OpenCode server is unreachable."
+									}
+									ctaLabel={isAgentUnhealthy ? "Go back" : "Retry"}
 								/>
 							</View>
 						)}
