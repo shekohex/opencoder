@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render } from "@testing-library/react-native";
 import type React from "react";
 
-import WorkspacesScreen from "@/app/(app)/(drawer)/workspaces/index";
+import WorkspacesScreen from "@/app/(app)/(drawer)/workspaces/index.native";
 import { FontProvider } from "@/lib/font-context";
 import { NuqsAdapter } from "@/lib/nuqs-adapter";
 import { ThemeProvider } from "@/lib/theme-context";
