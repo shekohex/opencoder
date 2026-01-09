@@ -72,7 +72,6 @@ export function DesktopShell({ children }: { children?: ReactNode }) {
 		workspacesCollapsed,
 		sessionsCollapsed,
 		toggleWorkspacesSidebar,
-		expandSessionsSidebar,
 		collapseSessionsSidebar,
 	} = useSidebarState();
 
@@ -118,16 +117,16 @@ export function DesktopShell({ children }: { children?: ReactNode }) {
 
 	const handleProjectSelect = useCallback(
 		(projectId: string, worktree?: string) => {
-			expandSessionsSidebar();
 			router.replace(
 				buildWorkspacePath({
 					workspaceId: selectedWorkspaceId,
 					projectId,
 					worktree,
+					sessionsExpanded: true,
 				}),
 			);
 		},
-		[router, selectedWorkspaceId, expandSessionsSidebar],
+		[router, selectedWorkspaceId],
 	);
 
 	const handleSessionSelect = useCallback(
@@ -138,6 +137,7 @@ export function DesktopShell({ children }: { children?: ReactNode }) {
 					projectId: selectedProjectId,
 					sessionId,
 					worktree: selectedProjectWorktree,
+					sessionsExpanded: true,
 				}),
 			);
 		},

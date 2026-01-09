@@ -1,38 +1,47 @@
 import type { Href } from "expo-router";
 import { parseAsString, useQueryState } from "nuqs";
 
+import { sidebarParamKeys } from "./sidebar-state";
+
 export const workspaceParamKeys = {
 	worktree: "wt",
 } as const;
 
 export type WorkspaceNavLevel = "workspaces" | "projects" | "sessions" | "chat";
 
-export function buildWorkspacePath(params: {
+export type WorkspacePathParams = {
 	workspaceId?: string | null;
 	projectId?: string | null;
 	sessionId?: string | null;
 	worktree?: string | null;
-}): Href {
-	const { workspaceId, projectId, sessionId, worktree } = params;
+	sessionsExpanded?: boolean;
+};
 
-	let path = "/workspaces";
+export function buildWorkspacePath(params: WorkspacePathParams): Href {
+	const { workspaceId, projectId, sessionId, worktree, sessionsExpanded } =
+		params;
 
-	if (workspaceId) {
-		path = `${path}/${workspaceId}`;
-		if (projectId) {
-			path = `${path}/${projectId}`;
-			if (sessionId) {
-				path = `${path}/${sessionId}`;
-			}
-		}
-	}
+	const segments = ["/workspaces"];
+	if (workspaceId) segments.push(workspaceId);
+	if (workspaceId && projectId) segments.push(projectId);
+	if (workspaceId && projectId && sessionId) segments.push(sessionId);
+
+	const pathname = segments.join("/");
+	const searchParams = new URLSearchParams();
 
 	if (worktree) {
-		const encoded = encodeURIComponent(worktree);
-		path = `${path}?${workspaceParamKeys.worktree}=${encoded}`;
+		searchParams.set(workspaceParamKeys.worktree, worktree);
 	}
 
-	return path as Href;
+	if (sessionsExpanded !== undefined) {
+		searchParams.set(
+			sidebarParamKeys.sessionsCollapsed,
+			String(!sessionsExpanded),
+		);
+	}
+
+	const search = searchParams.toString();
+	return (search ? `${pathname}?${search}` : pathname) as Href;
 }
 
 export function useWorktreeParam() {
