@@ -19,8 +19,8 @@ const STATUS_STYLES: Record<StatusTone, { pill: string; dot: string }> = {
 		dot: "bg-surface-weak",
 	},
 	error: {
-		pill: "bg-surface-danger text-foreground-danger border-border-danger",
-		dot: "bg-surface-danger",
+		pill: "bg-surface-critical text-foreground-critical border-border-critical",
+		dot: "bg-surface-critical",
 	},
 };
 
