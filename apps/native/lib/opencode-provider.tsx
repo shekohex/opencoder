@@ -265,7 +265,7 @@ export function GlobalOpenCodeProvider({
 						status: "error",
 						error: urlResult.message,
 					});
-					throw new Error(urlResult.message);
+					return;
 				}
 
 				const client = createCoderOpenCodeClient({
@@ -291,7 +291,6 @@ export function GlobalOpenCodeProvider({
 					status: "error",
 					error: message,
 				});
-				throw err;
 			} finally {
 				connectingRef.current.delete(workspaceId);
 			}
