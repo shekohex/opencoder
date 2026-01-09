@@ -2,7 +2,10 @@ import type { Href } from "expo-router";
 import { parseAsString, useQueryState } from "nuqs";
 
 export const workspaceParamKeys = {
+	workspace: "ws",
+	project: "proj",
 	worktree: "wt",
+	session: "sess",
 } as const;
 
 export type WorkspaceNavLevel = "workspaces" | "projects" | "sessions" | "chat";
@@ -35,11 +38,32 @@ export function buildWorkspacePath(params: {
 	return path as Href;
 }
 
-export function useWorktreeParam() {
+export function useWorkspaceQueryParams() {
+	const [workspaceId, setWorkspaceId] = useQueryState(
+		workspaceParamKeys.workspace,
+		parseAsString,
+	);
+	const [projectId, setProjectId] = useQueryState(
+		workspaceParamKeys.project,
+		parseAsString,
+	);
 	const [worktree, setWorktree] = useQueryState(
 		workspaceParamKeys.worktree,
 		parseAsString,
 	);
+	const [sessionId, setSessionId] = useQueryState(
+		workspaceParamKeys.session,
+		parseAsString,
+	);
 
-	return { worktree, setWorktree };
+	return {
+		workspaceId,
+		projectId,
+		worktree,
+		sessionId,
+		setWorkspaceId,
+		setProjectId,
+		setWorktree,
+		setSessionId,
+	};
 }

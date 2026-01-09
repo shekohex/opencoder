@@ -1,26 +1,17 @@
-import { renderHook } from "@testing-library/react-native";
+import { act, renderHook } from "@testing-library/react-native";
 import type { ReactNode } from "react";
 
-const mockReplace = jest.fn();
-
 jest.mock("expo-router", () => ({
-	useGlobalSearchParams: () => ({
-		workspaceId: "ws-1",
-		projectId: "proj-1",
-		sessionId: "sess-1",
-	}),
+	useGlobalSearchParams: () => ({}),
+	useLocalSearchParams: () => ({}),
 	useSegments: () => [],
-	useRouter: () => ({
-		replace: mockReplace,
-	}),
+	router: {
+		setParams: jest.fn(),
+	},
 }));
 
 import { NuqsAdapter } from "./nuqs-adapter";
-import {
-	useWorkspaceNav,
-	useWorkspaceNavigation,
-	WorkspaceNavProvider,
-} from "./workspace-nav";
+import { useWorkspaceNav, WorkspaceNavProvider } from "./workspace-nav";
 
 const wrapper = ({ children }: { children: ReactNode }) => (
 	<NuqsAdapter>
@@ -29,51 +20,69 @@ const wrapper = ({ children }: { children: ReactNode }) => (
 );
 
 describe("useWorkspaceNav", () => {
-	it("should read values from route params", () => {
+	it("should initialize with null values", () => {
 		const { result } = renderHook(() => useWorkspaceNav(), { wrapper });
+
+		expect(result.current.selectedWorkspaceId).toBeNull();
+		expect(result.current.selectedProjectId).toBeNull();
+		expect(result.current.selectedSessionId).toBeNull();
+	});
+
+	it("should reset project and session when workspace changes", () => {
+		const { result } = renderHook(() => useWorkspaceNav(), { wrapper });
+
+		act(() => {
+			result.current.setSelectedWorkspaceId("ws-1");
+			result.current.setSelectedProjectId("proj-1");
+			result.current.setSelectedSessionId("sess-1");
+		});
 
 		expect(result.current.selectedWorkspaceId).toBe("ws-1");
 		expect(result.current.selectedProjectId).toBe("proj-1");
 		expect(result.current.selectedSessionId).toBe("sess-1");
-	});
-});
 
-describe("useWorkspaceNavigation", () => {
-	beforeEach(() => {
-		mockReplace.mockClear();
-	});
+		act(() => {
+			result.current.setSelectedWorkspaceId("ws-2");
+		});
 
-	it("should navigate to workspace", () => {
-		const { result } = renderHook(() => useWorkspaceNavigation(), { wrapper });
-
-		result.current.navigateToWorkspace("ws-2");
-
-		expect(mockReplace).toHaveBeenCalledWith("/workspaces/ws-2");
+		expect(result.current.selectedWorkspaceId).toBe("ws-2");
+		expect(result.current.selectedProjectId).toBeNull();
+		expect(result.current.selectedSessionId).toBeNull();
 	});
 
-	it("should navigate to project with worktree", () => {
-		const { result } = renderHook(() => useWorkspaceNavigation(), { wrapper });
+	it("should reset session when project changes", () => {
+		const { result } = renderHook(() => useWorkspaceNav(), { wrapper });
 
-		result.current.navigateToProject("proj-2", "/home/coder/project");
+		act(() => {
+			result.current.setSelectedWorkspaceId("ws-1");
+			result.current.setSelectedProjectId("proj-1");
+			result.current.setSelectedSessionId("sess-1");
+		});
 
-		expect(mockReplace).toHaveBeenCalledWith(
-			"/workspaces/ws-1/proj-2?wt=%2Fhome%2Fcoder%2Fproject",
-		);
+		act(() => {
+			result.current.setSelectedProjectId("proj-2");
+		});
+
+		expect(result.current.selectedWorkspaceId).toBe("ws-1");
+		expect(result.current.selectedProjectId).toBe("proj-2");
+		expect(result.current.selectedSessionId).toBeNull();
 	});
 
-	it("should navigate to session", () => {
-		const { result } = renderHook(() => useWorkspaceNavigation(), { wrapper });
+	it("should clear all selections", () => {
+		const { result } = renderHook(() => useWorkspaceNav(), { wrapper });
 
-		result.current.navigateToSession("sess-2");
+		act(() => {
+			result.current.setSelectedWorkspaceId("ws-1");
+			result.current.setSelectedProjectId("proj-1");
+			result.current.setSelectedSessionId("sess-1");
+		});
 
-		expect(mockReplace).toHaveBeenCalledWith("/workspaces/ws-1/proj-1/sess-2");
-	});
+		act(() => {
+			result.current.clearSelection();
+		});
 
-	it("should navigate to workspaces root", () => {
-		const { result } = renderHook(() => useWorkspaceNavigation(), { wrapper });
-
-		result.current.navigateToWorkspaces();
-
-		expect(mockReplace).toHaveBeenCalledWith("/workspaces");
+		expect(result.current.selectedWorkspaceId).toBeNull();
+		expect(result.current.selectedProjectId).toBeNull();
+		expect(result.current.selectedSessionId).toBeNull();
 	});
 });

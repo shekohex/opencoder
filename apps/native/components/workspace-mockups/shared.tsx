@@ -30,7 +30,7 @@ import {
 	useOpenCodeSessions,
 } from "@/lib/session-queries";
 import { useTheme } from "@/lib/theme-context";
-import { useWorkspaceNav, useWorkspaceNavigation } from "@/lib/workspace-nav";
+import { useWorkspaceNav } from "@/lib/workspace-nav";
 import {
 	hasActiveBuilds as checkActiveBuilds,
 	groupWorkspacesByOwner,
@@ -1008,10 +1008,10 @@ export function AppShell({
 		selectedProjectId,
 		selectedProjectWorktree,
 		selectedSessionId,
+		setSelectedWorkspaceId,
+		setSelectedProjectId,
+		setSelectedSessionId,
 	} = useWorkspaceNav();
-
-	const { navigateToWorkspace, navigateToProject, navigateToSession } =
-		useWorkspaceNavigation();
 
 	const {
 		sessions: realSessions,
@@ -1038,7 +1038,7 @@ export function AppShell({
 		sessionListState === "ready" ? realSessions : [];
 
 	const handleSelectSession = (sessionId: string) => {
-		navigateToSession(sessionId);
+		setSelectedSessionId(sessionId);
 	};
 
 	const handleCreateSession = async () => {
@@ -1047,7 +1047,7 @@ export function AppShell({
 			const newSession = await createSession.mutateAsync({
 				directory: selectedProjectWorktree,
 			});
-			navigateToSession(newSession.id);
+			setSelectedSessionId(newSession.id);
 		} catch {}
 	};
 
@@ -1202,8 +1202,8 @@ export function AppShell({
 						workspaceGroups={workspaceGroups}
 						selectedWorkspaceId={selectedWorkspaceId}
 						selectedProjectId={selectedProjectId}
-						onSelectProject={navigateToProject}
-						onSelectWorkspace={navigateToWorkspace}
+						onSelectProject={setSelectedProjectId}
+						onSelectWorkspace={setSelectedWorkspaceId}
 						onCreateWorkspace={onCreateWorkspace}
 						listState={listState}
 					/>

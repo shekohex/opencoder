@@ -1,4 +1,4 @@
-import { useRouter } from "expo-router";
+import { useGlobalSearchParams, usePathname, useRouter } from "expo-router";
 import type { ReactNode } from "react";
 import { useCallback, useMemo } from "react";
 import { FlatList, Pressable, View } from "react-native";
@@ -31,7 +31,7 @@ import {
 	useSidebarState,
 } from "@/lib/sidebar-state";
 import { storage } from "@/lib/storage";
-import { useWorkspaceNav, useWorkspaceNavigation } from "@/lib/workspace-nav";
+import { useWorkspaceNav } from "@/lib/workspace-nav";
 import {
 	groupWorkspacesByOwner,
 	useWorkspaces,
@@ -66,6 +66,21 @@ function ResizeHandle({
 export function DesktopShell({ children }: { children?: ReactNode }) {
 	const insets = useSafeAreaInsets();
 	const router = useRouter();
+	const pathname = usePathname();
+	const searchParams = useGlobalSearchParams();
+	const isOnWorkspaces = pathname.startsWith("/workspaces");
+
+	const navigateToWorkspaces = useCallback(
+		(overrides?: Record<string, string | null | undefined>) => {
+			if (isOnWorkspaces) return;
+			const params = { ...searchParams, ...overrides };
+			for (const key of Object.keys(params)) {
+				if (params[key] == null) delete params[key];
+			}
+			router.push({ pathname: "/workspaces", params });
+		},
+		[isOnWorkspaces, searchParams, router],
+	);
 
 	const {
 		workspacesCollapsed,
@@ -80,10 +95,10 @@ export function DesktopShell({ children }: { children?: ReactNode }) {
 		selectedProjectId,
 		selectedProjectWorktree,
 		selectedSessionId,
+		setSelectedWorkspaceId,
+		setSelectedProjectId,
+		setSelectedSessionId,
 	} = useWorkspaceNav();
-
-	const { navigateToWorkspace, navigateToProject, navigateToSession } =
-		useWorkspaceNavigation();
 
 	const { data: workspaces, isLoading, isError } = useWorkspaces();
 
@@ -113,24 +128,27 @@ export function DesktopShell({ children }: { children?: ReactNode }) {
 
 	const handleWorkspaceSelect = useCallback(
 		(workspaceId: string) => {
-			navigateToWorkspace(workspaceId);
+			setSelectedWorkspaceId(workspaceId);
+			navigateToWorkspaces({ ws: workspaceId });
 		},
-		[navigateToWorkspace],
+		[setSelectedWorkspaceId, navigateToWorkspaces],
 	);
 
 	const handleProjectSelect = useCallback(
 		(projectId: string, worktree?: string) => {
-			navigateToProject(projectId, worktree);
+			setSelectedProjectId(projectId, worktree);
 			expandSessionsSidebar();
+			navigateToWorkspaces({ proj: projectId, wt: worktree });
 		},
-		[navigateToProject, expandSessionsSidebar],
+		[setSelectedProjectId, expandSessionsSidebar, navigateToWorkspaces],
 	);
 
 	const handleSessionSelect = useCallback(
 		(sessionId: string) => {
-			navigateToSession(sessionId);
+			setSelectedSessionId(sessionId);
+			navigateToWorkspaces({ sess: sessionId });
 		},
-		[navigateToSession],
+		[setSelectedSessionId, navigateToWorkspaces],
 	);
 
 	const listState: ListState = isLoading

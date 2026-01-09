@@ -9,16 +9,9 @@ jest.mock("@/lib/storage", () => ({
 	},
 }));
 
-const mockReplace = jest.fn();
-
 jest.mock("expo-router", () => ({
 	useRouter: () => ({
 		push: jest.fn(),
-		replace: mockReplace,
-	}),
-	useGlobalSearchParams: () => ({
-		workspaceId: "ws-1",
-		projectId: "proj-1",
 	}),
 }));
 
@@ -42,12 +35,9 @@ jest.mock("@/lib/workspace-nav", () => ({
 		selectedProjectId: "proj-1",
 		selectedProjectWorktree: "/home/coder/project",
 		selectedSessionId: null,
-	}),
-	useWorkspaceNavigation: () => ({
-		navigateToWorkspace: jest.fn(),
-		navigateToProject: jest.fn(),
-		navigateToSession: jest.fn(),
-		navigateToWorkspaces: jest.fn(),
+		setSelectedWorkspaceId: jest.fn(),
+		setSelectedProjectId: jest.fn(),
+		setSelectedSessionId: jest.fn(),
 	}),
 }));
 

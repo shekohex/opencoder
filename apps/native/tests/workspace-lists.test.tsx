@@ -3,10 +3,7 @@ import { fireEvent, render } from "@testing-library/react-native";
 import type React from "react";
 
 jest.mock("expo-router", () => ({
-	useGlobalSearchParams: () => ({
-		workspaceId: "ws-1",
-		projectId: "proj-1",
-	}),
+	useGlobalSearchParams: () => ({}),
 	useLocalSearchParams: () => ({}),
 	useSegments: () => [],
 	router: {
@@ -14,7 +11,6 @@ jest.mock("expo-router", () => ({
 	},
 	useRouter: () => ({
 		push: jest.fn(),
-		replace: jest.fn(),
 	}),
 	useNavigation: () => ({
 		dispatch: jest.fn(),
