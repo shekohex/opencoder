@@ -266,7 +266,10 @@ export function SelectContent({ className }: SelectContentProps) {
 				/>
 			</Animated.View>
 
-			<View className="pointer-events-box-none flex-1" pointerEvents="box-none">
+			<View
+				className="pointer-events-box-none flex-1"
+				style={{ pointerEvents: "box-none" }}
+			>
 				<FocusScope contain restoreFocus autoFocus>
 					<View
 						ref={ref}

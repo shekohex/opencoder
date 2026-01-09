@@ -163,7 +163,7 @@ export function DialogContent({
 
 			<View
 				className="pointer-events-box-none flex-1 items-center justify-center p-4"
-				pointerEvents="box-none"
+				style={{ pointerEvents: "box-none" }}
 			>
 				<FocusScope contain restoreFocus autoFocus>
 					<View

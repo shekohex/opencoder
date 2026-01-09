@@ -247,8 +247,13 @@ export function DialogContent({ children, className }: DialogContentProps) {
 		return (
 			<NativeDialogContext.Provider value={context}>
 				<View
-					style={{ position: "absolute", width: 0, height: 0, opacity: 0 }}
-					pointerEvents="none"
+					style={{
+						position: "absolute",
+						width: 0,
+						height: 0,
+						opacity: 0,
+						pointerEvents: "none",
+					}}
 				>
 					{children}
 				</View>

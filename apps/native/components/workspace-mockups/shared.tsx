@@ -236,14 +236,20 @@ export function WorkspaceThreePane({
 	const effectiveSidebarMax = Math.min(sidebarMax, maxSidebarTotal - middleMin);
 	const effectiveMiddleMax = Math.min(middleMax, maxSidebarTotal - sidebarMin);
 
-	const sidebarWidth = useSharedValue(
-		clampWidth(baseSidebarWidth, sidebarMin, effectiveSidebarMax),
+	const sidebarInitial = clampWidth(
+		baseSidebarWidth,
+		sidebarMin,
+		effectiveSidebarMax,
 	);
-	const middleWidth = useSharedValue(
-		clampWidth(baseMiddleWidth, middleMin, effectiveMiddleMax),
+	const middleInitial = clampWidth(
+		baseMiddleWidth,
+		middleMin,
+		effectiveMiddleMax,
 	);
-	const startSidebarWidth = useSharedValue(sidebarWidth.value);
-	const startMiddleWidth = useSharedValue(middleWidth.value);
+	const sidebarWidth = useSharedValue(sidebarInitial);
+	const middleWidth = useSharedValue(middleInitial);
+	const startSidebarWidth = useSharedValue(sidebarInitial);
+	const startMiddleWidth = useSharedValue(middleInitial);
 
 	useEffect(() => {
 		const maxLeft = Math.max(sidebarMin, maxSidebarTotal - middleMin);
@@ -854,8 +860,7 @@ function ResizeHandle({
 	return (
 		<GestureDetector gesture={gesture}>
 			<View
-				pointerEvents="box-only"
-				style={{ width: RESIZE_HANDLE_WIDTH }}
+				style={{ width: RESIZE_HANDLE_WIDTH, pointerEvents: "box-only" }}
 				className="items-center justify-center bg-border"
 			>
 				<View className="h-10 w-1 rounded-full bg-border" />
@@ -1072,14 +1077,20 @@ export function AppShell({
 	const effectiveSidebarMax = Math.min(sidebarMax, maxSidebarTotal - middleMin);
 	const effectiveMiddleMax = Math.min(middleMax, maxSidebarTotal - sidebarMin);
 
-	const sidebarWidth = useSharedValue(
-		clampWidth(baseSidebarWidth, sidebarMin, effectiveSidebarMax),
+	const sidebarInitial = clampWidth(
+		baseSidebarWidth,
+		sidebarMin,
+		effectiveSidebarMax,
 	);
-	const middleWidth = useSharedValue(
-		clampWidth(baseMiddleWidth, middleMin, effectiveMiddleMax),
+	const middleInitial = clampWidth(
+		baseMiddleWidth,
+		middleMin,
+		effectiveMiddleMax,
 	);
-	const startSidebarWidth = useSharedValue(sidebarWidth.value);
-	const startMiddleWidth = useSharedValue(middleWidth.value);
+	const sidebarWidth = useSharedValue(sidebarInitial);
+	const middleWidth = useSharedValue(middleInitial);
+	const startSidebarWidth = useSharedValue(sidebarInitial);
+	const startMiddleWidth = useSharedValue(middleInitial);
 
 	useEffect(() => {
 		const maxLeft = Math.max(sidebarMin, maxSidebarTotal - middleMin);
