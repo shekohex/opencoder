@@ -115,6 +115,8 @@ export function GlobalOpenCodeProvider({
 	const [connections, setConnections] = useState<
 		Map<string, WorkspaceConnection>
 	>(new Map());
+	const connectionsRef = useRef(connections);
+	connectionsRef.current = connections;
 	const eventRef = useRef(createGlobalEmitter<WorkspaceEvent>());
 	const abortControllersRef = useRef<Map<string, AbortController>>(new Map());
 	const connectingRef = useRef<Set<string>>(new Set());
@@ -232,7 +234,7 @@ export function GlobalOpenCodeProvider({
 				return;
 			}
 
-			const existing = connections.get(workspaceId);
+			const existing = connectionsRef.current.get(workspaceId);
 			if (
 				existing?.status === "connected" ||
 				existing?.status === "connecting"
@@ -295,14 +297,7 @@ export function GlobalOpenCodeProvider({
 				connectingRef.current.delete(workspaceId);
 			}
 		},
-		[
-			session,
-			coderBaseUrl,
-			connections,
-			getWorkspace,
-			wildcardAccessUrl,
-			updateConnection,
-		],
+		[session, coderBaseUrl, getWorkspace, wildcardAccessUrl, updateConnection],
 	);
 
 	const disconnect = useCallback((workspaceId: string) => {
@@ -323,35 +318,29 @@ export function GlobalOpenCodeProvider({
 
 	const getClient = useCallback(
 		(workspaceId: string): OpencodeClient | undefined => {
-			return connections.get(workspaceId)?.client;
+			return connectionsRef.current.get(workspaceId)?.client;
 		},
-		[connections],
+		[],
 	);
 
 	const getConnection = useCallback(
 		(workspaceId: string): WorkspaceConnection | undefined => {
-			return connections.get(workspaceId);
+			return connectionsRef.current.get(workspaceId);
 		},
-		[connections],
+		[],
 	);
 
-	const hasConnection = useCallback(
-		(workspaceId: string): boolean => {
-			const conn = connections.get(workspaceId);
-			return conn?.status === "connected";
-		},
-		[connections],
-	);
+	const hasConnection = useCallback((workspaceId: string): boolean => {
+		const conn = connectionsRef.current.get(workspaceId);
+		return conn?.status === "connected";
+	}, []);
 
-	const isConnecting = useCallback(
-		(workspaceId: string): boolean => {
-			return (
-				connections.get(workspaceId)?.status === "connecting" ||
-				connectingRef.current.has(workspaceId)
-			);
-		},
-		[connections],
-	);
+	const isConnecting = useCallback((workspaceId: string): boolean => {
+		return (
+			connectionsRef.current.get(workspaceId)?.status === "connecting" ||
+			connectingRef.current.has(workspaceId)
+		);
+	}, []);
 
 	useEffect(() => {
 		if (!workspaces) return;
@@ -502,21 +491,23 @@ export function WorkspaceSDKProvider({
 }
 
 export function useOpenCodeConnection(workspaceId: string | null) {
-	const globalOpenCode = useGlobalOpenCode();
+	const {
+		connections,
+		connect: globalConnect,
+		disconnect: globalDisconnect,
+	} = useGlobalOpenCode();
 
-	const connection = workspaceId
-		? globalOpenCode.getConnection(workspaceId)
-		: undefined;
+	const connection = workspaceId ? connections.get(workspaceId) : undefined;
 
 	const connect = useCallback(async () => {
 		if (!workspaceId) return;
-		await globalOpenCode.connect(workspaceId);
-	}, [workspaceId, globalOpenCode]);
+		await globalConnect(workspaceId);
+	}, [workspaceId, globalConnect]);
 
 	const disconnect = useCallback(() => {
 		if (!workspaceId) return;
-		globalOpenCode.disconnect(workspaceId);
-	}, [workspaceId, globalOpenCode]);
+		globalDisconnect(workspaceId);
+	}, [workspaceId, globalDisconnect]);
 
 	return {
 		connection,

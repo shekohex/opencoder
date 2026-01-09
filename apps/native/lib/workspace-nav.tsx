@@ -1,4 +1,4 @@
-import { createContext, type ReactNode, useContext } from "react";
+import { createContext, type ReactNode, useCallback, useContext } from "react";
 
 import { useWorkspaceQueryParams } from "./workspace-query-params";
 
@@ -47,27 +47,33 @@ export function WorkspaceNavProvider({ children }: { children: ReactNode }) {
 		setSessionId,
 	} = useWorkspaceQueryParams();
 
-	const setSelectedWorkspaceId = (id: WorkspaceId) => {
-		setWorkspaceId(id);
-		setProjectId(null);
-		setWorktree(null);
-		setSessionId(null);
-	};
+	const setSelectedWorkspaceId = useCallback(
+		(id: WorkspaceId) => {
+			setWorkspaceId(id);
+			setProjectId(null);
+			setWorktree(null);
+			setSessionId(null);
+		},
+		[setWorkspaceId, setProjectId, setWorktree, setSessionId],
+	);
 
-	const setSelectedProjectId = (id: ProjectId, worktree?: string) => {
-		setProjectId(id);
-		setWorktree(worktree ?? null);
-		setSessionId(null);
-	};
+	const setSelectedProjectId = useCallback(
+		(id: ProjectId, worktree?: string) => {
+			setProjectId(id);
+			setWorktree(worktree ?? null);
+			setSessionId(null);
+		},
+		[setProjectId, setWorktree, setSessionId],
+	);
 
 	const setSelectedSessionId = setSessionId;
 
-	const clearSelection = () => {
+	const clearSelection = useCallback(() => {
 		setWorkspaceId(null);
 		setProjectId(null);
 		setWorktree(null);
 		setSessionId(null);
-	};
+	}, [setWorkspaceId, setProjectId, setWorktree, setSessionId]);
 
 	return (
 		<WorkspaceNavContext.Provider
