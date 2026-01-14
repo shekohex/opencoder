@@ -13,11 +13,21 @@ import { breakpoints } from "@/lib/tokens";
 import { useDocumentTitle } from "@/lib/use-document-title";
 import { useWorkspaceNav } from "@/lib/workspace-nav";
 import { useWorkspaces } from "@/lib/workspace-queries";
+import MobileChatScreen from "./mobile";
 
 export default function WorkspaceChatScreen() {
 	const { width } = useWorkspaceLayout();
-	const showRightPanel = width >= breakpoints.xl;
 
+	if (width < breakpoints.md) {
+		return <MobileChatScreen />;
+	}
+
+	return <DesktopChatScreen />;
+}
+
+function DesktopChatScreen() {
+	const { width } = useWorkspaceLayout();
+	const showRightPanel = width >= breakpoints.xl;
 	const { selectedWorkspaceId, selectedProjectWorktree, selectedSessionId } =
 		useWorkspaceNav();
 	const { sessions } = useOpenCodeSessions(

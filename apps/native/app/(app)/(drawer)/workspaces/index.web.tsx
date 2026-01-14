@@ -15,16 +15,30 @@ import { breakpoints } from "@/lib/tokens";
 import { useDocumentTitle } from "@/lib/use-document-title";
 import { useWorkspaceNav } from "@/lib/workspace-nav";
 import { useWorkspaces } from "@/lib/workspace-queries";
+import { MobileWorkspaces } from "./mobile";
 
 export default function WorkspacesScreen() {
 	const { width } = useWorkspaceLayout();
-	const { isLoading, isError } = useWorkspacePolling();
+	const { isLoading, isError, workspaceGroups, hasActiveBuilds } =
+		useWorkspacePolling();
 
 	const getListState = (): ListState => {
 		if (isLoading) return "loading";
 		if (isError) return "error";
 		return "ready";
 	};
+
+	if (width < breakpoints.md) {
+		return (
+			<Container>
+				<MobileWorkspaces
+					workspaceGroups={workspaceGroups}
+					hasActiveBuilds={hasActiveBuilds}
+					listState={getListState()}
+				/>
+			</Container>
+		);
+	}
 
 	const showRightPanel = width >= breakpoints.xl;
 

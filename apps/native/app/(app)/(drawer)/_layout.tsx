@@ -15,17 +15,11 @@ const DrawerLayout = () => {
 
 	const isDesktopOrTablet = width >= breakpoints.md;
 
-	if (isDesktopOrTablet) {
-		return (
-			<WorkspaceNavProvider>
-				<DesktopShell>
-					<Slot />
-				</DesktopShell>
-			</WorkspaceNavProvider>
-		);
-	}
-
-	return (
+	const content = isDesktopOrTablet ? (
+		<DesktopShell>
+			<Slot />
+		</DesktopShell>
+	) : (
 		<Drawer
 			screenOptions={{
 				headerStyle: {
@@ -92,6 +86,8 @@ const DrawerLayout = () => {
 			/>
 		</Drawer>
 	);
+
+	return <WorkspaceNavProvider>{content}</WorkspaceNavProvider>;
 };
 
 export default DrawerLayout;

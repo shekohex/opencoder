@@ -1,14 +1,17 @@
-import type React from "react";
+import type { FC } from "react";
 import Svg, { ClipPath, Defs, G, Rect } from "react-native-svg";
 import { brandColors, colors } from "./colors";
 
+type ThemeMode = keyof typeof brandColors;
+
 export interface IconProps {
-	mode?: "light" | "dark";
+	mode?: ThemeMode;
 	size?: number;
 }
 
-export const Icon: React.FC<IconProps> = ({ mode = "light", size = 48 }) => {
-	const bColors = brandColors[mode];
+export const Icon: FC<IconProps> = ({ mode = "light", size = 48 }) => {
+	const modeKey: ThemeMode = mode;
+	const bColors = brandColors[modeKey];
 	return (
 		<Svg viewBox="0 0 48 48" width={size} height={size}>
 			<Defs>
