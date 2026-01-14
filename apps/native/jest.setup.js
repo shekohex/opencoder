@@ -85,3 +85,13 @@ jest.mock("expo-router", () => ({
 		Screen: () => null,
 	},
 }));
+
+jest.mock("react-native", () => {
+	const RN = jest.requireActual("react-native");
+	return {
+		...RN,
+		Platform: {
+			OS: "ios",
+		},
+	};
+});
