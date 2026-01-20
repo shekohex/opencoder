@@ -1,5 +1,25 @@
 import type { TypesGen } from "@coder/sdk";
-import type { Event, OpencodeClient } from "@opencode-ai/sdk";
+import type {
+	Event,
+	EventFileEdited,
+	EventFileWatcherUpdated,
+	EventMessagePartUpdated,
+	EventMessageUpdated,
+	EventPermissionReplied,
+	EventPermissionUpdated,
+	EventPtyCreated,
+	EventPtyDeleted,
+	EventPtyExited,
+	EventPtyUpdated,
+	EventSessionCreated,
+	EventSessionError,
+	EventSessionStatus,
+	EventSessionUpdated,
+	EventTodoUpdated,
+	EventVcsBranchUpdated,
+	OpencodeClient,
+} from "@opencode-ai/sdk";
+import { useQueryClient } from "@tanstack/react-query";
 import {
 	createContext,
 	type ReactNode,
@@ -563,4 +583,301 @@ export function useAttentionEvents(
 
 		return unsubscribe;
 	}, [globalEvents, onAttention]);
+}
+
+type ChatEventHandler = {
+	onMessageUpdated?: (event: EventMessageUpdated) => void;
+	onMessagePartUpdated?: (event: EventMessagePartUpdated) => void;
+	onSessionCreated?: (event: EventSessionCreated) => void;
+	onSessionUpdated?: (event: EventSessionUpdated) => void;
+	onSessionStatus?: (event: EventSessionStatus) => void;
+	onSessionError?: (event: EventSessionError) => void;
+};
+
+export function useChatEvents(handlers: ChatEventHandler) {
+	const { event } = useWorkspaceSDK();
+	const queryClient = useQueryClient();
+
+	useEffect(() => {
+		const unsubscribes: Array<() => void> = [];
+
+		if (handlers.onMessageUpdated) {
+			unsubscribes.push(
+				event.on("message.updated", (evt) => {
+					queryClient.invalidateQueries({
+						queryKey: ["messages", evt.properties.info.sessionID],
+					});
+					handlers.onMessageUpdated?.(evt as EventMessageUpdated);
+				}),
+			);
+		}
+
+		if (handlers.onMessagePartUpdated) {
+			unsubscribes.push(
+				event.on("message.part.updated", (evt) => {
+					queryClient.invalidateQueries({
+						queryKey: ["messages"],
+					});
+					handlers.onMessagePartUpdated?.(evt as EventMessagePartUpdated);
+				}),
+			);
+		}
+
+		if (handlers.onSessionCreated) {
+			unsubscribes.push(
+				event.on("session.created", (evt) => {
+					queryClient.invalidateQueries({
+						queryKey: ["sessions"],
+					});
+					handlers.onSessionCreated?.(evt as EventSessionCreated);
+				}),
+			);
+		}
+
+		if (handlers.onSessionUpdated) {
+			unsubscribes.push(
+				event.on("session.updated", (evt) => {
+					queryClient.invalidateQueries({
+						queryKey: ["session", evt.properties.info.id],
+					});
+					handlers.onSessionUpdated?.(evt as EventSessionUpdated);
+				}),
+			);
+		}
+
+		if (handlers.onSessionStatus) {
+			unsubscribes.push(
+				event.on("session.status", (evt) => {
+					queryClient.invalidateQueries({
+						queryKey: ["session", evt.properties.sessionID],
+					});
+					handlers.onSessionStatus?.(evt as EventSessionStatus);
+				}),
+			);
+		}
+
+		if (handlers.onSessionError) {
+			unsubscribes.push(
+				event.on("session.error", (evt) => {
+					handlers.onSessionError?.(evt as EventSessionError);
+				}),
+			);
+		}
+
+		return () => {
+			for (const unsubscribe of unsubscribes) {
+				unsubscribe();
+			}
+		};
+	}, [event, queryClient, handlers]);
+}
+
+type PermissionEventHandler = {
+	onPermissionUpdated?: (event: EventPermissionUpdated) => void;
+	onPermissionReplied?: (event: EventPermissionReplied) => void;
+};
+
+export function usePermissionEvents(handlers: PermissionEventHandler) {
+	const { event } = useWorkspaceSDK();
+	const queryClient = useQueryClient();
+
+	useEffect(() => {
+		const unsubscribes: Array<() => void> = [];
+
+		if (handlers.onPermissionUpdated) {
+			unsubscribes.push(
+				event.on("permission.updated", (evt) => {
+					queryClient.invalidateQueries({
+						queryKey: ["permissions"],
+					});
+					handlers.onPermissionUpdated?.(evt as EventPermissionUpdated);
+				}),
+			);
+		}
+
+		if (handlers.onPermissionReplied) {
+			unsubscribes.push(
+				event.on("permission.replied", (evt) => {
+					queryClient.invalidateQueries({
+						queryKey: ["permissions"],
+					});
+					handlers.onPermissionReplied?.(evt as EventPermissionReplied);
+				}),
+			);
+		}
+
+		return () => {
+			for (const unsubscribe of unsubscribes) {
+				unsubscribe();
+			}
+		};
+	}, [event, queryClient, handlers]);
+}
+
+type PtyEventHandler = {
+	onPtyCreated?: (event: EventPtyCreated) => void;
+	onPtyUpdated?: (event: EventPtyUpdated) => void;
+	onPtyExited?: (event: EventPtyExited) => void;
+	onPtyDeleted?: (event: EventPtyDeleted) => void;
+};
+
+export function usePtyEvents(handlers: PtyEventHandler) {
+	const { event } = useWorkspaceSDK();
+	const queryClient = useQueryClient();
+
+	useEffect(() => {
+		const unsubscribes: Array<() => void> = [];
+
+		if (handlers.onPtyCreated) {
+			unsubscribes.push(
+				event.on("pty.created", (evt) => {
+					queryClient.invalidateQueries({
+						queryKey: ["pty", evt.properties.info.id],
+					});
+					handlers.onPtyCreated?.(evt as EventPtyCreated);
+				}),
+			);
+		}
+
+		if (handlers.onPtyUpdated) {
+			unsubscribes.push(
+				event.on("pty.updated", (evt) => {
+					queryClient.invalidateQueries({
+						queryKey: ["pty", evt.properties.info.id],
+					});
+					handlers.onPtyUpdated?.(evt as EventPtyUpdated);
+				}),
+			);
+		}
+
+		if (handlers.onPtyExited) {
+			unsubscribes.push(
+				event.on("pty.exited", (evt) => {
+					queryClient.invalidateQueries({
+						queryKey: ["pty", evt.properties.id],
+					});
+					handlers.onPtyExited?.(evt as EventPtyExited);
+				}),
+			);
+		}
+
+		if (handlers.onPtyDeleted) {
+			unsubscribes.push(
+				event.on("pty.deleted", (evt) => {
+					queryClient.invalidateQueries({
+						queryKey: ["pty"],
+					});
+					handlers.onPtyDeleted?.(evt as EventPtyDeleted);
+				}),
+			);
+		}
+
+		return () => {
+			for (const unsubscribe of unsubscribes) {
+				unsubscribe();
+			}
+		};
+	}, [event, queryClient, handlers]);
+}
+
+type TodoEventHandler = {
+	onTodoUpdated?: (event: EventTodoUpdated) => void;
+};
+
+export function useTodoEvents(handlers: TodoEventHandler) {
+	const { event } = useWorkspaceSDK();
+	const queryClient = useQueryClient();
+
+	useEffect(() => {
+		const unsubscribes: Array<() => void> = [];
+
+		if (handlers.onTodoUpdated) {
+			unsubscribes.push(
+				event.on("todo.updated", (evt) => {
+					queryClient.invalidateQueries({
+						queryKey: ["todos"],
+					});
+					handlers.onTodoUpdated?.(evt as EventTodoUpdated);
+				}),
+			);
+		}
+
+		return () => {
+			for (const unsubscribe of unsubscribes) {
+				unsubscribe();
+			}
+		};
+	}, [event, queryClient, handlers]);
+}
+
+type FileEventHandler = {
+	onFileEdited?: (event: EventFileEdited) => void;
+	onFileWatcherUpdated?: (event: EventFileWatcherUpdated) => void;
+};
+
+export function useFileEvents(handlers: FileEventHandler) {
+	const { event } = useWorkspaceSDK();
+	const queryClient = useQueryClient();
+
+	useEffect(() => {
+		const unsubscribes: Array<() => void> = [];
+
+		if (handlers.onFileEdited) {
+			unsubscribes.push(
+				event.on("file.edited", (evt) => {
+					queryClient.invalidateQueries({
+						queryKey: ["files"],
+					});
+					handlers.onFileEdited?.(evt as EventFileEdited);
+				}),
+			);
+		}
+
+		if (handlers.onFileWatcherUpdated) {
+			unsubscribes.push(
+				event.on("file.watcher.updated", (evt) => {
+					queryClient.invalidateQueries({
+						queryKey: ["fileWatcher"],
+					});
+					handlers.onFileWatcherUpdated?.(evt as EventFileWatcherUpdated);
+				}),
+			);
+		}
+
+		return () => {
+			for (const unsubscribe of unsubscribes) {
+				unsubscribe();
+			}
+		};
+	}, [event, queryClient, handlers]);
+}
+
+type GitEventHandler = {
+	onVcsBranchUpdated?: (event: EventVcsBranchUpdated) => void;
+};
+
+export function useGitEvents(handlers: GitEventHandler) {
+	const { event } = useWorkspaceSDK();
+	const queryClient = useQueryClient();
+
+	useEffect(() => {
+		const unsubscribes: Array<() => void> = [];
+
+		if (handlers.onVcsBranchUpdated) {
+			unsubscribes.push(
+				event.on("vcs.branch.updated", (evt) => {
+					queryClient.invalidateQueries({
+						queryKey: ["git"],
+					});
+					handlers.onVcsBranchUpdated?.(evt as EventVcsBranchUpdated);
+				}),
+			);
+		}
+
+		return () => {
+			for (const unsubscribe of unsubscribes) {
+				unsubscribe();
+			}
+		};
+	}, [event, queryClient, handlers]);
 }

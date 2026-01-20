@@ -1,0 +1,164 @@
+# TDD Red-Green-Refactor Workflow
+# Pattern: Critic-Actor Pipeline
+# Forces discipline: failing test → implementation → refactor
+#
+# Usage:
+#   ralph run --config presets/tdd-red-green.yml --prompt "Implement a binary search tree"
+
+event_loop:
+  starting_event: "tdd.start"  # Ralph publishes this after coordination
+  max_iterations: 500                   # Maximum orchestration loops
+  max_runtime_seconds: 86400            # 4 hours max runtime
+  idle_timeout_secs: 5               # 5 min idle timeout
+# CLI backend settings
+cli:
+  backend: "claude"                     # claude, kiro, gemini, codex, amp, copilot, opencode, custom
+  prompt_mode: "arg"                    # arg (CLI argument) or stdin
+  experimental_tui: true               # Enable TUI mode support
+
+hats:
+  test_writer:
+    name: "🔴 Test Writer"
+    description: "Writes FAILING tests first. Never implements. Tests only."
+    triggers: ["tdd.start", "refactor.done"]
+    publishes: ["test.written"]
+    instructions: |
+      You write FAILING tests first. This is non-negotiable.
+
+      1. Read the spec/requirement
+      2. Write the minimum test that captures the requirement
+      3. Run the test to verify it FAILS (red phase)
+      4. Publish test.written with the test file path
+
+      NEVER write implementation code. Your job is tests only.
+      The test must fail for the right reason—testing the unimplemented behavior.
+
+  implementer:
+    name: "🟢 Implementer"
+    description: "Makes failing test pass with MINIMAL code. No extras."
+    triggers: ["test.written"]
+    publishes: ["test.passing"]
+    instructions: |
+      Make the failing test pass with MINIMAL code.
+
+      1. Read the failing test
+      2. Write the simplest code that makes it pass
+      3. Run the test to confirm green
+      4. Publish test.passing
+
+      Do NOT refactor. Do NOT add extra functionality.
+      Just make the test pass. Ugly code is fine at this stage.
+
+  linter:
+    name: "🧹 Linter"
+    description: "Runs lint and type checks to verify code quality."
+    triggers: ["test.passing"]
+    publishes: ["lint.passed", "lint.failed"]
+    instructions: |
+      Run lint and type checks to verify code quality.
+
+      1. Run `bun run check` for linting
+      2. Run `bun run check-types` for TypeScript checks
+      3. If either fails: publish lint.failed with error details
+      4. If both pass: publish lint.passed
+
+      CRITICAL: If ANY lint or type errors occur:
+      - Report the error immediately with full details
+      - DO NOT publish lint.passed
+      - Publish lint.failed with error details
+      - Continue looping to fix and retest
+
+  browser_tester:
+    name: "🌐 Browser Tester"
+    description: "Runs browser automation to test and validate features."
+    triggers: ["lint.passed"]
+    publishes: ["browser.passed", "browser.failed"]
+    instructions: |
+      Browser test the application using dev-browser skill.
+
+      SETUP (one-time):
+      1. First load the dev-browser skill using Skill tool: `dev-browser:dev-browser`
+      2. Get the skill base path from the output
+      3. Start dev-browser server HEADLESS (required for no X server):
+         `cd <skill-path> && HEADLESS=true npx tsx scripts/start-server.ts &`
+      4. Wait for "Ready" message
+      5. Start web server: `cd apps/native && bun run web &`
+      6. Verify web server responds: `curl -I http://localhost:8081`
+
+      TESTING (run from <skill-path> directory for @/ imports):
+      1. Write tsx script using heredoc
+      2. Track both page errors and console errors
+      3. Navigate to http://localhost:8081
+      4. Take screenshots for visual verification
+      5. Disconnect after each test (pages persist)
+
+      CRITICAL: If ANY errors occur:
+      - Report the error immediately with full details
+      - DO NOT publish browser.passing
+      - Publish browser.failed with error details
+      - Continue looping to fix and retest
+
+      Only publish browser.passed when:
+      - No page errors
+      - No console errors
+      - All features work as expected
+
+      Example script (MUST run from dev-browser directory):
+      ```bash
+      cd <skill-path> && npx tsx <<'EOF'
+      import { connect } from "@/client.js";
+
+      const client = await connect();
+      const page = await client.page("opencode-test");
+
+      const pageErrors: string[] = [];
+      const consoleErrors: string[] = [];
+
+      page.on("pageerror", error => {
+        pageErrors.push(error.message);
+        console.error("Page error:", error.message);
+      });
+
+      page.on("console", msg => {
+        if (msg.type() === "error") {
+          consoleErrors.push(msg.text());
+          console.log("Console error:", msg.text());
+        }
+      });
+
+      await page.goto("http://localhost:8081", { timeout: 30000 });
+      await new Promise(r => setTimeout(r, 3000));
+
+      await page.screenshot({ path: "/home/coder/project/opencoder/tmp/test.png" });
+
+      await client.disconnect();
+
+      if (pageErrors.length > 0 || consoleErrors.length > 0) {
+        console.error("BROWSER_TEST_FAILED");
+        process.exit(1);
+      }
+      console.log("BROWSER_TEST_PASSED");
+      EOF
+      ```
+
+      CLEANUP:
+      `pkill -f "dev-browser|start-server" && pkill -f "expo start --web"`
+
+  refactorer:
+    name: "🔵 Refactorer"
+    description: "Cleans up code after all checks pass."
+    triggers: ["browser.passed"]
+    publishes: ["refactor.done", "cycle.complete"]
+    default_publishes: "cycle.complete"
+    instructions: |
+      Clean up the code while keeping all tests and checks passing.
+
+      1. Review the implementation for code smells
+      2. Refactor for clarity, DRY, and maintainability
+      3. Run tests, lints, type-checks to confirm still passing
+      4. If more work needed: publish refactor.done
+      5. If feature complete AND browser tests passed: publish cycle.complete
+
+      CRITICAL: Only publish cycle.complete if browser.passed event was received.
+
+      Output LOOP_COMPLETED when the entire feature is fully implemented and all checks pass.

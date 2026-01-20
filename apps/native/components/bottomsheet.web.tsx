@@ -125,10 +125,7 @@ export function BottomSheetContent({
 				/>
 			</Animated.View>
 
-			<View
-				className="pointer-events-box-none flex-1 justify-end"
-				style={{ pointerEvents: "box-none" }}
-			>
+			<View className="pointer-events-box-none flex-1 justify-end">
 				<Animated.View
 					entering={SlideInDown.duration(250).springify().damping(20)}
 					exiting={SlideOutDown.duration(200)}

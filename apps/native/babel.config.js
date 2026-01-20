@@ -1,11 +1,11 @@
 module.exports = (api) => {
-	api.cache(true);
+	const isTest = api.env("test");
+
+	api.cache(() => (isTest ? "test" : "prod"));
+
 	return {
-		presets: [
-			["@babel/preset-env", { targets: { node: "current" } }],
-			"babel-preset-expo",
-			"@babel/preset-typescript",
-		],
-		plugins: ["transform-flow-strip-types"],
+		presets: isTest
+			? [["babel-preset-expo", { jsxRuntime: "automatic" }]]
+			: [["babel-preset-expo", { jsxImportSource: "nativewind" }]],
 	};
 };

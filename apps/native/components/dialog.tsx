@@ -161,10 +161,7 @@ export function DialogContent({
 				<Pressable className="absolute inset-0" onPress={onClose} />
 			</Animated.View>
 
-			<View
-				className="pointer-events-box-none flex-1 items-center justify-center p-4"
-				style={{ pointerEvents: "box-none" }}
-			>
+			<View className="pointer-events-box-none flex-1 items-center justify-center p-4">
 				<FocusScope contain restoreFocus autoFocus>
 					<View
 						ref={ref}

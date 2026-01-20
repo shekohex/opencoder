@@ -1,15 +1,13 @@
 import { Feather } from "@expo/vector-icons";
 import { Link } from "expo-router";
-import { Pressable, ScrollView, View } from "react-native";
+import { Pressable, View } from "react-native";
 
 import { AppText } from "@/components/app-text";
 import { Button } from "@/components/button";
+import { ChatInput } from "@/components/chat/ChatInput";
+import { MessageList } from "@/components/chat/MessageList";
 import { Container } from "@/components/container";
-import { messageRows } from "@/components/workspace-mockups/mock-data";
-import {
-	EmptyStateCard,
-	type ListState,
-} from "@/components/workspace-mockups/shared";
+import { useSessionMessages } from "@/lib/chat/chat-queries";
 import { useProjectName } from "@/lib/project-queries";
 import { useSessionById } from "@/lib/session-queries";
 import { useWorkspaceNav } from "@/lib/workspace-nav";
@@ -30,14 +28,16 @@ export default function WorkspaceChatScreen() {
 	);
 	const projectName = useProjectName(selectedProjectWorktree);
 
+	const { messages, isLoading, isError } = useSessionMessages(
+		selectedWorkspaceId,
+		selectedSessionId,
+	);
+
 	const backHref = buildWorkspacePath({
 		workspaceId: selectedWorkspaceId,
 		projectId: selectedProjectId,
 		worktree: selectedProjectWorktree,
 	});
-
-	const resolvedMessageState: ListState =
-		messageRows.length === 0 ? "empty" : "ready";
 
 	return (
 		<Container>
@@ -67,41 +67,22 @@ export default function WorkspaceChatScreen() {
 						</Button>
 					</View>
 				</View>
-				<ScrollView className="flex-1" contentContainerClassName="gap-3 p-4">
-					{resolvedMessageState === "empty" && (
-						<EmptyStateCard
-							title="No messages yet"
-							subtitle="Start a session to see messages here."
-							ctaLabel="New session"
+				{selectedWorkspaceId && selectedSessionId ? (
+					<>
+						<MessageList messages={messages} isLoading={isLoading} autoScroll />
+						<ChatInput
+							workspaceId={selectedWorkspaceId}
+							sessionId={selectedSessionId}
+							disabled={!selectedSessionId || isError}
 						/>
-					)}
-					{resolvedMessageState === "ready" &&
-						messageRows.map((message, index) => (
-							<View
-								key={`${message.role}-mobile-${index}`}
-								className={`rounded-xl px-3 py-2 ${
-									message.role === "user"
-										? "self-end bg-surface-interactive"
-										: "self-start bg-surface"
-								}`}
-								style={{ maxWidth: "85%" }}
-							>
-								<AppText className="text-foreground text-sm">
-									{message.text}
-								</AppText>
-							</View>
-						))}
-				</ScrollView>
-				<View className="border-border border-t bg-surface px-4 py-3">
-					<View className="flex-row items-center gap-2 rounded-xl border border-border bg-input px-3 py-2">
-						<AppText className="text-foreground-weak text-sm">
-							Message...
+					</>
+				) : (
+					<View className="flex-1 items-center justify-center">
+						<AppText className="text-foreground-weak">
+							No session selected
 						</AppText>
-						<View className="ml-auto">
-							<Feather name="send" size={14} color="var(--color-icon)" />
-						</View>
 					</View>
-				</View>
+				)}
 			</View>
 		</Container>
 	);

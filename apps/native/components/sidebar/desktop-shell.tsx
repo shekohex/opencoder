@@ -55,8 +55,8 @@ function ResizeHandle({
 	return (
 		<GestureDetector gesture={gesture}>
 			<View
-				style={{ width: RESIZE_HANDLE_WIDTH, pointerEvents: "box-only" }}
-				className="items-center justify-center"
+				style={{ width: RESIZE_HANDLE_WIDTH }}
+				className="pointer-events-box-only items-center justify-center"
 			>
 				<View className="h-10 w-1 rounded-full bg-border" />
 			</View>

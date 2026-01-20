@@ -187,3 +187,7 @@ bd sync  # Force immediate export/commit/push
 You can access the list of all Expo docs at: `https://docs.expo.dev/llms.txt` you can use webfetch tool or curl + rg then fetch the page you are looking for.
 
 </expo>
+
+<browser-testing>
+During your browser testing, if asked for coder url, you can use https://coder.0iq.xyz/ and the token can be found in .env file in that repo.
+</browser-testing>

@@ -35,7 +35,10 @@ jest.mock("react-native-nitro-modules", () => ({
 jest.mock("@expo/vector-icons", () => {
 	const React = require("react");
 	const Icon = (props) => React.createElement("Icon", props);
-	return new Proxy({}, { get: () => Icon });
+	return {
+		Ionicons: Icon,
+		default: Icon,
+	};
 });
 
 jest.mock("@gorhom/bottom-sheet", () => {
@@ -65,6 +68,30 @@ jest.mock("uniwind", () => ({
 	},
 }));
 
+jest.mock("expo-secure-store", () => ({
+	getItemAsync: jest.fn(),
+	setItemAsync: jest.fn(),
+	deleteItemAsync: jest.fn(),
+}));
+
+jest.mock("expo-clipboard", () => ({
+	getStringAsync: jest.fn(),
+	setStringAsync: jest.fn(),
+}));
+
+jest.mock("@react-navigation/native", () => ({
+	...jest.requireActual("@react-navigation/native"),
+	useNavigation: () => ({
+		navigate: jest.fn(),
+		goBack: jest.fn(),
+		push: jest.fn(),
+		reset: jest.fn(),
+		setParams: jest.fn(),
+		dispatch: jest.fn(),
+	}),
+	NavigationContainer: ({ children }) => children,
+}));
+
 jest.mock("expo-router", () => ({
 	useRouter: () => ({
 		push: jest.fn(),
@@ -86,12 +113,96 @@ jest.mock("expo-router", () => ({
 	},
 }));
 
-jest.mock("react-native", () => {
-	const RN = jest.requireActual("react-native");
-	return {
-		...RN,
-		Platform: {
-			OS: "ios",
+jest.mock("react-native/Libraries/TurboModule/TurboModuleRegistry", () => ({
+	getEnforcing: jest.fn(() => ({})),
+	get: jest.fn(() => ({})),
+}));
+
+jest.mock("@/lib/font-registry", () => ({
+	getFontFamily: jest.fn(() => "System"),
+	SANS_FONTS: { Inter: "Inter" },
+	MONO_FONTS: { IBMPlexMono: "IBMPlexMono" },
+}));
+
+jest.mock("@/lib/font-context", () => ({
+	useFontsConfig: () => ({
+		sansSet: "Inter",
+		monoSet: "IBMPlexMono",
+		monoFlavor: "normal",
+		isNerdEnabled: false,
+		resolveFont: jest.fn(() => "System"),
+		setSansSet: jest.fn(),
+		setMonoSet: jest.fn(),
+		setMonoFlavor: jest.fn(),
+	}),
+	FontProvider: ({ children }) => children,
+}));
+
+jest.mock("@/lib/opencode-provider", () => ({
+	useGlobalOpenCode: () => ({
+		connections: new Map(),
+		connect: jest.fn(),
+		disconnect: jest.fn(),
+		getClient: jest.fn(() => ({
+			session: {
+				prompt: jest.fn(),
+				create: jest.fn(),
+			},
+		})),
+		getConnection: jest.fn(),
+		hasConnection: jest.fn(),
+		isConnecting: jest.fn(),
+		event: {
+			on: jest.fn(() => jest.fn()),
+			emit: jest.fn(),
+			listen: jest.fn(() => jest.fn()),
 		},
+	}),
+	GlobalOpenCodeProvider: ({ children }) => children,
+}));
+
+jest.mock("@/lib/chat/chat-mutations", () => ({
+	useChatMutations: jest.fn(() => ({
+		sendMessage: {
+			mutate: jest.fn(),
+			isPending: false,
+		},
+		createSession: {
+			mutate: jest.fn(),
+			isPending: false,
+		},
+	})),
+}));
+
+jest.mock("react-native", () => {
+	const React = require("react");
+	const {
+		View: ReactView,
+		Text: ReactText,
+		Pressable: ReactPressable,
+	} = jest.requireActual("react-native");
+
+	const ActivityIndicator = (props) => {
+		const { testID = "activity-indicator", ...rest } = props;
+		return React.createElement(ReactView, { ...rest, testID });
+	};
+
+	return {
+		View: ReactView,
+		Text: ReactText,
+		Pressable: ReactPressable,
+		ActivityIndicator,
+		ScrollView: ({ children, ...props }) =>
+			React.createElement(ReactView, props, children),
+		FlatList: ({ data, renderItem, ...props }) =>
+			React.createElement(
+				ReactView,
+				props,
+				data?.map((item, i) => renderItem({ item, index: i })),
+			),
+		StyleSheet: { create: (styles) => styles, flatten: (styles) => styles },
+		Platform: { OS: "ios", select: (opts) => opts.ios || opts.default },
+		useColorScheme: () => "light",
+		useWindowDimensions: () => ({ width: 390, height: 844 }),
 	};
 });
