@@ -280,7 +280,7 @@ jest.mock("react-native", () => {
 		useWindowDimensions: () => ({ width: 390, height: 844 }),
 		Alert: {
 			alert: jest.fn(),
-			// @ts-ignore
+			// @ts-expect-error
 			Alert: jest.fn(),
 		},
 	};

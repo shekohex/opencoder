@@ -27,13 +27,28 @@
 - After: 278 passing, 12 suites failing
 - Added 211 passing tests
 
-**Remaining Test Issues (61 failures):**
-- Component import/export issues in test files
-- Tests using components that need additional native module mocks
-- These are pre-existing issues, not caused by console warning fixes
+**Remaining Test Issues (61 failures across 12 suites):**
+1. Component import/export issues:
+   - select.native.test.tsx (10) - SelectTrigger hoisting issue in component
+   - dialog.native.test.tsx (1) - test assertion expecting wrong call count
+   - permissions tests (13) - component export/import issues
 
-**Note:** The main objective (fix console warnings) is complete. Test failures are unrelated
-to the pointerEvents fixes and represent pre-existing test infrastructure gaps.
+2. Test infrastructure issues:
+   - auth tests (6) - findByText timeouts in test setup
+   - tests/sign-in.test.tsx (2) - timeouts
+   - tests/workspace-*.test.tsx (2) - timeouts
+
+3. Domain tests using bun:test (excluded from Jest):
+   - domain/types/__tests__/opencode.test.ts
+   - domain/types/__tests__/events.test.ts
+
+These are pre-existing issues not caused by console warning fixes. Fixing them would require:
+- Reordering component function declarations
+- Fixing async test timeout issues
+- Additional native module mocks
+
+**Note:** Main objective (fix console warnings) complete. Test failures represent
+pre-existing test infrastructure gaps requiring separate work to address.
 
 ### [ ] Task 3: Configure Browser Testing
 ### [ ] Task 4: Add Browser Test Coverage
