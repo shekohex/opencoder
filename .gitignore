@@ -53,3 +53,5 @@ temp
 .bv/
 .agent/skills/dev-browser/profiles/
 .agent/skills/dev-browser/tmp/
+core
+apps/native/core
