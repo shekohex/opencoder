@@ -1,6 +1,6 @@
 import { Feather } from "@expo/vector-icons";
-import { DrawerActions } from "@react-navigation/native";
-import { Link, useNavigation } from "expo-router";
+import { DrawerActions, useNavigation } from "@react-navigation/native";
+import { Link } from "expo-router";
 import { Pressable, SectionList, View } from "react-native";
 
 import { AppText } from "@/components/app-text";

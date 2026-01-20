@@ -1,19 +1,21 @@
 import { Feather } from "@expo/vector-icons";
 import { Link } from "expo-router";
-import { Pressable, View } from "react-native";
+import { Pressable, ScrollView, View } from "react-native";
 
 import { AppText } from "@/components/app-text";
 import { Button } from "@/components/button";
 import { ChatInput } from "@/components/chat/ChatInput";
 import { MessageList } from "@/components/chat/MessageList";
 import { Container } from "@/components/container";
+import { PermissionRequest } from "@/components/permissions/PermissionRequest";
 import { useSessionMessages } from "@/lib/chat/chat-queries";
+import { WorkspaceSDKProvider } from "@/lib/opencode-provider";
 import { useProjectName } from "@/lib/project-queries";
 import { useSessionById } from "@/lib/session-queries";
 import { useWorkspaceNav } from "@/lib/workspace-nav";
 import { buildWorkspacePath } from "@/lib/workspace-query-params";
 
-export default function WorkspaceChatScreen() {
+function ChatScreenInner() {
 	const {
 		selectedWorkspaceId,
 		selectedProjectId,
@@ -69,7 +71,19 @@ export default function WorkspaceChatScreen() {
 				</View>
 				{selectedWorkspaceId && selectedSessionId ? (
 					<>
-						<MessageList messages={messages} isLoading={isLoading} autoScroll />
+						<ScrollView
+							className="flex-1"
+							contentContainerClassName="gap-3 p-4"
+						>
+							<MessageList
+								messages={messages}
+								isLoading={isLoading}
+								autoScroll={false}
+							/>
+							{selectedSessionId && (
+								<PermissionRequest sessionId={selectedSessionId} />
+							)}
+						</ScrollView>
 						<ChatInput
 							workspaceId={selectedWorkspaceId}
 							sessionId={selectedSessionId}
@@ -85,5 +99,19 @@ export default function WorkspaceChatScreen() {
 				)}
 			</View>
 		</Container>
+	);
+}
+
+export default function WorkspaceChatScreen() {
+	const { selectedWorkspaceId } = useWorkspaceNav();
+
+	if (!selectedWorkspaceId) {
+		return null;
+	}
+
+	return (
+		<WorkspaceSDKProvider workspaceId={selectedWorkspaceId}>
+			<ChatScreenInner />
+		</WorkspaceSDKProvider>
 	);
 }

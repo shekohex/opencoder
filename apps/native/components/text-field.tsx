@@ -192,6 +192,8 @@ function ErrorMessage({ children, className, ...props }: ErrorMessageProps) {
 	);
 }
 
+export { Label, Input, Description, ErrorMessage };
+
 TextField.Label = Label;
 TextField.Input = Input;
 TextField.Description = Description;

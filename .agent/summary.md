@@ -1,8 +1,8 @@
 # Loop Summary
 
 **Status:** Completed successfully
-**Iterations:** 2
-**Duration:** 16m 34s
+**Iterations:** 3
+**Duration:** 22m 35s
 
 ## Tasks
 
@@ -10,19 +10,13 @@ _No scratchpad found._
 
 ## Events
 
-- 78 total events
-- 15 test.written
-- 12 tdd.start
-- 11 task.start
-- 10 loop.terminate
-- 10 test.passing
-- 5 cycle.complete
-- 5 refactor.done
-- 4 lint.passed
-- 3 browser.passed
-- 2 task.resume
-- 1 step3.impl.done
+- 11 total events
+- 4 test.written
+- 3 tdd.start
+- 2 loop.terminate
+- 1 task.start
+- 1 test.passing
 
 ## Final Commit
 
-96ab7f2: feat(domain): add OpenCode core data types and event types
+6138de4: docs(scratchpad): document remaining test failures

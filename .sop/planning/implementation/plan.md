@@ -2,16 +2,16 @@
 
 ## Progress Checklist
 
-- [ ] Step 1: Core Data Models & Types
-- [ ] Step 2: Chat Message Components (Basic)
-- [ ] Step 3: Chat Input & Message Creation
-- [ ] Step 4: SSE Event Handling Extension
-- [ ] Step 5: Chat Screen Integration
-- [ ] Step 6: Message Parts (Diff, Tool, File)
-- [ ] Step 7: Permissions & Questions UI
-- [ ] Step 8: Git Operations Integration
-- [ ] Step 9: Terminal Component (ghostty-web)
-- [ ] Step 10: Multi-Agent & Task Tracker
+- [x] Step 1: Core Data Models & Types
+- [x] Step 2: Chat Message Components (Basic)
+- [x] Step 3: Chat Input & Message Creation
+- [x] Step 4: SSE Event Handling Extension
+- [x] Step 5: Chat Screen Integration
+- [x] Step 6: Message Parts (Diff, Tool, File)
+- [x] Step 7: Permissions & Questions UI
+- [x] Step 8: Git Operations Integration
+- [x] Step 9: Terminal Component (ghostty-web)
+- [x] Step 10: Multi-Agent & Task Tracker
 - [ ] Step 11: Settings Screens
 - [ ] Step 12: Testing & Polish
 

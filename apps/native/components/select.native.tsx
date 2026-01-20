@@ -55,6 +55,49 @@ function buildItems(children: React.ReactNode): InternalItem[] {
 	return items;
 }
 
+export function SelectTrigger({ children, className }: SelectTriggerProps) {
+	const { isOpen, setOpen, selectedValues, placeholder, disabled, listState } =
+		useSelectContext();
+
+	const displayText = listState
+		? getDisplayValue(selectedValues, listState.collection, placeholder)
+		: (placeholder ?? "Select...");
+
+	const handlePress = useCallback(() => {
+		setOpen(!isOpen);
+	}, [isOpen, setOpen]);
+
+	if (React.isValidElement(children)) {
+		const childProps = children.props as Partial<{
+			onPress?: (e: GestureResponderEvent) => void;
+		}>;
+		return React.cloneElement(children, {
+			onPress: (e: GestureResponderEvent) => {
+				childProps.onPress?.(e);
+				handlePress();
+			},
+		} as Partial<{ onPress?: (e: GestureResponderEvent) => void }>);
+	}
+
+	return (
+		<Pressable
+			onPress={handlePress}
+			disabled={disabled}
+			accessibilityRole="button"
+			accessibilityState={{ expanded: isOpen, disabled }}
+			accessibilityLabel={displayText}
+			className={`flex-row items-center justify-between rounded-md border border-border bg-input px-3 py-2.5 ${disabled ? "opacity-50" : ""} ${className ?? ""}`}
+		>
+			<Text className="text-foreground">{displayText}</Text>
+			<Feather
+				name={isOpen ? "chevron-up" : "chevron-down"}
+				size={16}
+				color="var(--color-icon)"
+			/>
+		</Pressable>
+	);
+}
+
 export function Select<T = unknown>({
 	children,
 	value,
@@ -136,49 +179,6 @@ export function Select<T = unknown>({
 			{!hasCustomTrigger && <SelectTrigger />}
 			{children}
 		</SelectContext.Provider>
-	);
-}
-
-export function SelectTrigger({ children, className }: SelectTriggerProps) {
-	const { isOpen, setOpen, selectedValues, placeholder, disabled, listState } =
-		useSelectContext();
-
-	const displayText = listState
-		? getDisplayValue(selectedValues, listState.collection, placeholder)
-		: (placeholder ?? "Select...");
-
-	const handlePress = useCallback(() => {
-		setOpen(!isOpen);
-	}, [isOpen, setOpen]);
-
-	if (React.isValidElement(children)) {
-		const childProps = children.props as Partial<{
-			onPress?: (e: GestureResponderEvent) => void;
-		}>;
-		return React.cloneElement(children, {
-			onPress: (e: GestureResponderEvent) => {
-				childProps.onPress?.(e);
-				handlePress();
-			},
-		} as Partial<{ onPress?: (e: GestureResponderEvent) => void }>);
-	}
-
-	return (
-		<Pressable
-			onPress={handlePress}
-			disabled={disabled}
-			accessibilityRole="button"
-			accessibilityState={{ expanded: isOpen, disabled }}
-			accessibilityLabel={displayText}
-			className={`flex-row items-center justify-between rounded-md border border-border bg-input px-3 py-2.5 ${disabled ? "opacity-50" : ""} ${className ?? ""}`}
-		>
-			<Text className="text-foreground">{displayText}</Text>
-			<Feather
-				name={isOpen ? "chevron-up" : "chevron-down"}
-				size={16}
-				color="var(--color-icon)"
-			/>
-		</Pressable>
 	);
 }
 

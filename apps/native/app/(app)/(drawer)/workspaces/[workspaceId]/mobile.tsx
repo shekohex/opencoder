@@ -1,6 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import type { Href } from "expo-router";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { useCallback } from "react";
 import { Pressable, View } from "react-native";
 
@@ -19,6 +19,7 @@ const BACK_ROUTE = "/workspaces" as Href;
 export default function WorkspaceProjectsScreen() {
 	const rowHeight = ROW_HEIGHTS.mobile;
 	const { selectedWorkspaceId } = useWorkspaceNav();
+	const router = useRouter();
 	const { projectGroups, isLoading, isError, error } =
 		useOpenCodeProjects(selectedWorkspaceId);
 	const workspaceName = useWorkspaceName(selectedWorkspaceId);
@@ -32,6 +33,10 @@ export default function WorkspaceProjectsScreen() {
 			}),
 		[selectedWorkspaceId],
 	);
+
+	const handleOpenSettings = useCallback(() => {
+		router.push(`/workspaces/${selectedWorkspaceId}/settings` as Href);
+	}, [router, selectedWorkspaceId]);
 
 	return (
 		<Container>
@@ -50,6 +55,7 @@ export default function WorkspaceProjectsScreen() {
 						title={workspaceName ?? "Projects"}
 						backLabel="Workspaces"
 						backHref={BACK_ROUTE}
+						onSettingsPress={handleOpenSettings}
 					/>
 				}
 			/>
@@ -61,10 +67,12 @@ function MobileHeader({
 	title,
 	backLabel,
 	backHref,
+	onSettingsPress,
 }: {
 	title: string;
 	backLabel: string;
 	backHref: Href;
+	onSettingsPress: () => void;
 }) {
 	return (
 		<View className="gap-3">
@@ -83,9 +91,14 @@ function MobileHeader({
 				<AppText className="font-semibold text-foreground-strong text-xl">
 					{title}
 				</AppText>
-				<Button size="sm" variant="outline">
-					New
-				</Button>
+				<View className="flex-row items-center gap-2">
+					<Button size="sm" variant="outline" onPress={onSettingsPress}>
+						<Feather name="settings" size={14} />
+					</Button>
+					<Button size="sm" variant="outline">
+						New
+					</Button>
+				</View>
 			</View>
 		</View>
 	);

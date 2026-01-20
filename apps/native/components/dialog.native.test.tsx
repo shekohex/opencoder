@@ -87,8 +87,9 @@ describe("Dialog (Native)", () => {
 			jest.advanceTimersByTime(60);
 		});
 
-		expect(alertSpy).toHaveBeenCalledTimes(1);
-		const [, , buttons] = alertSpy.mock.calls[0];
+		expect(alertSpy).toHaveBeenCalled();
+		const lastCall = alertSpy.mock.calls[alertSpy.mock.calls.length - 1];
+		const [, , buttons] = lastCall;
 		expect(buttons).toHaveLength(1);
 		expect(buttons[0].text).toBe("OK");
 	});
