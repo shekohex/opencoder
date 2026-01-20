@@ -69,14 +69,14 @@ jest.mock("uniwind", () => ({
 }));
 
 jest.mock("expo-secure-store", () => ({
-	getItemAsync: jest.fn(),
-	setItemAsync: jest.fn(),
-	deleteItemAsync: jest.fn(),
+	getItemAsync: jest.fn(() => Promise.resolve(null)),
+	setItemAsync: jest.fn(() => Promise.resolve()),
+	deleteItemAsync: jest.fn(() => Promise.resolve()),
 }));
 
 jest.mock("expo-clipboard", () => ({
-	getStringAsync: jest.fn(),
-	setStringAsync: jest.fn(),
+	getStringAsync: jest.fn(() => Promise.resolve("")),
+	setStringAsync: jest.fn(() => Promise.resolve()),
 }));
 
 jest.mock("@react-navigation/native", () => ({
@@ -190,49 +190,63 @@ jest.mock("react-native-reanimated", () => {
 	const React = require("react");
 	const { View, Text } = require("react-native");
 
-	const createAnimation = () => ({
-		duration: () => createAnimation(),
-		delay: () => createAnimation(),
-		springify: () => createAnimation(),
-		damping: () => createAnimation(),
-		randomDelay: () => createAnimation(),
+	const createAnimationConfig = () => ({
+		duration: () => createAnimationConfig(),
+		delay: () => createAnimationConfig(),
+		springify: () => createAnimationConfig(),
+		damping: () => createAnimationConfig(),
+		randomDelay: () => createAnimationConfig(),
 	});
 
-	return {
-		default: {
-			View: ({ children, ...props }) =>
-				React.createElement(View, props, children),
-			Text: ({ children, ...props }) =>
-				React.createElement(Text, props, children),
-			ScrollView: ({ children, ...props }) =>
-				React.createElement(View, props, children),
-			FadeIn: createAnimation,
-			FadeOut: createAnimation,
-			SlideInDown: createAnimation,
-			SlideOutDown: createAnimation,
-			useAnimatedStyle: (fn) => fn(),
-			useSharedValue: (val) => ({ value: val }),
-			useDerivedValue: (fn) => ({ value: fn() }),
-			withTiming: (val) => val,
-			withSpring: (val) => val,
-			withSequence: () => ({}),
-			useAnimatedScrollHandler: () => ({}),
-			createAnimatedComponent: (comp) => comp,
-		},
-		FadeIn: createAnimation,
-		FadeOut: createAnimation,
-		SlideInDown: createAnimation,
-		SlideOutDown: createAnimation,
+	const FadeIn = createAnimationConfig();
+	const FadeOut = createAnimationConfig();
+	const SlideInDown = createAnimationConfig();
+	const SlideOutDown = createAnimationConfig();
+
+	const AnimatedView = ({ children, ...props }) =>
+		React.createElement(View, props, children);
+	const AnimatedText = ({ children, ...props }) =>
+		React.createElement(Text, props, children);
+	const AnimatedScrollView = ({ children, ...props }) =>
+		React.createElement(View, props, children);
+
+	const ReanimatedModule = {
+		View: AnimatedView,
+		Text: AnimatedText,
+		ScrollView: AnimatedScrollView,
+		createAnimatedComponent: (comp) => comp,
+		FadeIn,
+		FadeOut,
+		SlideInDown,
+		SlideOutDown,
 		useAnimatedStyle: (fn) => fn(),
 		useSharedValue: (val) => ({ value: val }),
+		useDerivedValue: (fn) => ({ value: fn() }),
 		withTiming: (val) => val,
 		withSpring: (val) => val,
+		withSequence: () => ({}),
+		useAnimatedScrollHandler: () => ({}),
 	};
+
+	ReanimatedModule.default = ReanimatedModule;
+	return ReanimatedModule;
 });
 
 jest.mock("react-native-worklets", () => ({
 	createRunInContextFn: jest.fn(),
 }));
+
+jest.mock("react-native-safe-area-context", () => {
+	const React = require("react");
+	const { View } = require("react-native");
+	const SafeAreaView = ({ children, ...props }) =>
+		React.createElement(View, props, children);
+	return {
+		SafeAreaView,
+		useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+		useSafeAreaFrame: () => ({ x: 0, y: 0, width: 390, height: 844 }),
+	};
+});
 
 jest.mock("react-native", () => {
 	const React = require("react");
@@ -264,5 +278,10 @@ jest.mock("react-native", () => {
 		Platform: { OS: "ios", select: (opts) => opts.ios || opts.default },
 		useColorScheme: () => "light",
 		useWindowDimensions: () => ({ width: 390, height: 844 }),
+		Alert: {
+			alert: jest.fn(),
+			// @ts-ignore
+			Alert: jest.fn(),
+		},
 	};
 });

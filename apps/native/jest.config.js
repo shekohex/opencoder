@@ -4,6 +4,7 @@ module.exports = {
 	transformIgnorePatterns: [
 		"node_modules/(?!((?:\\.bun/.+?/node_modules/)?((jest-)?react-native|@react-native(-community)?|@react-native/.*|expo(nent)?|expo-modules-core|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg|uniwind|@opencoder/branding|nuqs)))",
 	],
+	testPathIgnorePatterns: ["<rootDir>/domain/types/__tests__/"],
 	moduleNameMapper: {
 		"^@/(.*)$": "<rootDir>/$1",
 	},
