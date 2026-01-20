@@ -15,6 +15,7 @@
 		}
 	},
 	"scripts": {
+		"test": "NODE_OPTIONS=\"--max-old-space-size=8192\" turbo test",
 		"check": "biome check --unsafe --write .",
 		"prepare": "husky",
 		"dev": "turbo dev",
@@ -22,8 +23,7 @@
 		"check-types": "turbo check-types",
 		"typecheck": "turbo check-types",
 		"dev:native": "turbo -F native dev",
-		"dev:web": "turbo -F native web",
-		"test": "turbo test"
+		"dev:web": "turbo -F native web"
 	},
 	"dependencies": {
 		"dotenv": "^17.2.3",

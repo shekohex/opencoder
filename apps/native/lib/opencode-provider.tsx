@@ -306,6 +306,8 @@ export function GlobalOpenCodeProvider({
 					status: "connected",
 					error: undefined,
 				});
+
+				_setupEventStream(workspaceId, client);
 			} catch (err) {
 				const message =
 					err instanceof Error ? err.message : "Connection failed";
@@ -317,7 +319,14 @@ export function GlobalOpenCodeProvider({
 				connectingRef.current.delete(workspaceId);
 			}
 		},
-		[session, coderBaseUrl, getWorkspace, wildcardAccessUrl, updateConnection],
+		[
+			session,
+			coderBaseUrl,
+			getWorkspace,
+			wildcardAccessUrl,
+			updateConnection,
+			_setupEventStream,
+		],
 	);
 
 	const disconnect = useCallback((workspaceId: string) => {

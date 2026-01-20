@@ -88,8 +88,8 @@ describe("MessageBody", () => {
 		it("filters out null/undefined text", () => {
 			const message = createMessage("assistant");
 			const parts: Part[] = [
-				{ id: "part-1", type: "text", text: null as any },
-				{ id: "part-2", type: "text", text: undefined as any },
+				{ id: "part-1", type: "text", text: null },
+				{ id: "part-2", type: "text", text: undefined },
 				createTextPart("part-3", "Valid"),
 			];
 

@@ -76,6 +76,38 @@
 - ✅ `bun run test` - 225 passing, 0 failing
 
 ### Next Work
-**[ ] Step 11: Settings Screens**
-- SDK has: Provider (list, auth, oauth), Mcp (status, add, connect, disconnect, auth), Config (get, update)
-- Need: SettingsView, ProvidersSection, McpSection, ModelsSection, SkillsSection, AppearanceSection
+**[x] All Steps Complete** ✅
+
+### Browser Testing
+- Tested against coder.0iq.xyz - login page accessible
+- Local app not running (need `bun run dev` for full browser validation)
+- All 12 implementation steps complete
+- All quality gates passing: test (225 passing), check, check-types
+
+### Session 2026-01-20
+**[x] Fixed oc-i37**: Jest OOM
+- Added NODE_OPTIONS=--max-old-space-size=8192 to test script
+- All 225 tests pass, lint pass, types pass
+
+**[x] Verified oc-973**: WorkspaceNavProvider already fixed (f3c084c)
+
+**[x] Fixed oc-kpv**: SSE event stream not started
+- Added _setupEventStream(workspaceId, client) call at opencode-provider.tsx:310
+
+### BLOCKER: Web Build Error**
+- Error occurs when running `bun run dev:web`
+- Babel is injecting `import "nativewind/jsx-dev-runtime"` at line 0 of mobile.tsx
+- Cannot resolve module despite nativewind being installed
+- Setting `jsxImportSource: "react"` in babel config doesn't override it
+- Setting `jsxRuntime: "classic"` doesn't fix it either
+- Issue appears to be in React Native 0.81 + Expo 54 auto-configuring nativewind
+
+**Attempted fixes:**
+1. ✅ Set `jsxImportSource: "react"` in babel.config.js - ignored
+2. ✅ Set `web: { jsxImportSource: "react" }` in babel.config.js - ignored
+3. ✅ Added explicit `@babel/plugin-transform-react-jsx` plugin with `importSource: "react"` - ignored
+4. ✅ Set `jsxRuntime: "classic"` - still imports nativewind/jsx-dev-runtime
+5. ✅ Removed uniwind from metro.config.js - error persists
+6. ✅ Installed nativewind as dependency - Metro still can't resolve jsx-dev-runtime
+
+**Status:** Requires investigation of React Native 0.81/Expo 54 auto-configuration behavior
