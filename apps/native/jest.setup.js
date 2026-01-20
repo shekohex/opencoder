@@ -174,6 +174,66 @@ jest.mock("@/lib/chat/chat-mutations", () => ({
 	})),
 }));
 
+jest.mock("react-native-svg", () => {
+	const React = require("react");
+	const { View } = require("react-native");
+	return {
+		Svg: ({ children, ...props }) => React.createElement(View, props, children),
+		Path: (props) => React.createElement("Path", props),
+		Circle: (props) => React.createElement("Circle", props),
+		Rect: (props) => React.createElement("Rect", props),
+		G: (props) => React.createElement("G", props),
+	};
+});
+
+jest.mock("react-native-reanimated", () => {
+	const React = require("react");
+	const { View, Text } = require("react-native");
+
+	const createAnimation = () => ({
+		duration: () => createAnimation(),
+		delay: () => createAnimation(),
+		springify: () => createAnimation(),
+		damping: () => createAnimation(),
+		randomDelay: () => createAnimation(),
+	});
+
+	return {
+		default: {
+			View: ({ children, ...props }) =>
+				React.createElement(View, props, children),
+			Text: ({ children, ...props }) =>
+				React.createElement(Text, props, children),
+			ScrollView: ({ children, ...props }) =>
+				React.createElement(View, props, children),
+			FadeIn: createAnimation,
+			FadeOut: createAnimation,
+			SlideInDown: createAnimation,
+			SlideOutDown: createAnimation,
+			useAnimatedStyle: (fn) => fn(),
+			useSharedValue: (val) => ({ value: val }),
+			useDerivedValue: (fn) => ({ value: fn() }),
+			withTiming: (val) => val,
+			withSpring: (val) => val,
+			withSequence: () => ({}),
+			useAnimatedScrollHandler: () => ({}),
+			createAnimatedComponent: (comp) => comp,
+		},
+		FadeIn: createAnimation,
+		FadeOut: createAnimation,
+		SlideInDown: createAnimation,
+		SlideOutDown: createAnimation,
+		useAnimatedStyle: (fn) => fn(),
+		useSharedValue: (val) => ({ value: val }),
+		withTiming: (val) => val,
+		withSpring: (val) => val,
+	};
+});
+
+jest.mock("react-native-worklets", () => ({
+	createRunInContextFn: jest.fn(),
+}));
+
 jest.mock("react-native", () => {
 	const React = require("react");
 	const {
