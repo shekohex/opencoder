@@ -12,8 +12,8 @@
 - [x] Step 8: Git Operations Integration
 - [x] Step 9: Terminal Component (ghostty-web)
 - [x] Step 10: Multi-Agent & Task Tracker
-- [ ] Step 11: Settings Screens
-- [ ] Step 12: Testing & Polish
+- [x] Step 11: Settings Screens
+- [x] Step 12: Testing & Polish
 
 ## Implementation Steps
 
