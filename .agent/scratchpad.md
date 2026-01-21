@@ -104,4 +104,4 @@
 
 **Issue oc-ib6**: Visual polish for auth screens (priority 3, open)
 
-**Issue oc-uh1**: Add query cache cleanup on signOut (priority 2, open)
+**Issue oc-uh1**: Add query cache cleanup on signOut (priority 2, complete) ✅
