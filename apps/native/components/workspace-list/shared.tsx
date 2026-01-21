@@ -13,6 +13,7 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
 	useAnimatedStyle,
 	useSharedValue,
+	withSpring,
 } from "react-native-reanimated";
 import { AppText } from "@/components/app-text";
 import { Button } from "@/components/button";
@@ -31,6 +32,7 @@ import {
 	useOpenCodeSessions,
 } from "@/lib/session-queries";
 import { useTheme } from "@/lib/theme-context";
+import { useSidebarWidths } from "@/lib/use-sidebar-widths";
 import { useWorkspaceNav } from "@/lib/workspace-nav";
 import {
 	hasActiveBuilds as checkActiveBuilds,
@@ -244,23 +246,15 @@ export function WorkspaceThreePane({
 	}, []);
 
 	const maxSidebarTotal = maxSidebarArea ?? baseSidebarWidth + baseMiddleWidth;
-	const effectiveSidebarMax = Math.min(sidebarMax, maxSidebarTotal - middleMin);
-	const effectiveMiddleMax = Math.min(middleMax, maxSidebarTotal - sidebarMin);
+	const _effectiveSidebarMax = Math.min(
+		sidebarMax,
+		maxSidebarTotal - middleMin,
+	);
+	const _effectiveMiddleMax = Math.min(middleMax, maxSidebarTotal - sidebarMin);
 
-	const sidebarInitial = clampWidth(
-		baseSidebarWidth,
-		sidebarMin,
-		effectiveSidebarMax,
-	);
-	const middleInitial = clampWidth(
-		baseMiddleWidth,
-		middleMin,
-		effectiveMiddleMax,
-	);
-	const sidebarWidth = useSharedValue(sidebarInitial);
-	const middleWidth = useSharedValue(middleInitial);
-	const startSidebarWidth = useSharedValue(sidebarInitial);
-	const startMiddleWidth = useSharedValue(middleInitial);
+	const { sidebarWidth, middleWidth } = useSidebarWidths(breakpoint);
+	const startSidebarWidth = useSharedValue(sidebarWidth.value);
+	const startMiddleWidth = useSharedValue(middleWidth.value);
 
 	useEffect(() => {
 		const maxLeft = Math.max(sidebarMin, maxSidebarTotal - middleMin);
@@ -584,6 +578,9 @@ function WorkspaceSidebarContent({
 					keyExtractor={(item) => item.name}
 					style={{ flex: 1 }}
 					contentContainerStyle={{ paddingBottom: 12 }}
+					CellRendererComponent={({ children, index }) => (
+						<View key={index}>{children}</View>
+					)}
 					renderItem={({ item: row }) => {
 						const isSelected = (row.id ?? row.name) === selectedWorkspaceId;
 						const isExpanded = row.name === expandedWorkspaceId;
@@ -636,6 +633,19 @@ function WorkspaceAccordionTrigger({
 	onPress: () => void;
 	onToggle: () => void;
 }) {
+	const rotation = useSharedValue(0);
+
+	useEffect(() => {
+		rotation.value = withSpring(isExpanded ? -1 : 0, {
+			damping: 15,
+			stiffness: 150,
+		});
+	}, [isExpanded, rotation]);
+
+	const animatedStyle = useAnimatedStyle(() => ({
+		transform: [{ rotate: `${rotation.value * 180}deg` }],
+	}));
+
 	return (
 		<View className="flex-row items-center py-2">
 			<WorkspaceCard
@@ -654,9 +664,7 @@ function WorkspaceAccordionTrigger({
 			>
 				<Animated.View
 					className="items-center justify-center"
-					style={{
-						transform: [{ rotate: isExpanded ? "-180deg" : "0deg" }],
-					}}
+					style={animatedStyle}
 				>
 					<Feather name="chevron-down" size={18} color="var(--color-icon)" />
 				</Animated.View>
@@ -1120,23 +1128,15 @@ export function AppShell({
 	}, []);
 
 	const maxSidebarTotal = maxSidebarArea ?? baseSidebarWidth + baseMiddleWidth;
-	const effectiveSidebarMax = Math.min(sidebarMax, maxSidebarTotal - middleMin);
-	const effectiveMiddleMax = Math.min(middleMax, maxSidebarTotal - sidebarMin);
+	const _effectiveSidebarMax = Math.min(
+		sidebarMax,
+		maxSidebarTotal - middleMin,
+	);
+	const _effectiveMiddleMax = Math.min(middleMax, maxSidebarTotal - sidebarMin);
 
-	const sidebarInitial = clampWidth(
-		baseSidebarWidth,
-		sidebarMin,
-		effectiveSidebarMax,
-	);
-	const middleInitial = clampWidth(
-		baseMiddleWidth,
-		middleMin,
-		effectiveMiddleMax,
-	);
-	const sidebarWidth = useSharedValue(sidebarInitial);
-	const middleWidth = useSharedValue(middleInitial);
-	const startSidebarWidth = useSharedValue(sidebarInitial);
-	const startMiddleWidth = useSharedValue(middleInitial);
+	const { sidebarWidth, middleWidth } = useSidebarWidths(breakpoint);
+	const startSidebarWidth = useSharedValue(sidebarWidth.value);
+	const startMiddleWidth = useSharedValue(middleWidth.value);
 
 	useEffect(() => {
 		const maxLeft = Math.max(sidebarMin, maxSidebarTotal - middleMin);

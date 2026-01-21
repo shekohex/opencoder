@@ -1,6 +1,8 @@
+import { Icon, Logo } from "@opencoder/branding";
 import { useState } from "react";
 import { View } from "react-native";
 import { useSession } from "@/lib/auth";
+import { useTheme } from "@/lib/theme-context";
 import { AppText } from "../app-text";
 import { Button } from "../button";
 import { TextField } from "../text-field";
@@ -11,6 +13,7 @@ interface BaseUrlStepProps {
 
 export function BaseUrlStep({ onNext }: BaseUrlStepProps) {
 	const { setBaseUrl } = useSession();
+	const { mode } = useTheme();
 	const [url, setUrl] = useState("");
 	const [error, setError] = useState<string | undefined>();
 
@@ -41,11 +44,12 @@ export function BaseUrlStep({ onNext }: BaseUrlStepProps) {
 	};
 
 	return (
-		<View className="w-full max-w-sm gap-4">
-			<View className="mb-4 items-center gap-2">
-				<AppText className="font-bold text-2xl">Enter Coder URL</AppText>
-				<AppText className="text-center text-foreground-weak">
-					Enter the URL of your Coder deployment to continue.
+		<View className="w-full max-w-sm gap-5">
+			<View className="items-center gap-4">
+				<Icon mode={mode} size={32} />
+				<Logo mode={mode} width={140} height={28} />
+				<AppText className="text-center text-foreground-weak text-sm">
+					Enter your Coder deployment URL to continue
 				</AppText>
 			</View>
 

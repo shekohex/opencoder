@@ -48,4 +48,13 @@ export const storage = {
 		}
 		return mmkv?.getBoolean(key) ?? false;
 	},
+
+	getNumber: (key: string): number | undefined => {
+		if (Platform.OS === "web") {
+			if (typeof localStorage === "undefined") return undefined;
+			const value = localStorage.getItem(key);
+			return value ? Number.parseFloat(value) : undefined;
+		}
+		return mmkv?.getNumber(key);
+	},
 };
