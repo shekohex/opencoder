@@ -2,7 +2,7 @@
 
 **Status:** Completed successfully
 **Iterations:** 2
-**Duration:** 2m 42s
+**Duration:** 1m 54s
 
 ## Tasks
 
@@ -10,10 +10,10 @@ _No scratchpad found._
 
 ## Events
 
-- 42 total events
-- 15 loop.complete
-- 12 task.start
-- 9 loop.terminate
+- 59 total events
+- 21 loop.complete
+- 18 task.start
+- 14 loop.terminate
 - 2 tdd.start
 - 1 browser.passed
 - 1 lint.passed
@@ -22,4 +22,4 @@ _No scratchpad found._
 
 ## Final Commit
 
-1f2a8af: refactor(opencode): cleanup queries and components
+e6976bf: chore(agent): record loop.complete event
