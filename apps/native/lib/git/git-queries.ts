@@ -1,20 +1,7 @@
 import type { OpencodeClient, Pty } from "@opencode-ai/sdk";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
-export interface GitStatus {
-	branch: string;
-	ahead: number;
-	behind: number;
-	files: Array<{
-		path: string;
-		status: "modified" | "added" | "deleted" | "renamed";
-	}>;
-}
-
-export interface GitIdentity {
-	name: string;
-	email: string;
-}
+import { assertClient } from "@/lib/opencode-provider";
 
 export const gitKeys = {
 	status: (workspaceId: string, directory: string) =>
@@ -31,9 +18,7 @@ export function useGitStatus(
 	return useQuery<Pty>({
 		queryKey: gitKeys.status(workspaceId, directory),
 		queryFn: async () => {
-			if (!client) {
-				throw new Error("OpenCode client not available");
-			}
+			assertClient(client);
 
 			const result = await client.pty.create({
 				body: {
@@ -63,9 +48,7 @@ export function useGitIdentity(
 	return useQuery<Pty>({
 		queryKey: gitKeys.identity(workspaceId, directory),
 		queryFn: async () => {
-			if (!client) {
-				throw new Error("OpenCode client not available");
-			}
+			assertClient(client);
 
 			const result = await client.pty.create({
 				body: {
@@ -96,9 +79,7 @@ export function useGitCommit(client: OpencodeClient | null) {
 			directory: string;
 			message: string;
 		}) => {
-			if (!client) {
-				throw new Error("OpenCode client not available");
-			}
+			assertClient(client);
 
 			const result = await client.pty.create({
 				body: {
@@ -118,9 +99,7 @@ export function useGitCommit(client: OpencodeClient | null) {
 export function useGitPush(client: OpencodeClient | null) {
 	const mutation = useMutation({
 		mutationFn: async ({ directory }: { directory: string }) => {
-			if (!client) {
-				throw new Error("OpenCode client not available");
-			}
+			assertClient(client);
 
 			const result = await client.pty.create({
 				body: {
@@ -140,9 +119,7 @@ export function useGitPush(client: OpencodeClient | null) {
 export function useGitPull(client: OpencodeClient | null) {
 	const mutation = useMutation({
 		mutationFn: async ({ directory }: { directory: string }) => {
-			if (!client) {
-				throw new Error("OpenCode client not available");
-			}
+			assertClient(client);
 
 			const result = await client.pty.create({
 				body: {
@@ -168,9 +145,7 @@ export function useGitAdd(client: OpencodeClient | null) {
 			directory: string;
 			paths: string[];
 		}) => {
-			if (!client) {
-				throw new Error("OpenCode client not available");
-			}
+			assertClient(client);
 
 			const result = await client.pty.create({
 				body: {
@@ -196,9 +171,7 @@ export function useGitCreateBranch(client: OpencodeClient | null) {
 			directory: string;
 			name: string;
 		}) => {
-			if (!client) {
-				throw new Error("OpenCode client not available");
-			}
+			assertClient(client);
 
 			const result = await client.pty.create({
 				body: {
@@ -226,9 +199,7 @@ export function useGitSetIdentity(client: OpencodeClient | null) {
 			name: string;
 			email: string;
 		}) => {
-			if (!client) {
-				throw new Error("OpenCode client not available");
-			}
+			assertClient(client);
 
 			await client.pty.create({
 				body: {

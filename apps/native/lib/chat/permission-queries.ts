@@ -1,6 +1,7 @@
 import type { OpencodeClient } from "@opencode-ai/sdk";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { Permission } from "@/domain/types";
+import { assertClient } from "@/lib/opencode-provider";
 
 export type PermissionReply = "once" | "always" | "reject";
 
@@ -38,9 +39,7 @@ export function usePendingPermissions(
 	const query = useQuery<Permission[]>({
 		queryKey: ["permissions", sessionId],
 		queryFn: async () => {
-			if (!client) {
-				throw new Error("OpenCode client not available");
-			}
+			assertClient(client);
 
 			const extendedClient = client as ExtendedOpencodeClient;
 			if (!extendedClient.permission) {
@@ -78,9 +77,7 @@ export function useRespondToPermission(client: OpencodeClient | null) {
 			requestId: string;
 			reply: PermissionReply;
 		}) => {
-			if (!client) {
-				throw new Error("OpenCode client not available");
-			}
+			assertClient(client);
 
 			const extendedClient = client as ExtendedOpencodeClient;
 			if (!extendedClient.permission) {
@@ -108,24 +105,6 @@ export function useRespondToPermission(client: OpencodeClient | null) {
 	};
 }
 
-export function usePermissionQueries(
-	client: OpencodeClient | null,
-	sessionId: string,
-) {
-	if (!client) {
-		throw new Error("No OpenCode client connected");
-	}
-
-	const permissions = usePendingPermissions(client, sessionId);
-	const { respondToPermission, isPending } = useRespondToPermission(client);
-
-	return {
-		...permissions,
-		respondToPermission,
-		isResponding: isPending,
-	};
-}
-
 export function usePendingQuestions(
 	client: OpencodeClient | null,
 	sessionId: string,
@@ -136,9 +115,7 @@ export function usePendingQuestions(
 	const query = useQuery<Permission[]>({
 		queryKey: ["questions", sessionId],
 		queryFn: async () => {
-			if (!client) {
-				throw new Error("OpenCode client not available");
-			}
+			assertClient(client);
 
 			const extendedClient = client as ExtendedOpencodeClient;
 			if (!extendedClient.permission) {
@@ -178,9 +155,7 @@ export function useRespondToQuestion(client: OpencodeClient | null) {
 			requestId: string;
 			answers: string[][];
 		}) => {
-			if (!client) {
-				throw new Error("OpenCode client not available");
-			}
+			assertClient(client);
 
 			const extendedClient = client as ExtendedOpencodeClient;
 			if (!extendedClient.permission) {
@@ -205,23 +180,5 @@ export function useRespondToQuestion(client: OpencodeClient | null) {
 	return {
 		respondToQuestion,
 		isPending: mutation.isPending,
-	};
-}
-
-export function useQuestionQueries(
-	client: OpencodeClient | null,
-	sessionId: string,
-) {
-	if (!client) {
-		throw new Error("No OpenCode client connected");
-	}
-
-	const questions = usePendingQuestions(client, sessionId);
-	const { respondToQuestion, isPending } = useRespondToQuestion(client);
-
-	return {
-		...questions,
-		respondToQuestion,
-		isResponding: isPending,
 	};
 }

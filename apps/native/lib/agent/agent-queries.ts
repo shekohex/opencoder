@@ -1,6 +1,7 @@
 import type { Session, Todo } from "@opencode-ai/sdk";
 import { useQuery } from "@tanstack/react-query";
 import {
+	assertClient,
 	useOpenCodeConnection,
 	useWorkspaceConnectionStatus,
 } from "@/lib/opencode-provider";
@@ -24,9 +25,7 @@ export function useSessionList(workspaceId: string | null, directory?: string) {
 	const query = useQuery<Session[]>({
 		queryKey: sessionListQueryKey(workspaceId),
 		queryFn: async () => {
-			if (!client) {
-				throw new Error("OpenCode client not available");
-			}
+			assertClient(client);
 
 			const result = await client.session.list({
 				query: directory ? { directory } : undefined,
@@ -55,9 +54,7 @@ export function useSessionChildren(sessionId: string | null) {
 	const query = useQuery<Session[]>({
 		queryKey: sessionChildrenQueryKey(sessionId),
 		queryFn: async () => {
-			if (!client) {
-				throw new Error("OpenCode client not available");
-			}
+			assertClient(client);
 			if (!sessionId) {
 				throw new Error("No session ID provided");
 			}
@@ -89,9 +86,7 @@ export function useSessionTodo(sessionId: string | null) {
 	const query = useQuery<Todo[]>({
 		queryKey: sessionTodoQueryKey(sessionId),
 		queryFn: async () => {
-			if (!client) {
-				throw new Error("OpenCode client not available");
-			}
+			assertClient(client);
 			if (!sessionId) {
 				throw new Error("No session ID provided");
 			}
@@ -136,9 +131,7 @@ export function useSessionStatus(workspaceId: string | null) {
 	const query = useQuery<SessionStatusMap>({
 		queryKey: sessionStatusQueryKey(workspaceId),
 		queryFn: async () => {
-			if (!client) {
-				throw new Error("OpenCode client not available");
-			}
+			assertClient(client);
 
 			const result = await client.session.status(undefined);
 

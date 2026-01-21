@@ -57,6 +57,14 @@ export interface WorkspaceConnection {
 	error?: string;
 }
 
+export function assertClient(
+	client: OpencodeClient | null | undefined,
+): asserts client is OpencodeClient {
+	if (!client) {
+		throw new Error("OpenCode client not available");
+	}
+}
+
 type WorkspaceEvent = Event;
 
 export interface GlobalOpenCodeContextValue {

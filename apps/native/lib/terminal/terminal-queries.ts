@@ -1,6 +1,8 @@
 import type { OpencodeClient, Pty } from "@opencode-ai/sdk";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
+import { assertClient } from "@/lib/opencode-provider";
+
 export const terminalKeys = {
 	list: (workspaceId: string, directory: string) =>
 		["terminal", "list", workspaceId, directory] as const,
@@ -14,9 +16,7 @@ export function useTerminalList(
 	return useQuery<Pty[]>({
 		queryKey: terminalKeys.list(workspaceId, directory),
 		queryFn: async () => {
-			if (!client) {
-				throw new Error("OpenCode client not available");
-			}
+			assertClient(client);
 
 			const result = await client.pty.list({
 				query: { directory },
@@ -43,9 +43,7 @@ export function useTerminalCreate(client: OpencodeClient | null) {
 			args: string[];
 			title?: string;
 		}) => {
-			if (!client) {
-				throw new Error("OpenCode client not available");
-			}
+			assertClient(client);
 
 			const result = await client.pty.create({
 				body: { command, args, cwd, title },
@@ -69,9 +67,7 @@ export function useTerminalResize(client: OpencodeClient | null) {
 			rows: number;
 			cols: number;
 		}) => {
-			if (!client) {
-				throw new Error("OpenCode client not available");
-			}
+			assertClient(client);
 
 			const result = await client.pty.update({
 				body: { size: { rows, cols } },
@@ -88,9 +84,7 @@ export function useTerminalResize(client: OpencodeClient | null) {
 export function useTerminalDelete(client: OpencodeClient | null) {
 	const mutation = useMutation({
 		mutationFn: async ({ ptyId }: { ptyId: string }) => {
-			if (!client) {
-				throw new Error("OpenCode client not available");
-			}
+			assertClient(client);
 
 			await client.pty.remove({
 				path: { id: ptyId },
@@ -104,9 +98,7 @@ export function useTerminalDelete(client: OpencodeClient | null) {
 export function useTerminalConnect(client: OpencodeClient | null) {
 	const mutation = useMutation({
 		mutationFn: async ({ ptyId }: { ptyId: string }) => {
-			if (!client) {
-				throw new Error("OpenCode client not available");
-			}
+			assertClient(client);
 
 			const result = await client.pty.connect({
 				path: { id: ptyId },

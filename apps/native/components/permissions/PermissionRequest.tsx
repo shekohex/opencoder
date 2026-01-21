@@ -26,10 +26,11 @@ export function PermissionRequest({ sessionId }: PermissionRequestProps) {
 	);
 	const { respondToQuestion } = useRespondToQuestion(client);
 
-	if (
-		(permissionsLoading && questionsLoading) ||
-		(permissions.length === 0 && questions.length === 0)
-	) {
+	if (permissionsLoading || questionsLoading) {
+		return null;
+	}
+
+	if (permissions.length === 0 && questions.length === 0) {
 		return null;
 	}
 

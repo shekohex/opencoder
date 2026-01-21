@@ -34,9 +34,7 @@ export function Terminal({ workspaceId, directory }: TerminalProps) {
 		deleteMutation.mutate({ ptyId });
 	};
 
-	const handleTerminalPress = (pty: Pty) => {
-		console.log("Open terminal:", pty.id);
-	};
+	const handleTerminalPress = (_pty: Pty) => {};
 
 	return (
 		<View testID="terminal-container" style={{ flex: 1 }}>
