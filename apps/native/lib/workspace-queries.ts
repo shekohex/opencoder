@@ -1,11 +1,17 @@
 import { API, type TypesGen } from "@coder/sdk";
 import { useQuery } from "@tanstack/react-query";
 
-import type {
-	StatusTone,
-	WorkspaceBadge,
-	WorkspaceRowData,
-} from "@/components/workspace-mockups/mock-data";
+export type StatusTone = "success" | "warning" | "inactive" | "error";
+export type WorkspaceBadge = "favorite" | "outdated" | "task" | "shared";
+
+export type WorkspaceRowData = {
+	id?: string;
+	name: string;
+	status: string;
+	statusTone: StatusTone;
+	lastUsed: string;
+	badges: WorkspaceBadge[];
+};
 
 export const workspacesQueryKey = ["workspaces"] as const;
 

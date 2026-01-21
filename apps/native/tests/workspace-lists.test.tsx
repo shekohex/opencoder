@@ -20,8 +20,7 @@ jest.mock("expo-router", () => ({
 
 import WorkspaceSessionsScreen from "@/app/(app)/(drawer)/workspaces/[workspaceId]/[projectId]/index";
 import WorkspaceProjectsScreen from "@/app/(app)/(drawer)/workspaces/[workspaceId]/index";
-import { workspaceGroups } from "@/components/workspace-mockups/mock-data";
-import { AppShell } from "@/components/workspace-mockups/shared";
+import { AppShell } from "@/components/workspace-list/shared";
 import { FontProvider } from "@/lib/font-context";
 import { NuqsAdapter } from "@/lib/nuqs-adapter";
 import { GlobalOpenCodeProvider } from "@/lib/opencode-provider";
@@ -117,8 +116,25 @@ describe("Workspace lists", () => {
 	it("does not log contextType warning in workspace list", () => {
 		const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
 
+		const mockWorkspaceGroups = [
+			{
+				owner: "Test Owner",
+				ownerInitials: "TO",
+				rows: [
+					{
+						id: "test-1",
+						name: "test-workspace",
+						status: "Running",
+						statusTone: "success" as const,
+						lastUsed: "1m ago",
+						badges: [],
+					},
+				],
+			},
+		];
+
 		render(
-			<AppShell breakpoint="desktop" workspaceGroups={workspaceGroups} />,
+			<AppShell breakpoint="desktop" workspaceGroups={mockWorkspaceGroups} />,
 			{
 				wrapper: createWrapper(),
 			},

@@ -12,7 +12,7 @@ import {
 	type ListState,
 	LoadingList,
 	ROW_HEIGHTS,
-} from "@/components/workspace-mockups/shared";
+} from "@/components/workspace-list/shared";
 import { useProjectName } from "@/lib/project-queries";
 import {
 	type SessionRowData,

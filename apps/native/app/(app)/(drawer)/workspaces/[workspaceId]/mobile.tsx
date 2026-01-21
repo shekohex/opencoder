@@ -8,7 +8,7 @@ import { AppText } from "@/components/app-text";
 import { Button } from "@/components/button";
 import { Container } from "@/components/container";
 import { ProjectsListContent } from "@/components/projects-list";
-import { ROW_HEIGHTS } from "@/components/workspace-mockups/shared";
+import { ROW_HEIGHTS } from "@/components/workspace-list/shared";
 import { useOpenCodeProjects } from "@/lib/project-queries";
 import { useWorkspaceNav } from "@/lib/workspace-nav";
 import { useWorkspaceName } from "@/lib/workspace-queries";

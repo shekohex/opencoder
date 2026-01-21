@@ -16,7 +16,7 @@ import {
 	type ListState,
 	LoadingList,
 } from "@/components/list-states";
-import { WorkspaceCard } from "@/components/workspace-mockups/workspace-card";
+import { WorkspaceCard } from "@/components/workspace-list/workspace-card";
 import { useOpenCodeProjects } from "@/lib/project-queries";
 import {
 	type SessionRowData,

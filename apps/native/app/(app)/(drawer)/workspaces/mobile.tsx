@@ -5,8 +5,8 @@ import { Pressable, SectionList, View } from "react-native";
 
 import { AppText } from "@/components/app-text";
 import { Button } from "@/components/button";
-import { buildStatus } from "@/components/workspace-mockups/mock-data";
 import {
+	buildStatus,
 	EmptyStateCard,
 	ErrorBanner,
 	type ListState,
@@ -14,8 +14,8 @@ import {
 	LogoEmptyState,
 	ROW_HEIGHTS,
 	type WorkspaceGroup,
-} from "@/components/workspace-mockups/shared";
-import { WorkspaceItem } from "@/components/workspace-mockups/workspace-item";
+} from "@/components/workspace-list/shared";
+import { WorkspaceItem } from "@/components/workspace-list/workspace-item";
 import { useWorkspaceLayout } from "@/lib/hooks/use-workspace-layout";
 import { useCoderBrowser } from "@/lib/use-coder-browser";
 import { buildWorkspacePath } from "@/lib/workspace-query-params";

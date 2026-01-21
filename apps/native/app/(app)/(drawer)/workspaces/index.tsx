@@ -1,5 +1,5 @@
 import { Container } from "@/components/container";
-import { useWorkspacePolling } from "@/components/workspace-mockups/shared";
+import { useWorkspacePolling } from "@/components/workspace-list/shared";
 import { MobileWorkspaces } from "./mobile";
 
 export default function WorkspacesScreen() {

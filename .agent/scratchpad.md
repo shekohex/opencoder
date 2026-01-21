@@ -105,5 +105,11 @@
 - Resolution: Not critical - web works despite warnings
 
 ### Remaining Tasks
-**[ ] Move mobile.tsx component** - Should be in `components/` not routes folder
-**[ ] Optional: Switch to Node 20.19.4** - Eliminates cosmetic stream warnings
+
+**Issue oc-5fg**: Redesign sidebar navigation for desktop/tablet (priority 1, in_progress)
+- Rename `workspace-mockups` folder to `workspace-list` or similar
+- Clean up sidebar components structure
+
+**Issue oc-jx2**: FlatList inside Accordion causes contextType warning (priority 3, in_progress)
+
+**Issue oc-sac**: Phase 5: Polish and animations (priority 3, open)

@@ -13,7 +13,11 @@ import Animated, {
 import { AppText } from "@/components/app-text";
 import { TooltipBadge } from "@/components/tooltip-badge";
 
-import type { StatusTone, WorkspaceBadge, WorkspaceRowData } from "./mock-data";
+import type {
+	StatusTone,
+	WorkspaceBadge,
+	WorkspaceRowData,
+} from "@/lib/workspace-queries";
 
 const STATUS_DOT_STYLES: Record<StatusTone, { dot: string; ring: string }> = {
 	success: {

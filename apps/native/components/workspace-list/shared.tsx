@@ -23,7 +23,7 @@ import {
 	LoadingList,
 } from "@/components/list-states";
 import { ProjectsListContent } from "@/components/projects-list";
-import { WorkspaceCard } from "@/components/workspace-mockups/workspace-card";
+import { WorkspaceCard } from "@/components/workspace-list/workspace-card";
 import { useOpenCodeProjects } from "@/lib/project-queries";
 import {
 	type SessionRowData as RealSessionRowData,
@@ -40,12 +40,21 @@ import {
 } from "@/lib/workspace-queries";
 import { buildWorkspacePath } from "@/lib/workspace-query-params";
 
-import {
-	buildStatus,
-	emptyStateActions,
-	messageRows,
-	workspaceGroups as workspaceGroupsSeed,
-} from "./mock-data";
+const workspaceGroupsSeed: WorkspaceGroup[] = [];
+
+const messageRows: { role: string; text: string }[] = [];
+
+const emptyStateActions = [
+	"Create workspace",
+	"Invite teammates",
+	"Import repo",
+];
+
+export const buildStatus = {
+	title: "Build in progress",
+	detail: "deploy-preview-214 · 2m elapsed",
+	stage: "Bundling assets",
+};
 
 export type BreakpointName = "desktop" | "tablet";
 

@@ -8,7 +8,7 @@ import {
 	type ListState,
 	RIGHT_PANEL_WIDTH,
 	useWorkspacePolling,
-} from "@/components/workspace-mockups/shared";
+} from "@/components/workspace-list/shared";
 import { useWorkspaceLayout } from "@/lib/hooks/use-workspace-layout";
 import { useOpenCodeSessions } from "@/lib/session-queries";
 import { breakpoints } from "@/lib/tokens";

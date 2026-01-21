@@ -3,7 +3,7 @@ import { View } from "react-native";
 
 import { AppText } from "@/components/app-text";
 
-import type { StatusTone, WorkspaceRowData } from "./mock-data";
+import type { StatusTone, WorkspaceRowData } from "@/lib/workspace-queries";
 
 const STATUS_STYLES: Record<StatusTone, { pill: string; dot: string }> = {
 	success: {
