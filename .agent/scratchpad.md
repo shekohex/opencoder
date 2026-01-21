@@ -81,6 +81,8 @@
 ### Browser Testing
 - ✅ Web server starts successfully (`bun run dev:web`)
 - ✅ Server returns HTTP 200 OK
+- ✅ Settings routes verified: `/workspaces/[workspaceId]/settings`, `/settings/providers`, `/settings/mcp`
+- ✅ Settings button visible on workspaces page
 - ⚠️ Cosmetic "Premature close" warnings due to Node.js v24 vs Expo 54 requirement (Node 20.19.4)
 - All 12 implementation steps complete
 - All quality gates passing: test (227 passing), check, check-types

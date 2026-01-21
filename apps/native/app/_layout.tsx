@@ -112,7 +112,7 @@ export default function RootLayout() {
 			{Platform.OS === "web" && __DEV__ ? (
 				<ReactQueryDevtools initialIsOpen={false} />
 			) : null}
-			<SessionProvider>
+			<SessionProvider queryClient={queryClientRef.current}>
 				<FontProvider>
 					<NuqsAdapter>
 						<ThemeProvider>

@@ -1,4 +1,5 @@
 import { API } from "@coder/sdk";
+import type { QueryClient } from "@tanstack/react-query";
 import React from "react";
 import { Platform } from "react-native";
 import { useStorageState } from "@/lib/useStorageState";
@@ -14,14 +15,16 @@ function getProxyUrl(): string {
 	return "http://localhost:8081";
 }
 
-const AuthContext = React.createContext<{
+type AuthContextValue = {
 	signIn: (token: string) => void;
 	signOut: () => void;
 	session?: string | null;
 	isLoading: boolean;
 	baseUrl?: string | null;
 	setBaseUrl: (url: string) => void;
-}>({
+};
+
+const AuthContext = React.createContext<AuthContextValue>({
 	signIn: () => null,
 	signOut: () => null,
 	session: null,
@@ -41,10 +44,23 @@ export function useSession() {
 	return value;
 }
 
-export function SessionProvider(props: React.PropsWithChildren) {
+type SessionProviderProps = React.PropsWithChildren<{
+	queryClient?: QueryClient;
+}>;
+
+export function SessionProvider(props: SessionProviderProps) {
 	const [[isLoadingSession, session], setSession] = useStorageState("session");
 	const [[isLoadingBaseUrl, baseUrl], setBaseUrlState] =
 		useStorageState("base_url");
+	const queryClient = React.useMemo(() => {
+		if (props.queryClient) return props.queryClient;
+		if (__DEV__) {
+			console.warn(
+				"SessionProvider: queryClient not provided, cache will not be cleared on signOut",
+			);
+		}
+		return null;
+	}, [props.queryClient]);
 
 	React.useEffect(() => {
 		if (baseUrl) {
@@ -80,6 +96,7 @@ export function SessionProvider(props: React.PropsWithChildren) {
 	const signOut = () => {
 		API.setSessionToken("");
 		setSession(null);
+		queryClient?.clear();
 	};
 
 	return (
