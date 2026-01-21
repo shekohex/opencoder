@@ -2,7 +2,7 @@
 
 **Status:** Completed successfully
 **Iterations:** 2
-**Duration:** 5m 59s
+**Duration:** 5m 38s
 
 ## Tasks
 
@@ -10,13 +10,13 @@ _No scratchpad found._
 
 ## Events
 
-- 114 total events
-- 37 loop.terminate
-- 33 task.start
-- 12 tdd.start
+- 123 total events
+- 40 loop.terminate
+- 36 task.start
+- 13 tdd.start
+- 9 loop.complete
 - 8 cycle.complete
 - 7 browser.passed
-- 7 loop.complete
 - 2 lint.passed
 - 2 test.passing
 - 2 test.written
@@ -27,4 +27,4 @@ _No scratchpad found._
 
 ## Final Commit
 
-2c047f8: 2026-01-21T05:13:51+02:00
+6fff7d6: chore(agent): update loop events summary
