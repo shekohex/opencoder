@@ -10,16 +10,17 @@ _No scratchpad found._
 
 ## Events
 
-- 59 total events
+- 62 total events
 - 21 loop.complete
-- 18 task.start
-- 14 loop.terminate
+- 19 task.start
+- 15 loop.terminate
 - 2 tdd.start
 - 1 browser.passed
+- 1 cycle.complete
 - 1 lint.passed
 - 1 refactor.done
 - 1 test.written
 
 ## Final Commit
 
-e6976bf: chore(agent): record loop.complete event
+9f58596: chore(agent): record loop.complete event
