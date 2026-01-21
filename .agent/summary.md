@@ -2,7 +2,7 @@
 
 **Status:** Completed successfully
 **Iterations:** 3
-**Duration:** 1m 50s
+**Duration:** 2m 35s
 
 ## Tasks
 
@@ -10,12 +10,12 @@ _No scratchpad found._
 
 ## Events
 
-- 49 total events
-- 13 loop.terminate
-- 13 task.start
-- 7 tdd.start
-- 5 cycle.complete
-- 3 browser.passed
+- 55 total events
+- 15 task.start
+- 14 loop.terminate
+- 8 tdd.start
+- 6 cycle.complete
+- 4 browser.passed
 - 2 loop.complete
 - 2 test.written
 - 1 lint.passed
@@ -25,4 +25,4 @@ _No scratchpad found._
 
 ## Final Commit
 
-1a71b3d: feat(polish): complete Phase 5 polish - animations, sidebar persistence, resize handles
+9ecc645: chore(agent): update loop events summary
