@@ -67,13 +67,13 @@
 - Settings button added to workspace header
 
 **Step 12: Testing & Polish** ✅ COMPLETE
-- 225 passing, 0 failing
+- 227 passing, 0 failing
 - select.native.test.tsx added to ignore list (pre-existing broken test)
 
 ### Quality Gates
 - ✅ `bun run check` passes
 - ✅ `bun run check-types` passes
-- ✅ `bun run test` - 225 passing, 0 failing
+- ✅ `bun run test` - 227 passing, 0 failing
 
 ### Next Work
 **[x] All Steps Complete** ✅
@@ -82,34 +82,24 @@
 - ✅ Web server starts successfully (`bun run dev:web`)
 - ✅ Server returns HTTP 200 OK
 - ⚠️ Cosmetic "Premature close" warnings due to Node.js v24 vs Expo 54 requirement (Node 20.19.4)
-- ⚠️ Warning: `mobile.tsx` missing default export (not a route file, should be moved to components/)
 - All 12 implementation steps complete
-- All quality gates passing: test (225 passing), check, check-types
+- All quality gates passing: test (227 passing), check, check-types
 
-### Session 2026-01-20
-**[x] Fixed oc-i37**: Jest OOM
-- Added NODE_OPTIONS=--max-old-space-size=8192 to test script
-- All 225 tests pass, lint pass, types pass
-
-**[x] Verified oc-973**: WorkspaceNavProvider already fixed (f3c084c)
-
-**[x] Fixed oc-kpv**: SSE event stream not started
-- Added _setupEventStream(workspaceId, client) call at opencode-provider.tsx:310
-
-**[x] Investigated Web Build "Error"** - NOT A BLOCKER
-- Web bundling works: 2431 modules bundled successfully
-- Server responds with HTTP 200 OK
-- "Premature close" errors are cosmetic warnings from Node.js v24's stricter stream handling
-- These don't prevent functionality - they're just logged warnings
-- Root cause: Node.js v24.13.0 vs Expo SDK 54 requirement (Node 20.19.4)
-- Resolution: Not critical - web works despite warnings
+### Session 2026-01-21
+**[x] Fixed oc-5fg**: Sidebar navigation redesign
+- Renamed workspace-mockups folder to workspace-list
+- Moved types (StatusTone, WorkspaceBadge, WorkspaceRowData) to lib/workspace-queries.ts
+- Removed mock-data.ts file
+- Exported buildStatus from shared.tsx
+- Updated workspace-list-folder.test.tsx to check no workspace-mockups imports
+- All 227 tests pass, lint pass, types pass
 
 ### Remaining Tasks
-
-**Issue oc-5fg**: Redesign sidebar navigation for desktop/tablet (priority 1, in_progress)
-- Rename `workspace-mockups` folder to `workspace-list` or similar
-- Clean up sidebar components structure
 
 **Issue oc-jx2**: FlatList inside Accordion causes contextType warning (priority 3, in_progress)
 
 **Issue oc-sac**: Phase 5: Polish and animations (priority 3, open)
+
+**Issue oc-ib6**: Visual polish for auth screens (priority 3, open)
+
+**Issue oc-uh1**: Add query cache cleanup on signOut (priority 2, open)
